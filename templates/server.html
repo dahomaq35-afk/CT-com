@@ -1,1 +1,1689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>{{ guild.name }} - CT BOT</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="brand">
+
+                <div class="ct-logo small">
+                    <span class="ct-c">C</span>
+                    <span class="ct-t">T</span>
+                </div>
+
+                <span class="brand-name">
+                    BOT PANEL
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-content">
+
+            <div class="nav-title">
+                السيرفر
+            </div>
+
+            <div class="nav-list">
+
+                <button class="nav-item active"
+                        onclick="showSection('overview', this)">
+
+                    <span class="icon">⌂</span>
+                    <span class="label">نظرة عامة</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('commands', this)">
+
+                    <span class="icon">⌘</span>
+                    <span class="label">الأوامر</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('logs', this)">
+
+                    <span class="icon">📋</span>
+                    <span class="label">السجلات</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('protection', this)">
+
+                    <span class="icon">🛡</span>
+                    <span class="label">الحماية</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('tickets', this)">
+
+                    <span class="icon">🎫</span>
+                    <span class="label">التذاكر</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('applications', this)">
+
+                    <span class="icon">📝</span>
+                    <span class="label">التقديمات</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('laws', this)">
+
+                    <span class="icon">⚖</span>
+                    <span class="label">القوانين</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('levels', this)">
+
+                    <span class="icon">📈</span>
+                    <span class="label">المستويات</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('ai', this)">
+
+                    <span class="icon">🤖</span>
+                    <span class="label">الذكاء الاصطناعي</span>
+
+                </button>
+
+
+                <button class="nav-item"
+                        onclick="showSection('settings', this)">
+
+                    <span class="icon">⚙</span>
+                    <span class="label">الإعدادات</span>
+
+                </button>
+
+            </div>
+
+
+            <div class="nav-title">
+                العودة
+            </div>
+
+            <div class="nav-list">
+
+                <a href="/" class="nav-item">
+
+                    <span class="icon">←</span>
+                    <span class="label">الرئيسية</span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-footer">
+
+            <div class="user-box">
+
+                {% if user and user.avatar %}
+
+                <img
+                    class="user-avatar"
+                    src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png?size=128"
+                    alt="Avatar">
+
+                {% else %}
+
+                <div class="user-avatar"></div>
+
+                {% endif %}
+
+
+                <div class="user-info">
+
+                    <div class="user-name">
+                        {{ user.global_name or user.username }}
+                    </div>
+
+                    <div class="user-status">
+                        ● متصل
+                    </div>
+
+                </div>
+
+
+                <a href="/logout"
+                   class="btn btn-secondary"
+                   style="min-height:32px;padding:0 9px;">
+
+                    خروج
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div class="topbar-right">
+
+                <button class="mobile-menu"
+                        onclick="toggleSidebar()">
+
+                    ☰
+
+                </button>
+
+
+                <div>
+
+                    <div class="page-title">
+                        {{ guild.name }}
+                    </div>
+
+                    <div class="page-subtitle">
+                        إدارة إعدادات السيرفر
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-left">
+
+                <span class="badge badge-green">
+                    ● متصل
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+
+            <!-- ================= SERVER HEADER ================= -->
+
+            <div class="server-header">
+
+                {% if guild.icon %}
+
+                <img
+                    class="server-header-icon"
+                    src="{{ guild.icon }}"
+                    alt="Server">
+
+                {% else %}
+
+                <div class="server-header-icon"></div>
+
+                {% endif %}
+
+
+                <div class="server-header-info">
+
+                    <h1>
+                        {{ guild.name }}
+                    </h1>
+
+                    <p>
+                        Server ID:
+                        {{ guild.id }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= OVERVIEW ================= -->
+
+            <section id="section-overview"
+                     class="section">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            نظرة عامة
+                        </h2>
+
+                        <p>
+                            إحصائيات وأنظمة السيرفر
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                السجلات الأمنية
+                            </span>
+
+                            <div class="stat-icon">
+                                🛡
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            {{ stats.security_logs or 0 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                التحذيرات
+                            </span>
+
+                            <div class="stat-icon">
+                                ⚠
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            {{ stats.warnings or 0 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                التذاكر
+                            </span>
+
+                            <div class="stat-icon">
+                                🎫
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            {{ stats.tickets or 0 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                البلاغات
+                            </span>
+
+                            <div class="stat-icon">
+                                📋
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            {{ stats.criminal_records or 0 }}
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="grid-3"
+                     style="margin-top:15px;">
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            الإنذارات
+                        </span>
+
+                        <div class="stat-value">
+                            {{ stats.warrants or 0 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            البلاغات الطبية
+                        </span>
+
+                        <div class="stat-value">
+                            {{ stats.medical_reports or 0 }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            Dispatch
+                        </span>
+
+                        <div class="stat-value">
+                            {{ stats.dispatches or 0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= COMMANDS ================= -->
+
+            <section id="section-commands"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            الأوامر
+                        </h2>
+
+                        <p>
+                            التحكم في أوامر البوت وصلاحيات استخدامها
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                إدارة الأوامر
+                            </h3>
+
+                            <p>
+                                سيتم تحميل الأوامر من البوت تلقائياً
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel-body">
+
+                        <div class="command-list">
+
+
+                            <div class="command-row">
+
+                                <div class="command-info">
+
+                                    <div class="stat-icon">
+                                        /
+                                    </div>
+
+                                    <div>
+
+                                        <div class="command-name">
+                                            أوامر البوت
+                                        </div>
+
+                                        <div class="command-description">
+                                            تفعيل أو تعطيل الأوامر وتحديد صلاحياتها
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge badge-yellow">
+                                    ربط النظام الرئيسي
+                                </span>
+
+                            </div>
+
+
+                            <div class="command-row">
+
+                                <div class="command-info">
+
+                                    <div class="stat-icon">
+                                        🔐
+                                    </div>
+
+                                    <div>
+
+                                        <div class="command-name">
+                                            الصلاحيات
+                                        </div>
+
+                                        <div class="command-description">
+                                            تحديد الرتب المسموح لها باستخدام الأوامر
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge badge-yellow">
+                                    جاهز للربط
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= LOGS ================= -->
+
+            <section id="section-logs"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            السجلات
+                        </h2>
+
+                        <p>
+                            تحديد الروم الخاص بكل نوع من السجلات
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+
+                        {% set log_types = [
+
+                            ('security_log',
+                             'سجل الحماية',
+                             'security_log_channel_id',
+                             'security_log_channel'),
+
+                            ('delete_log',
+                             'سجل حذف الرسائل',
+                             'delete_log_channel_id',
+                             'delete_log_channel'),
+
+                            ('edit_log',
+                             'سجل تعديل الرسائل',
+                             'edit_log_channel_id',
+                             'edit_log_channel'),
+
+                            ('member_log',
+                             'سجل الأعضاء',
+                             'member_log_channel_id',
+                             'member_log_channel'),
+
+                            ('mod_log',
+                             'سجل الإدارة',
+                             'mod_log_channel_id',
+                             'mod_log_channel'),
+
+                            ('role_log',
+                             'سجل الرتب',
+                             'role_log_channel_id',
+                             'role_log_channel'),
+
+                            ('channel_log',
+                             'سجل الرومات',
+                             'channel_log_channel_id',
+                             'channel_log_channel')
+
+                        ] %}
+
+
+                        {% for type, name, setting_key, action_name in log_types %}
+
+                        <form method="POST"
+                              action="/server/{{ guild.id }}/action"
+                              class="toggle-row">
+
+
+                            <div class="toggle-info">
+
+                                <h4>
+                                    {{ name }}
+                                </h4>
+
+                                <p>
+                                    اختر الروم الذي يستقبل هذا النوع من السجل
+                                </p>
+
+                            </div>
+
+
+                            <div style="width:260px;">
+
+                                <select
+                                    name="channel_id"
+                                    class="form-select"
+                                    onchange="this.form.submit()">
+
+                                    <option value="">
+                                        تعطيل
+                                    </option>
+
+
+                                    {% for channel in channels %}
+
+                                    <option
+                                        value="{{ channel.id }}"
+                                        {% if settings.get(setting_key)|string == channel.id|string %}
+                                        selected
+                                        {% endif %}>
+
+                                        #{{ channel.name }}
+
+                                    </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="{{ action_name }}">
+
+                            </div>
+
+                        </form>
+
+                        {% endfor %}
+
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= PROTECTION ================= -->
+
+            <section id="section-protection"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            الحماية
+                        </h2>
+
+                        <p>
+                            التحكم في الرتب المستثناة من نظام الحماية
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="grid-2">
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    إضافة رتبة مستثناة
+                                </h3>
+
+                                <p>
+                                    الرتبة لن تتأثر ببعض أنظمة الحماية
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+                            <form method="POST"
+                                  action="/server/{{ guild.id }}/action">
+
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="add_excluded_role">
+
+
+                                <div class="form-group">
+
+                                    <label class="form-label">
+                                        الرتبة
+                                    </label>
+
+
+                                    <select
+                                        name="role_id"
+                                        class="form-select"
+                                        required>
+
+                                        <option value="">
+                                            اختر الرتبة
+                                        </option>
+
+
+                                        {% for role in roles %}
+
+                                            {% if not role.managed %}
+
+                                            <option value="{{ role.id }}">
+                                                @{{ role.name }}
+                                            </option>
+
+                                            {% endif %}
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <button class="btn btn-primary"
+                                        type="submit">
+
+                                    إضافة الرتبة
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    الرتب المستثناة
+                                </h3>
+
+                                <p>
+                                    الرتب التي تم استثناؤها
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+
+                            {% if excluded_role_objects %}
+
+                                {% for role in excluded_role_objects %}
+
+                                <form method="POST"
+                                      action="/server/{{ guild.id }}/action"
+                                      class="toggle-row">
+
+                                    <div class="toggle-info">
+
+                                        <h4>
+                                            @{{ role.name }}
+                                        </h4>
+
+                                    </div>
+
+
+                                    <input
+                                        type="hidden"
+                                        name="action"
+                                        value="remove_excluded_role">
+
+
+                                    <input
+                                        type="hidden"
+                                        name="role_id"
+                                        value="{{ role.id }}">
+
+
+                                    <button
+                                        class="btn btn-danger"
+                                        type="submit">
+
+                                        إزالة
+
+                                    </button>
+
+                                </form>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+                                        🛡
+                                    </div>
+
+                                    <h3>
+                                        لا توجد رتب مستثناة
+                                    </h3>
+
+                                    <p>
+                                        لم تتم إضافة أي رتبة حتى الآن.
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= TICKETS ================= -->
+
+            <section id="section-tickets"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            التذاكر
+                        </h2>
+
+                        <p>
+                            متابعة التذاكر الموجودة في السيرفر
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        رقم
+                                    </th>
+
+                                    <th>
+                                        المستخدم
+                                    </th>
+
+                                    <th>
+                                        الحالة
+                                    </th>
+
+                                    <th>
+                                        تاريخ الإنشاء
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% if tickets %}
+
+                                    {% for ticket in tickets %}
+
+                                    <tr>
+
+                                        <td>
+                                            #{{ ticket.id }}
+                                        </td>
+
+                                        <td>
+                                            {{ ticket.user_id }}
+                                        </td>
+
+                                        <td>
+
+                                            {% if ticket.status == "open" %}
+
+                                            <span class="badge badge-green">
+                                                مفتوحة
+                                            </span>
+
+                                            {% else %}
+
+                                            <span class="badge badge-red">
+                                                مغلقة
+                                            </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        <td>
+                                            {{ ticket.created_at }}
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                {% else %}
+
+                                    <tr>
+
+                                        <td colspan="4"
+                                            style="text-align:center;padding:40px;">
+
+                                            لا توجد تذاكر حالياً.
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endif %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= APPLICATIONS ================= -->
+
+            <section id="section-applications"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            التقديمات
+                        </h2>
+
+                        <p>
+                            إدارة أنظمة التقديم والطلبات
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                📝
+                            </div>
+
+                            <h3>
+                                نظام التقديمات
+                            </h3>
+
+                            <p>
+                                سيتم ربط التقديمات مع قاعدة بيانات البوت.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= LAWS ================= -->
+
+            <section id="section-laws"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            القوانين
+                        </h2>
+
+                        <p>
+                            إدارة قوانين السيرفر
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="grid-2">
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    إضافة قانون
+                                </h3>
+
+                                <p>
+                                    إنشاء قانون جديد للسيرفر
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    رقم القانون
+                                </label>
+
+                                <input
+                                    class="form-input"
+                                    type="number"
+                                    min="1"
+                                    max="30"
+                                    placeholder="مثال: 1">
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    اسم القانون
+                                </label>
+
+                                <input
+                                    class="form-input"
+                                    type="text"
+                                    placeholder="اسم القانون">
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    نص القانون
+                                </label>
+
+                                <textarea
+                                    class="form-textarea"
+                                    placeholder="اكتب نص القانون"></textarea>
+
+                            </div>
+
+
+                            <button
+                                class="btn btn-primary"
+                                onclick="futureFeature('حفظ القوانين')">
+
+                                حفظ القانون
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    القوانين المحفوظة
+                                </h3>
+
+                                <p>
+                                    حتى 30 قانون
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    ⚖
+                                </div>
+
+                                <h3>
+                                    لا توجد قوانين
+                                </h3>
+
+                                <p>
+                                    سيتم عرض القوانين بعد ربط قاعدة البيانات.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= LEVELS ================= -->
+
+            <section id="section-levels"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            المستويات
+                        </h2>
+
+                        <p>
+                            نظام الخبرة والمستويات
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+
+                        <div class="toggle-row">
+
+                            <div class="toggle-info">
+
+                                <h4>
+                                    تفعيل نظام المستويات
+                                </h4>
+
+                                <p>
+                                    منح الأعضاء XP عند النشاط
+                                </p>
+
+                            </div>
+
+
+                            <label class="toggle">
+
+                                <input type="checkbox">
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="form-group"
+                             style="margin-top:20px;">
+
+                            <label class="form-label">
+                                روم إشعارات المستوى
+                            </label>
+
+                            <select class="form-select">
+
+                                <option>
+                                    سيتم جلب الرومات من Discord
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="futureFeature('نظام المستويات')">
+
+                            حفظ إعدادات المستويات
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= AI ================= -->
+
+            <section id="section-ai"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            الذكاء الاصطناعي
+                        </h2>
+
+                        <p>
+                            إعداد نظام الذكاء الاصطناعي للسيرفر
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+
+                        <form method="POST"
+                              action="/server/{{ guild.id }}/action">
+
+
+                            <div class="toggle-row">
+
+                                <div class="toggle-info">
+
+                                    <h4>
+                                        تفعيل الذكاء الاصطناعي
+                                    </h4>
+
+                                    <p>
+                                        السماح للبوت باستخدام نظام الذكاء الاصطناعي
+                                    </p>
+
+                                </div>
+
+
+                                {% if settings.get("ai_enabled") %}
+
+                                    <input type="hidden"
+                                           name="action"
+                                           value="ai_disable">
+
+                                    <button
+                                        class="btn btn-danger"
+                                        type="submit">
+
+                                        تعطيل
+
+                                    </button>
+
+                                {% else %}
+
+                                    <input type="hidden"
+                                           name="action"
+                                           value="ai_enable">
+
+                                    <button
+                                        class="btn btn-success"
+                                        type="submit">
+
+                                        تفعيل
+
+                                    </button>
+
+                                {% endif %}
+
+                            </div>
+
+                        </form>
+
+
+                        <form method="POST"
+                              action="/server/{{ guild.id }}/action"
+                              style="margin-top:20px;">
+
+
+                            <input type="hidden"
+                                   name="action"
+                                   value="ai_channel">
+
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    روم الذكاء الاصطناعي
+                                </label>
+
+
+                                <select
+                                    name="channel_id"
+                                    class="form-select">
+
+                                    <option value="">
+                                        تعطيل
+                                    </option>
+
+
+                                    {% for channel in channels %}
+
+                                    <option
+                                        value="{{ channel.id }}"
+                                        {% if settings.get("ai_channel_id")|string == channel.id|string %}
+                                        selected
+                                        {% endif %}>
+
+                                        #{{ channel.name }}
+
+                                    </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <button
+                                class="btn btn-primary"
+                                type="submit">
+
+                                حفظ
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= SETTINGS ================= -->
+
+            <section id="section-settings"
+                     class="section hidden">
+
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>
+                            الإعدادات
+                        </h2>
+
+                        <p>
+                            معلومات وإعدادات السيرفر
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="grid-2">
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    معلومات السيرفر
+                                </h3>
+
+                                <p>
+                                    معلومات Discord الأساسية
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    اسم السيرفر
+                                </label>
+
+                                <input
+                                    class="form-input"
+                                    value="{{ guild.name }}"
+                                    readonly>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Server ID
+                                </label>
+
+                                <input
+                                    class="form-input"
+                                    value="{{ guild.id }}"
+                                    readonly
+                                    dir="ltr">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    حالة الاتصال
+                                </h3>
+
+                                <p>
+                                    حالة البوت مع Discord
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel-body">
+
+                            <div class="render-status">
+
+                                <span class="status-dot"></span>
+
+                                البوت متصل بالسيرفر
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <div class="footer">
+                CT BOT © 2026 — جميع الحقوق محفوظة
+            </div>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+
+function toggleSidebar() {
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+    sidebar.classList.toggle("open");
+
+}
+
+
+function showSection(name, button) {
+
+    document
+        .querySelectorAll(".section")
+        .forEach(section => {
+
+            section.classList.add("hidden");
+
+        });
+
+
+    const target =
+        document.getElementById(
+            "section-" + name
+        );
+
+
+    if (target) {
+
+        target.classList.remove("hidden");
+
+    }
+
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(item => {
+
+            item.classList.remove("active");
+
+        });
+
+
+    if (button) {
+
+        button.classList.add("active");
+
+    }
+
+
+    window.location.hash = name;
+
+
+    document
+        .getElementById("sidebar")
+        .classList.remove("open");
+
+}
+
+
+function loadSectionFromHash() {
+
+    const hash =
+        window.location.hash.replace("#", "");
+
+
+    if (!hash) {
+
+        return;
+
+    }
+
+
+    const button =
+        document.querySelector(
+            '.nav-item[onclick*="' + hash + '"]'
+        );
+
+
+    if (button) {
+
+        showSection(hash, button);
+
+    }
+
+}
+
+
+function futureFeature(name) {
+
+    alert(
+        "قسم " +
+        name +
+        " جاهز من ناحية الواجهة وسيتم ربط الحفظ مع main.py."
+    );
+
+}
+
+
+window.addEventListener(
+    "hashchange",
+    loadSectionFromHash
+);
+
+
+loadSectionFromHash();
+
+
+</script>
+
+</body>
+</html>
