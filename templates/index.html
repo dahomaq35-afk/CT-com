@@ -1,1 +1,898 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>CT BOT — لوحة التحكم</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="brand">
+                <div class="ct-logo small">
+                    <span class="ct-c">C</span><span class="ct-t">T</span>
+                </div>
+
+                <span class="brand-name">BOT PANEL</span>
+            </div>
+
+        </div>
+
+        <div class="sidebar-content">
+
+            <div class="nav-title">الرئيسية</div>
+
+            <div class="nav-list">
+
+                <a href="#home" class="nav-item active">
+                    <span class="icon">⌂</span>
+                    <span class="label">الرئيسية</span>
+                </a>
+
+                <a href="#bots" class="nav-item">
+                    <span class="icon">🤖</span>
+                    <span class="label">البوتات</span>
+                </a>
+
+                <a href="#servers" class="nav-item">
+                    <span class="icon">▣</span>
+                    <span class="label">السيرفرات</span>
+                </a>
+
+            </div>
+
+            <div class="nav-title">إدارة النظام</div>
+
+            <div class="nav-list">
+
+                <a href="#render" class="nav-item">
+                    <span class="icon">◉</span>
+                    <span class="label">Render</span>
+                </a>
+
+                <a href="#status" class="nav-item">
+                    <span class="icon">●</span>
+                    <span class="label">حالة النظام</span>
+                </a>
+
+                <a href="#settings" class="nav-item">
+                    <span class="icon">⚙</span>
+                    <span class="label">الإعدادات</span>
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="sidebar-footer">
+
+            <div class="user-box">
+
+                {% if user and user.avatar %}
+
+                    <img
+                        class="user-avatar"
+                        src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png?size=128"
+                        alt="Avatar"
+                    >
+
+                {% else %}
+
+                    <div class="user-avatar"></div>
+
+                {% endif %}
+
+                <div class="user-info">
+
+                    <div class="user-name">
+                        {{ user.global_name or user.username }}
+                    </div>
+
+                    <div class="user-status">
+                        ● متصل
+                    </div>
+
+                </div>
+
+                <a href="/logout" class="btn btn-secondary"
+                   style="min-height:32px;padding:0 9px;">
+                    خروج
+                </a>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="topbar-right">
+
+                <button
+                    class="mobile-menu"
+                    onclick="toggleSidebar()">
+                    ☰
+                </button>
+
+                <div>
+
+                    <div class="page-title">
+                        لوحة تحكم CT
+                    </div>
+
+                    <div class="page-subtitle">
+                        إدارة البوتات والسيرفرات والأنظمة
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="topbar-left">
+
+                <span class="badge badge-green">
+                    ● النظام يعمل
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT -->
+        <div class="content">
+
+
+            <!-- HOME -->
+            <section id="home" class="dashboard-section">
+
+                <div class="welcome">
+
+                    <div class="welcome-content">
+
+                        <div class="ct-logo large">
+                            <span class="ct-c">C</span><span class="ct-t">T</span>
+                        </div>
+
+                        <h1 style="margin-top:15px;">
+                            أهلاً {{ user.global_name or user.username }}
+                        </h1>
+
+                        <p>
+                            من هنا تقدر تدير البوتات والسيرفرات
+                            والأنظمة المرتبطة بها من مكان واحد.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                السيرفرات
+                            </span>
+
+                            <div class="stat-icon">
+                                ◈
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            {{ guilds|length }}
+                        </div>
+
+                        <div class="stat-description">
+                            السيرفرات التي يستطيع البوت الوصول إليها
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                حالة البوت
+                            </span>
+
+                            <div class="stat-icon">
+                                ●
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            متصل
+                        </div>
+
+                        <div class="stat-description">
+                            Discord Gateway
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                النظام
+                            </span>
+
+                            <div class="stat-icon">
+                                ⚙
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            يعمل
+                        </div>
+
+                        <div class="stat-description">
+                            لوحة التحكم متاحة
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                الحماية
+                            </span>
+
+                            <div class="stat-icon">
+                                🛡
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+                            جاهزة
+                        </div>
+
+                        <div class="stat-description">
+                            إعدادات الحماية متاحة
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- QUICK ACTIONS -->
+
+                <div class="section-title">
+
+                    <div>
+                        <h2>الوصول السريع</h2>
+                        <p>أهم الأقسام الموجودة في اللوحة</p>
+                    </div>
+
+                </div>
+
+
+                <div class="grid-4">
+
+                    <a href="#bots" class="panel">
+                        <div class="panel-body">
+
+                            <div class="stat-icon">
+                                🤖
+                            </div>
+
+                            <h3 style="margin-top:12px;font-size:13px;">
+                                إدارة البوتات
+                            </h3>
+
+                            <p class="text-muted"
+                               style="font-size:10px;margin-top:4px;">
+                                إدارة البوتات المرتبطة باللوحة
+                            </p>
+
+                        </div>
+                    </a>
+
+
+                    <a href="#servers" class="panel">
+                        <div class="panel-body">
+
+                            <div class="stat-icon">
+                                ▣
+                            </div>
+
+                            <h3 style="margin-top:12px;font-size:13px;">
+                                إدارة السيرفرات
+                            </h3>
+
+                            <p class="text-muted"
+                               style="font-size:10px;margin-top:4px;">
+                                الدخول إلى إعدادات كل سيرفر
+                            </p>
+
+                        </div>
+                    </a>
+
+
+                    <a href="#render" class="panel">
+                        <div class="panel-body">
+
+                            <div class="stat-icon">
+                                ◉
+                            </div>
+
+                            <h3 style="margin-top:12px;font-size:13px;">
+                                Render
+                            </h3>
+
+                            <p class="text-muted"
+                               style="font-size:10px;margin-top:4px;">
+                                تشغيل وإيقاف الخدمات
+                            </p>
+
+                        </div>
+                    </a>
+
+
+                    <a href="#status" class="panel">
+                        <div class="panel-body">
+
+                            <div class="stat-icon">
+                                ●
+                            </div>
+
+                            <h3 style="margin-top:12px;font-size:13px;">
+                                حالة النظام
+                            </h3>
+
+                            <p class="text-muted"
+                               style="font-size:10px;margin-top:4px;">
+                                متابعة حالة الخدمات
+                            </p>
+
+                        </div>
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- BOTS -->
+
+            <section id="bots"
+                     class="dashboard-section"
+                     style="margin-top:45px;">
+
+                <div class="section-title">
+
+                    <div>
+                        <h2>البوتات</h2>
+
+                        <p>
+                            إدارة البوتات المرتبطة بلوحة CT
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="alert('سيتم تفعيل إضافة البوتات بعد ربط النظام الرئيسي')">
+
+                        + إضافة بوت
+
+                    </button>
+
+                </div>
+
+
+                <div class="grid-3">
+
+                    <div class="bot-card">
+
+                        <div class="bot-head">
+
+                            <div class="bot-avatar"></div>
+
+                            <div>
+
+                                <div class="bot-name">
+                                    البوت الرئيسي
+                                </div>
+
+                                <div class="bot-id">
+                                    سيتم جلب البيانات من Discord
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="server-footer">
+
+                            <span class="badge badge-yellow">
+                                بانتظار الربط
+                            </span>
+
+                            <button class="btn btn-secondary"
+                                    onclick="alert('سيتم تفعيل إعداد البوت بعد ربط main.py')">
+                                إدارة
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SERVERS -->
+
+            <section id="servers"
+                     class="dashboard-section"
+                     style="margin-top:45px;">
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>السيرفرات</h2>
+
+                        <p>
+                            السيرفرات التي يتواجد فيها البوت
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if guilds %}
+
+                <div class="server-grid">
+
+                    {% for guild in guilds %}
+
+                    <div class="server-card">
+
+                        <div class="server-head">
+
+                            {% if guild.icon %}
+
+                            <img
+                                class="server-icon"
+                                src="{{ guild.icon }}"
+                                alt="Server">
+
+                            {% else %}
+
+                            <div class="server-icon"></div>
+
+                            {% endif %}
+
+                            <div class="server-info">
+
+                                <div class="server-name">
+                                    {{ guild.name }}
+                                </div>
+
+                                <div class="server-id">
+                                    {{ guild.id }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="server-footer">
+
+                            <span class="badge badge-green">
+                                متاح
+                            </span>
+
+                            <button
+                                class="btn btn-primary"
+                                onclick="manageServer('{{ guild.id }}')">
+
+                                إدارة السيرفر
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="panel">
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            ▣
+                        </div>
+
+                        <h3>
+                            لا توجد سيرفرات
+                        </h3>
+
+                        <p>
+                            لم يتم العثور على سيرفرات متاحة للبوت.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- RENDER -->
+
+            <section id="render"
+                     class="dashboard-section"
+                     style="margin-top:45px;">
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>Render</h2>
+
+                        <p>
+                            إدارة خدمات البوتات على Render
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="render-card">
+
+                    <div class="render-status">
+
+                        <span class="status-dot"></span>
+
+                        <span>
+                            سيتم ربط Render عند إنهاء النظام الرئيسي
+                        </span>
+
+                    </div>
+
+
+                    <div class="render-actions">
+
+                        <button class="btn btn-success"
+                                onclick="renderAction('start')">
+                            تشغيل
+                        </button>
+
+                        <button class="btn btn-danger"
+                                onclick="renderAction('stop')">
+                            إيقاف
+                        </button>
+
+                        <button class="btn btn-secondary"
+                                onclick="renderAction('restart')">
+                            إعادة تشغيل
+                        </button>
+
+                        <button class="btn btn-secondary"
+                                onclick="renderAction('status')">
+                            تحديث الحالة
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STATUS -->
+
+            <section id="status"
+                     class="dashboard-section"
+                     style="margin-top:45px;">
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>حالة النظام</h2>
+
+                        <p>
+                            الحالة الحالية للخدمات
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="grid-3">
+
+                    <div class="render-card">
+
+                        <div class="render-status">
+
+                            <span class="status-dot"></span>
+
+                            Discord Bot
+
+                        </div>
+
+                        <h3 style="margin-top:12px;">
+                            متصل
+                        </h3>
+
+                    </div>
+
+
+                    <div class="render-card">
+
+                        <div class="render-status">
+
+                            <span class="status-dot"></span>
+
+                            Web Panel
+
+                        </div>
+
+                        <h3 style="margin-top:12px;">
+                            يعمل
+                        </h3>
+
+                    </div>
+
+
+                    <div class="render-card">
+
+                        <div class="render-status">
+
+                            <span class="status-dot"></span>
+
+                            Database
+
+                        </div>
+
+                        <h3 style="margin-top:12px;">
+                            جاهزة
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SETTINGS -->
+
+            <section id="settings"
+                     class="dashboard-section"
+                     style="margin-top:45px;">
+
+                <div class="section-title">
+
+                    <div>
+
+                        <h2>الإعدادات</h2>
+
+                        <p>
+                            إعدادات لوحة CT
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        <div class="toggle-row">
+
+                            <div class="toggle-info">
+
+                                <h4>
+                                    إشعارات النظام
+                                </h4>
+
+                                <p>
+                                    إظهار تنبيهات العمليات داخل اللوحة
+                                </p>
+
+                            </div>
+
+                            <label class="toggle">
+
+                                <input
+                                    type="checkbox"
+                                    id="notifications"
+                                    checked>
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="toggle-row">
+
+                            <div class="toggle-info">
+
+                                <h4>
+                                    التحديث التلقائي
+                                </h4>
+
+                                <p>
+                                    تحديث بيانات الحالة بشكل تلقائي
+                                </p>
+
+                            </div>
+
+                            <label class="toggle">
+
+                                <input
+                                    type="checkbox"
+                                    id="autoRefresh"
+                                    checked>
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <div class="footer">
+                CT BOT © 2026 — جميع الحقوق محفوظة
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+
+    if (sidebar) {
+        sidebar.classList.toggle("open");
+    }
+}
+
+
+function manageServer(id) {
+    window.location.href = "/server/" + id;
+}
+
+
+function renderAction(action) {
+
+    alert(
+        "وظيفة Render (" +
+        action +
+        ") سيتم ربطها مع API في main.py."
+    );
+
+}
+
+
+function activateSection() {
+
+    const hash = window.location.hash;
+
+    if (!hash) {
+        return;
+    }
+
+    document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.remove("active");
+    });
+
+    const active = document.querySelector(
+        '.nav-item[href="' + hash + '"]'
+    );
+
+    if (active) {
+        active.classList.add("active");
+    }
+
+    const element = document.querySelector(hash);
+
+    if (element) {
+        setTimeout(() => {
+
+            element.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        }, 50);
+    }
+
+}
+
+
+document.querySelectorAll(".nav-item").forEach(item => {
+
+    item.addEventListener("click", () => {
+
+        document.querySelectorAll(".nav-item").forEach(nav => {
+            nav.classList.remove("active");
+        });
+
+        item.classList.add("active");
+
+        const sidebar = document.getElementById("sidebar");
+
+        if (sidebar) {
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+
+window.addEventListener("hashchange", activateSection);
+
+activateSection();
+
+
+</script>
+
+</body>
+</html>
