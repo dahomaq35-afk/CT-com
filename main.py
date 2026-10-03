@@ -2,6 +2,7 @@ import os
 import sqlite3
 import secrets
 import asyncio
+import json
 from functools import wraps
 from threading import Thread
 
@@ -35,19 +36,29 @@ APP.secret_key = os.getenv(
 
 DB_FILE = "ct_bot.db"
 
-DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", "")
-DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", "")
+DISCORD_CLIENT_ID = os.getenv(
+    "DISCORD_CLIENT_ID",
+    ""
+)
+
+DISCORD_CLIENT_SECRET = os.getenv(
+    "DISCORD_CLIENT_SECRET",
+    ""
+)
+
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI",
     "http://127.0.0.1:5000/callback"
 )
 
-DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+DISCORD_BOT_TOKEN = os.getenv(
+    "DISCORD_BOT_TOKEN",
+    ""
+)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-
-PORT = int(os.getenv("PORT", "5000"))
+PORT = int(
+    os.getenv("PORT", "5000")
+)
 
 
 # =========================================================
@@ -55,6 +66,7 @@ PORT = int(os.getenv("PORT", "5000"))
 # =========================================================
 
 def db():
+
     connection = sqlite3.connect(
         DB_FILE,
         check_same_thread=False
@@ -147,15 +159,16 @@ def init_db():
 # SETTINGS
 # =========================================================
 
-import json
-
-
 def get_settings(guild_id):
 
     connection = db()
 
     row = connection.execute(
-        "SELECT data FROM guild_settings WHERE guild_id = ?",
+        """
+        SELECT data
+        FROM guild_settings
+        WHERE guild_id = ?
+        """,
         (str(guild_id),)
     ).fetchone()
 
@@ -174,27 +187,45 @@ def save_settings(guild_id, settings):
 
     connection = db()
 
-    connection.execute("""
-        INSERT INTO guild_settings(guild_id, data)
+    connection.execute(
+        """
+        INSERT INTO guild_settings
+        (guild_id, data)
         VALUES (?, ?)
+
         ON CONFLICT(guild_id)
-        DO UPDATE SET data = excluded.data
-    """, (
-        str(guild_id),
-        json.dumps(settings, ensure_ascii=False)
-    ))
+        DO UPDATE SET
+            data = excluded.data
+        """,
+        (
+            str(guild_id),
+            json.dumps(
+                settings,
+                ensure_ascii=False
+            )
+        )
+    )
 
     connection.commit()
     connection.close()
 
 
-def update_setting(guild_id, key, value):
+def update_setting(
+    guild_id,
+    key,
+    value
+):
 
-    settings = get_settings(guild_id)
+    settings = get_settings(
+        guild_id
+    )
 
     settings[key] = value
 
-    save_settings(guild_id, settings)
+    save_settings(
+        guild_id,
+        settings
+    )
 
 
 # =========================================================
@@ -223,10 +254,19 @@ async def on_ready():
     )
 
     try:
+
         await bot.tree.sync()
-        print("Slash commands synced.")
+
+        print(
+            "Slash commands synced."
+        )
+
     except Exception as error:
-        print("Slash sync error:", error)
+
+        print(
+            "Slash sync error:",
+            error
+        )
 
 
 # =========================================================
@@ -239,8 +279,13 @@ def get_guild(guild_id):
         return None
 
     try:
-        return bot.get_guild(int(guild_id))
+
+        return bot.get_guild(
+            int(guild_id)
+        )
+
     except Exception:
+
         return None
 
 
@@ -249,7 +294,7 @@ def guild_channels(guild):
     if not guild:
         return []
 
-    channels = []
+    result = []
 
     for channel in guild.channels:
 
@@ -261,9 +306,25 @@ def guild_channels(guild):
                 discord.StageChannel
             )
         ):
-            channels.append(channel)
 
-    return channels
+            result.append(channel)
+
+    return result
+
+
+def guild_categories(guild):
+
+    if not guild:
+        return []
+
+    return [
+        channel
+        for channel in guild.channels
+        if isinstance(
+            channel,
+            discord.CategoryChannel
+        )
+    ]
 
 
 def guild_roles(guild):
@@ -275,7 +336,7 @@ def guild_roles(guild):
 
 
 # =========================================================
-# DISCORD OAUTH
+# OAUTH
 # =========================================================
 
 def login_required(function):
@@ -284,9 +345,15 @@ def login_required(function):
     def wrapper(*args, **kwargs):
 
         if "user" not in session:
-            return redirect("/login")
 
-        return function(*args, **kwargs)
+            return redirect(
+                "/login"
+            )
+
+        return function(
+            *args,
+            **kwargs
+        )
 
     return wrapper
 
@@ -299,7 +366,8 @@ def login():
         return """
         <h2>Discord OAuth غير مضبوط</h2>
         <p>
-        أضف DISCORD_CLIENT_ID في Environment Variables.
+        أضف DISCORD_CLIENT_ID
+        في Environment Variables.
         </p>
         """, 500
 
@@ -316,19 +384,24 @@ def login():
     )
 
     return redirect(
-        "https://discord.com/oauth2/authorize?" + query
+        "https://discord.com/oauth2/authorize?"
+        + query
     )
 
 
 @APP.route("/callback")
 def callback():
 
-    code = request.args.get("code")
+    code = request.args.get(
+        "code"
+    )
 
     if not code:
-        return redirect("/login")
+        return redirect(
+            "/login"
+        )
 
-    token_response = requests.post(
+    response = requests.post(
         "https://discord.com/api/oauth2/token",
         data={
             "client_id": DISCORD_CLIENT_ID,
@@ -340,37 +413,49 @@ def callback():
         timeout=15
     )
 
-    if token_response.status_code != 200:
+    if response.status_code != 200:
 
         return (
             "فشل تسجيل الدخول مع Discord.",
             401
         )
 
-    token_data = token_response.json()
+    token_data = response.json()
 
-    access_token = token_data.get("access_token")
+    access_token = token_data.get(
+        "access_token"
+    )
 
     if not access_token:
-        return "لم يتم الحصول على Access Token.", 401
 
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
+        return (
+            "لم يتم الحصول على Access Token.",
+            401
+        )
 
     user_response = requests.get(
         "https://discord.com/api/users/@me",
-        headers=headers,
+        headers={
+            "Authorization":
+                f"Bearer {access_token}"
+        },
         timeout=15
     )
 
     if user_response.status_code != 200:
-        return "تعذر جلب حساب Discord.", 401
 
-    user = user_response.json()
+        return (
+            "تعذر جلب حساب Discord.",
+            401
+        )
 
-    session["user"] = user
-    session["access_token"] = access_token
+    session["user"] = (
+        user_response.json()
+    )
+
+    session["access_token"] = (
+        access_token
+    )
 
     return redirect("/")
 
@@ -389,7 +474,9 @@ def logout():
 
 def get_user_guilds():
 
-    access_token = session.get("access_token")
+    access_token = session.get(
+        "access_token"
+    )
 
     if not access_token:
         return []
@@ -397,7 +484,8 @@ def get_user_guilds():
     response = requests.get(
         "https://discord.com/api/users/@me/guilds",
         headers={
-            "Authorization": f"Bearer {access_token}"
+            "Authorization":
+                f"Bearer {access_token}"
         },
         timeout=15
     )
@@ -406,6 +494,35 @@ def get_user_guilds():
         return []
 
     return response.json()
+
+
+def user_can_manage_guild(
+    guild_id
+):
+
+    guilds = get_user_guilds()
+
+    for guild in guilds:
+
+        if str(
+            guild["id"]
+        ) != str(guild_id):
+
+            continue
+
+        permissions = int(
+            guild.get(
+                "permissions",
+                0
+            )
+        )
+
+        return bool(
+            permissions & 0x8
+            or permissions & 0x20
+        )
+
+    return False
 
 
 # =========================================================
@@ -420,12 +537,14 @@ def index():
 
     for guild in guilds:
 
-        icon = guild.get("icon")
+        icon = guild.get(
+            "icon"
+        )
 
         if icon:
 
             guild["icon"] = (
-                f"https://cdn.discordapp.com/icons/"
+                "https://cdn.discordapp.com/icons/"
                 f"{guild['id']}/{icon}.png?size=128"
             )
 
@@ -435,66 +554,58 @@ def index():
 
     return render_template(
         "index.html",
-        user=session.get("user"),
+        user=session.get(
+            "user"
+        ),
         guilds=guilds
     )
-
-
-# =========================================================
-# GUILD ACCESS
-# =========================================================
-
-def user_can_manage_guild(guild_id):
-
-    guilds = get_user_guilds()
-
-    for guild in guilds:
-
-        if str(guild["id"]) != str(guild_id):
-            continue
-
-        permissions = int(
-            guild.get("permissions", 0)
-        )
-
-        administrator = bool(
-            permissions & 0x8
-        )
-
-        manage_guild = bool(
-            permissions & 0x20
-        )
-
-        return administrator or manage_guild
-
-    return False
 
 
 # =========================================================
 # SERVER PAGE
 # =========================================================
 
-@APP.route("/server/<guild_id>")
+@APP.route(
+    "/server/<guild_id>"
+)
 @login_required
 def server(guild_id):
 
-    if not user_can_manage_guild(guild_id):
-        return "ليس لديك صلاحية إدارة هذا السيرفر.", 403
+    if not user_can_manage_guild(
+        guild_id
+    ):
 
-    guild = get_guild(guild_id)
+        return (
+            "ليس لديك صلاحية إدارة هذا السيرفر.",
+            403
+        )
+
+    guild = get_guild(
+        guild_id
+    )
 
     if not guild:
 
         return (
-            "البوت غير موجود في هذا السيرفر "
-            "أو لم يتمكن من الوصول إليه.",
+            "البوت غير موجود في هذا السيرفر.",
             404
         )
 
-    channels = guild_channels(guild)
-    roles = guild_roles(guild)
+    channels = guild_channels(
+        guild
+    )
 
-    settings = get_settings(guild_id)
+    categories = guild_categories(
+        guild
+    )
+
+    roles = guild_roles(
+        guild
+    )
+
+    settings = get_settings(
+        guild_id
+    )
 
     connection = db()
 
@@ -543,10 +654,11 @@ def server(guild_id):
         for row in excluded_rows
     }
 
-    excluded_role_objects = [
+    excluded_roles = [
         role
         for role in roles
-        if str(role.id) in excluded_ids
+        if str(role.id)
+        in excluded_ids
     ]
 
     stats = {
@@ -567,11 +679,12 @@ def server(guild_id):
         user=session.get("user"),
         guild=guild,
         channels=channels,
+        categories=categories,
         roles=roles,
         settings=settings,
         tickets=ticket_rows,
         stats=stats,
-        excluded_role_objects=excluded_role_objects
+        excluded_roles=excluded_roles
     )
 
 
@@ -586,61 +699,81 @@ def server(guild_id):
 @login_required
 def server_action(guild_id):
 
-    if not user_can_manage_guild(guild_id):
+    if not user_can_manage_guild(
+        guild_id
+    ):
+
         return "غير مصرح.", 403
 
-    guild = get_guild(guild_id)
+    guild = get_guild(
+        guild_id
+    )
 
     if not guild:
+
         return "السيرفر غير متاح.", 404
 
-    action = request.form.get("action", "")
+    action = request.form.get(
+        "action",
+        ""
+    )
 
-    # -----------------------------------------
-    # PROTECTION
-    # -----------------------------------------
+    # -----------------------------------------------------
+    # EXCLUDED ROLE
+    # -----------------------------------------------------
 
     if action == "add_excluded_role":
 
-        role_id = request.form.get("role_id")
+        role_id = request.form.get(
+            "role_id"
+        )
 
         if role_id:
 
             connection = db()
 
-            connection.execute("""
-                INSERT OR IGNORE INTO excluded_roles
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO
+                excluded_roles
                 (guild_id, role_id)
                 VALUES (?, ?)
-            """, (
-                str(guild_id),
-                str(role_id)
-            ))
+                """,
+                (
+                    str(guild_id),
+                    str(role_id)
+                )
+            )
 
             connection.commit()
             connection.close()
 
     elif action == "remove_excluded_role":
 
-        role_id = request.form.get("role_id")
+        role_id = request.form.get(
+            "role_id"
+        )
 
         connection = db()
 
-        connection.execute("""
+        connection.execute(
+            """
             DELETE FROM excluded_roles
             WHERE guild_id = ?
             AND role_id = ?
-        """, (
-            str(guild_id),
-            str(role_id)
-        ))
+            """,
+            (
+                str(guild_id),
+                str(role_id)
+            )
+        )
 
         connection.commit()
         connection.close()
 
-    # -----------------------------------------
+    # -----------------------------------------------------
     # LOGS
-    # -----------------------------------------
+    # -----------------------------------------------------
 
     elif action in {
         "security_log_channel",
@@ -656,118 +789,86 @@ def server_action(guild_id):
             "channel_id"
         )
 
-        setting_map = {
-            "security_log_channel":
-                "security_log_channel_id",
-
-            "delete_log_channel":
-                "delete_log_channel_id",
-
-            "edit_log_channel":
-                "edit_log_channel_id",
-
-            "member_log_channel":
-                "member_log_channel_id",
-
-            "mod_log_channel":
-                "mod_log_channel_id",
-
-            "role_log_channel":
-                "role_log_channel_id",
-
-            "channel_log_channel":
-                "channel_log_channel_id"
-        }
-
         update_setting(
             guild_id,
-            setting_map[action],
+            action,
             channel_id or None
         )
 
-    # -----------------------------------------
-    # AI
-    # -----------------------------------------
-
-    elif action == "ai_enable":
-
-        update_setting(
-            guild_id,
-            "ai_enabled",
-            True
-        )
-
-    elif action == "ai_disable":
-
-        update_setting(
-            guild_id,
-            "ai_enabled",
-            False
-        )
-
-    elif action == "ai_channel":
-
-        update_setting(
-            guild_id,
-            "ai_channel_id",
-            request.form.get("channel_id") or None
-        )
-
-    # -----------------------------------------
-    # TICKET SETTINGS
-    # -----------------------------------------
+    # -----------------------------------------------------
+    # TICKETS
+    # -----------------------------------------------------
 
     elif action == "ticket_channel":
 
         update_setting(
             guild_id,
-            "ticket_channel_id",
-            request.form.get("channel_id") or None
+            "ticket_channel",
+            request.form.get(
+                "channel_id"
+            ) or None
         )
 
     elif action == "ticket_category":
 
         update_setting(
             guild_id,
-            "ticket_category_id",
-            request.form.get("category_id") or None
+            "ticket_category",
+            request.form.get(
+                "category_id"
+            ) or None
         )
 
-    # -----------------------------------------
+    # -----------------------------------------------------
     # LEVELS
-    # -----------------------------------------
+    # -----------------------------------------------------
 
     elif action == "levels_enable":
 
         update_setting(
             guild_id,
             "levels_enabled",
-            request.form.get("enabled") == "1"
+            request.form.get(
+                "enabled"
+            ) == "1"
         )
 
     elif action == "levels_channel":
 
         update_setting(
             guild_id,
-            "levels_channel_id",
-            request.form.get("channel_id") or None
+            "levels_channel",
+            request.form.get(
+                "channel_id"
+            ) or None
         )
 
-    # -----------------------------------------
+    # -----------------------------------------------------
     # GENERAL
-    # -----------------------------------------
+    # -----------------------------------------------------
 
     elif action == "setting":
 
-        key = request.form.get("key")
-        value = request.form.get("value")
+        key = request.form.get(
+            "key"
+        )
+
+        value = request.form.get(
+            "value"
+        )
 
         if key:
+
             update_setting(
                 guild_id,
                 key,
                 value
             )
+
+    section = request.form.get(
+        "section",
+        "overview"
+    )
 
     return redirect(
         url_for(
@@ -775,15 +876,12 @@ def server_action(guild_id):
             guild_id=guild_id
         )
         + "#"
-        + request.form.get(
-            "section",
-            "overview"
-        )
+        + section
     )
 
 
 # =========================================================
-# LAWS API
+# LAWS
 # =========================================================
 
 @APP.route(
@@ -795,19 +893,24 @@ def get_laws(guild_id):
 
     connection = db()
 
-    rows = connection.execute("""
+    rows = connection.execute(
+        """
         SELECT *
         FROM laws
         WHERE guild_id = ?
         ORDER BY law_number ASC
-    """, (str(guild_id),)).fetchall()
+        """,
+        (str(guild_id),)
+    ).fetchall()
 
     connection.close()
 
-    return jsonify([
-        dict(row)
-        for row in rows
-    ])
+    return jsonify({
+        "laws": [
+            dict(row)
+            for row in rows
+        ]
+    })
 
 
 @APP.route(
@@ -817,7 +920,10 @@ def get_laws(guild_id):
 @login_required
 def create_law(guild_id):
 
-    if not user_can_manage_guild(guild_id):
+    if not user_can_manage_guild(
+        guild_id
+    ):
+
         return jsonify({
             "error": "unauthorized"
         }), 403
@@ -826,43 +932,75 @@ def create_law(guild_id):
         silent=True
     ) or {}
 
-    number = data.get("law_number")
-    name = data.get("law_name")
-    text_value = data.get("law_text")
-
     try:
-        number = int(number)
+
+        number = int(
+            data.get("law_number")
+        )
+
     except Exception:
+
         return jsonify({
-            "error": "رقم القانون غير صحيح"
+            "error":
+                "رقم القانون غير صحيح"
         }), 400
 
+    name = str(
+        data.get(
+            "law_name",
+            ""
+        )
+    ).strip()
+
+    text_value = str(
+        data.get(
+            "law_text",
+            ""
+        )
+    ).strip()
+
     if not 1 <= number <= 30:
+
         return jsonify({
-            "error": "رقم القانون يجب أن يكون من 1 إلى 30"
+            "error":
+                "رقم القانون من 1 إلى 30"
         }), 400
 
     if not name or not text_value:
+
         return jsonify({
-            "error": "اسم القانون ونصه مطلوبان"
+            "error":
+                "اسم القانون ونصه مطلوبان"
         }), 400
 
     connection = db()
 
-    connection.execute("""
+    connection.execute(
+        """
         INSERT INTO laws
-        (guild_id, law_number, law_name, law_text)
+        (
+            guild_id,
+            law_number,
+            law_name,
+            law_text
+        )
         VALUES (?, ?, ?, ?)
-        ON CONFLICT(guild_id, law_number)
+
+        ON CONFLICT(
+            guild_id,
+            law_number
+        )
         DO UPDATE SET
             law_name = excluded.law_name,
             law_text = excluded.law_text
-    """, (
-        str(guild_id),
-        number,
-        str(name),
-        str(text_value)
-    ))
+        """,
+        (
+            str(guild_id),
+            number,
+            name,
+            text_value
+        )
+    )
 
     connection.commit()
     connection.close()
@@ -877,23 +1015,32 @@ def create_law(guild_id):
     methods=["DELETE"]
 )
 @login_required
-def delete_law(guild_id, number):
+def delete_law(
+    guild_id,
+    number
+):
 
-    if not user_can_manage_guild(guild_id):
+    if not user_can_manage_guild(
+        guild_id
+    ):
+
         return jsonify({
             "error": "unauthorized"
         }), 403
 
     connection = db()
 
-    connection.execute("""
+    connection.execute(
+        """
         DELETE FROM laws
         WHERE guild_id = ?
         AND law_number = ?
-    """, (
-        str(guild_id),
-        number
-    ))
+        """,
+        (
+            str(guild_id),
+            number
+        )
+    )
 
     connection.commit()
     connection.close()
@@ -907,24 +1054,104 @@ def delete_law(guild_id, number):
 # LEVELS
 # =========================================================
 
+def add_xp(
+    guild_id,
+    user_id,
+    amount
+):
+
+    connection = db()
+
+    row = connection.execute(
+        """
+        SELECT xp, level
+        FROM levels
+        WHERE guild_id = ?
+        AND user_id = ?
+        """,
+        (
+            str(guild_id),
+            str(user_id)
+        )
+    ).fetchone()
+
+    if row:
+
+        xp = row["xp"] + amount
+        level = row["level"]
+
+    else:
+
+        xp = amount
+        level = 0
+
+    while xp >= (
+        100 + level * 50
+    ):
+
+        xp -= (
+            100 + level * 50
+        )
+
+        level += 1
+
+    connection.execute(
+        """
+        INSERT INTO levels
+        (
+            guild_id,
+            user_id,
+            xp,
+            level
+        )
+        VALUES (?, ?, ?, ?)
+
+        ON CONFLICT(
+            guild_id,
+            user_id
+        )
+        DO UPDATE SET
+            xp = excluded.xp,
+            level = excluded.level
+        """,
+        (
+            str(guild_id),
+            str(user_id),
+            xp,
+            level
+        )
+    )
+
+    connection.commit()
+    connection.close()
+
+    return level, xp
+
+
 @APP.route(
     "/api/server/<guild_id>/levels/<user_id>",
     methods=["GET"]
 )
 @login_required
-def get_level(guild_id, user_id):
+def get_level(
+    guild_id,
+    user_id
+):
 
     connection = db()
 
-    row = connection.execute("""
+    row = connection.execute(
+        """
         SELECT *
         FROM levels
         WHERE guild_id = ?
         AND user_id = ?
-    """, (
-        str(guild_id),
-        str(user_id)
-    )).fetchone()
+        """,
+        (
+            str(guild_id),
+            str(user_id)
+        )
+    ).fetchone()
 
     connection.close()
 
@@ -937,61 +1164,9 @@ def get_level(guild_id, user_id):
             "level": 0
         })
 
-    return jsonify(dict(row))
-
-
-def add_xp(guild_id, user_id, amount):
-
-    connection = db()
-
-    row = connection.execute("""
-        SELECT xp, level
-        FROM levels
-        WHERE guild_id = ?
-        AND user_id = ?
-    """, (
-        str(guild_id),
-        str(user_id)
-    )).fetchone()
-
-    if not row:
-
-        xp = amount
-        level = 0
-
-    else:
-
-        xp = row["xp"] + amount
-        level = row["level"]
-
-    required = 100 + (
-        level * 50
+    return jsonify(
+        dict(row)
     )
-
-    if xp >= required:
-
-        xp -= required
-        level += 1
-
-    connection.execute("""
-        INSERT INTO levels
-        (guild_id, user_id, xp, level)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(guild_id, user_id)
-        DO UPDATE SET
-            xp = excluded.xp,
-            level = excluded.level
-    """, (
-        str(guild_id),
-        str(user_id),
-        xp,
-        level
-    ))
-
-    connection.commit()
-    connection.close()
-
-    return level, xp
 
 
 # =========================================================
@@ -1004,12 +1179,10 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    guild = message.guild
-
-    if guild:
+    if message.guild:
 
         settings = get_settings(
-            str(guild.id)
+            message.guild.id
         )
 
         if settings.get(
@@ -1018,18 +1191,70 @@ async def on_message(message):
         ):
 
             try:
-                add_xp(
-                    guild.id,
+
+                old_level = 0
+
+                connection = db()
+
+                row = connection.execute(
+                    """
+                    SELECT level
+                    FROM levels
+                    WHERE guild_id = ?
+                    AND user_id = ?
+                    """,
+                    (
+                        str(
+                            message.guild.id
+                        ),
+                        str(
+                            message.author.id
+                        )
+                    )
+                ).fetchone()
+
+                connection.close()
+
+                if row:
+                    old_level = row["level"]
+
+                new_level, xp = add_xp(
+                    message.guild.id,
                     message.author.id,
                     5
                 )
+
+                if new_level > old_level:
+
+                    channel_id = settings.get(
+                        "levels_channel"
+                    )
+
+                    if channel_id:
+
+                        channel = (
+                            message.guild.get_channel(
+                                int(channel_id)
+                            )
+                        )
+
+                        if channel:
+
+                            await channel.send(
+                                f"🎉 {message.author.mention} "
+                                f"وصل إلى المستوى **{new_level}**!"
+                            )
+
             except Exception as error:
+
                 print(
                     "XP error:",
                     error
                 )
 
-    await bot.process_commands(message)
+    await bot.process_commands(
+        message
+    )
 
 
 # =========================================================
@@ -1045,20 +1270,25 @@ def get_tickets(guild_id):
 
     connection = db()
 
-    rows = connection.execute("""
+    rows = connection.execute(
+        """
         SELECT *
         FROM tickets
         WHERE guild_id = ?
         ORDER BY id DESC
         LIMIT 100
-    """, (str(guild_id),)).fetchall()
+        """,
+        (str(guild_id),)
+    ).fetchall()
 
     connection.close()
 
-    return jsonify([
-        dict(row)
-        for row in rows
-    ])
+    return jsonify({
+        "tickets": [
+            dict(row)
+            for row in rows
+        ]
+    })
 
 
 @APP.route(
@@ -1066,34 +1296,160 @@ def get_tickets(guild_id):
     methods=["POST"]
 )
 @login_required
-def create_ticket(guild_id):
+def create_ticket(
+    guild_id
+):
 
-    if not user_can_manage_guild(guild_id):
+    if not user_can_manage_guild(
+        guild_id
+    ):
+
         return jsonify({
             "error": "unauthorized"
         }), 403
+
+    guild = get_guild(
+        guild_id
+    )
+
+    if not guild:
+
+        return jsonify({
+            "error":
+                "البوت غير موجود في السيرفر"
+        }), 404
 
     data = request.get_json(
         silent=True
     ) or {}
 
-    user_id = data.get("user_id")
+    user_id = data.get(
+        "user_id"
+    )
 
     if not user_id:
+
         return jsonify({
-            "error": "user_id مطلوب"
+            "error":
+                "user_id مطلوب"
         }), 400
+
+    settings = get_settings(
+        guild_id
+    )
+
+    category = None
+
+    category_id = settings.get(
+        "ticket_category"
+    )
+
+    if category_id:
+
+        try:
+
+            category = guild.get_channel(
+                int(category_id)
+            )
+
+        except Exception:
+
+            category = None
+
+    try:
+
+        user = guild.get_member(
+            int(user_id)
+        )
+
+    except Exception:
+
+        user = None
+
+    overwrites = {
+        guild.default_role:
+            discord.PermissionOverwrite(
+                view_channel=False
+            )
+    }
+
+    if user:
+
+        overwrites[user] = (
+            discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True,
+                read_message_history=True
+            )
+        )
+
+    overwrites[guild.me] = (
+        discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            manage_channels=True
+        )
+    )
+
+    channel = await_create_ticket_channel(
+        guild,
+        user,
+        category,
+        overwrites
+    )
+
+    return jsonify(channel)
+
+
+def await_create_ticket_channel(
+    guild,
+    user,
+    category,
+    overwrites
+):
+
+    loop = bot.loop
+
+    future = asyncio.run_coroutine_threadsafe(
+        guild.create_text_channel(
+            name=(
+                f"ticket-{user.id}"
+                if user
+                else "ticket"
+            ),
+            category=category,
+            overwrites=overwrites
+        ),
+        loop
+    )
+
+    channel = future.result(
+        timeout=20
+    )
 
     connection = db()
 
-    cursor = connection.execute("""
+    cursor = connection.execute(
+        """
         INSERT INTO tickets
-        (guild_id, user_id, status)
-        VALUES (?, ?, 'open')
-    """, (
-        str(guild_id),
-        str(user_id)
-    ))
+        (
+            guild_id,
+            user_id,
+            channel_id,
+            status
+        )
+        VALUES (?, ?, ?, 'open')
+        """,
+        (
+            str(guild.id),
+            str(
+                user.id
+                if user
+                else "0"
+            ),
+            str(channel.id)
+        )
+    )
 
     connection.commit()
 
@@ -1101,10 +1457,13 @@ def create_ticket(guild_id):
 
     connection.close()
 
-    return jsonify({
+    return {
         "success": True,
-        "ticket_id": ticket_id
-    })
+        "ticket_id": ticket_id,
+        "channel_id": str(
+            channel.id
+        )
+    }
 
 
 # =========================================================
@@ -1116,24 +1475,31 @@ def create_ticket(guild_id):
     methods=["GET"]
 )
 @login_required
-def applications(guild_id):
+def get_applications(
+    guild_id
+):
 
     connection = db()
 
-    rows = connection.execute("""
+    rows = connection.execute(
+        """
         SELECT *
         FROM applications
         WHERE guild_id = ?
         ORDER BY id DESC
         LIMIT 100
-    """, (str(guild_id),)).fetchall()
+        """,
+        (str(guild_id),)
+    ).fetchall()
 
     connection.close()
 
-    return jsonify([
-        dict(row)
-        for row in rows
-    ])
+    return jsonify({
+        "applications": [
+            dict(row)
+            for row in rows
+        ]
+    })
 
 
 @APP.route(
@@ -1141,44 +1507,64 @@ def applications(guild_id):
     methods=["POST"]
 )
 @login_required
-def create_application(guild_id):
+def create_application(
+    guild_id
+):
 
     data = request.get_json(
         silent=True
     ) or {}
 
-    user_id = data.get("user_id")
+    user_id = data.get(
+        "user_id"
+    )
 
     if not user_id:
+
         return jsonify({
-            "error": "user_id مطلوب"
+            "error":
+                "user_id مطلوب"
         }), 400
 
     connection = db()
 
-    cursor = connection.execute("""
+    cursor = connection.execute(
+        """
         INSERT INTO applications
-        (guild_id, user_id, application_type, data)
-        VALUES (?, ?, ?, ?)
-    """, (
-        str(guild_id),
-        str(user_id),
-        data.get("application_type"),
-        json.dumps(
-            data,
-            ensure_ascii=False
+        (
+            guild_id,
+            user_id,
+            application_type,
+            status,
+            data
         )
-    ))
+        VALUES (?, ?, ?, 'pending', ?)
+        """,
+        (
+            str(guild_id),
+            str(user_id),
+            data.get(
+                "application_type"
+            ),
+            json.dumps(
+                data,
+                ensure_ascii=False
+            )
+        )
+    )
 
     connection.commit()
 
-    application_id = cursor.lastrowid
+    application_id = (
+        cursor.lastrowid
+    )
 
     connection.close()
 
     return jsonify({
         "success": True,
-        "application_id": application_id
+        "application_id":
+            application_id
     })
 
 
@@ -1186,28 +1572,91 @@ def create_application(guild_id):
 # COMMAND SETTINGS
 # =========================================================
 
+def get_bot_commands():
+
+    result = []
+
+    for command in bot.tree.get_commands():
+
+        result.append({
+            "name": command.name,
+            "description":
+                command.description
+                or ""
+        })
+
+    return result
+
+
 @APP.route(
     "/api/server/<guild_id>/commands",
     methods=["GET"]
 )
 @login_required
-def get_commands(guild_id):
+def get_commands(
+    guild_id
+):
 
     connection = db()
 
-    rows = connection.execute("""
+    rows = connection.execute(
+        """
         SELECT *
         FROM command_settings
         WHERE guild_id = ?
-        ORDER BY command_name
-    """, (str(guild_id),)).fetchall()
+        """,
+        (str(guild_id),)
+    ).fetchall()
 
     connection.close()
 
-    return jsonify([
-        dict(row)
+    saved = {
+        row["command_name"]:
+            row
         for row in rows
-    ])
+    }
+
+    commands_list = []
+
+    for command in get_bot_commands():
+
+        saved_command = saved.get(
+            command["name"]
+        )
+
+        if saved_command:
+
+            enabled = bool(
+                saved_command["enabled"]
+            )
+
+            role_id = (
+                saved_command["role_id"]
+            )
+
+        else:
+
+            enabled = True
+            role_id = None
+
+        commands_list.append({
+            "name":
+                command["name"],
+
+            "description":
+                command["description"],
+
+            "enabled":
+                enabled,
+
+            "role_id":
+                role_id
+        })
+
+    return jsonify({
+        "commands":
+            commands_list
+    })
 
 
 @APP.route(
@@ -1215,11 +1664,17 @@ def get_commands(guild_id):
     methods=["POST"]
 )
 @login_required
-def update_command(guild_id):
+def update_command(
+    guild_id
+):
 
-    if not user_can_manage_guild(guild_id):
+    if not user_can_manage_guild(
+        guild_id
+    ):
+
         return jsonify({
-            "error": "unauthorized"
+            "error":
+                "unauthorized"
         }), 403
 
     data = request.get_json(
@@ -1231,32 +1686,53 @@ def update_command(guild_id):
     )
 
     if not command_name:
+
         return jsonify({
-            "error": "command_name مطلوب"
+            "error":
+                "command_name مطلوب"
         }), 400
 
     enabled = (
         1
-        if data.get("enabled", True)
+        if data.get(
+            "enabled",
+            True
+        )
         else 0
+    )
+
+    role_id = data.get(
+        "role_id"
     )
 
     connection = db()
 
-    connection.execute("""
+    connection.execute(
+        """
         INSERT INTO command_settings
-        (guild_id, command_name, enabled, role_id)
+        (
+            guild_id,
+            command_name,
+            enabled,
+            role_id
+        )
         VALUES (?, ?, ?, ?)
-        ON CONFLICT(guild_id, command_name)
+
+        ON CONFLICT(
+            guild_id,
+            command_name
+        )
         DO UPDATE SET
             enabled = excluded.enabled,
             role_id = excluded.role_id
-    """, (
-        str(guild_id),
-        str(command_name),
-        enabled,
-        data.get("role_id")
-    ))
+        """,
+        (
+            str(guild_id),
+            str(command_name),
+            enabled,
+            role_id
+        )
+    )
 
     connection.commit()
     connection.close()
@@ -1267,105 +1743,68 @@ def update_command(guild_id):
 
 
 # =========================================================
-# AI
+# SYSTEM STATUS
 # =========================================================
 
-async def ask_ai(prompt):
-
-    if not prompt:
-        return "اكتب سؤالك أولاً."
-
-    if not OPENAI_API_KEY:
-        return (
-            "نظام الذكاء الاصطناعي غير مربوط حالياً. "
-            "أضف OPENAI_API_KEY في Environment Variables."
-        )
-
-    try:
-
-        from openai import OpenAI
-
-        client = OpenAI(
-            api_key=OPENAI_API_KEY
-        )
-
-        response = client.responses.create(
-            model="gpt-4.1-mini",
-            input=prompt
-        )
-
-        return response.output_text
-
-    except Exception as error:
-
-        print("AI error:", error)
-
-        return (
-            "حدث خطأ أثناء تشغيل الذكاء الاصطناعي."
-        )
-
-
-@bot.event
-async def on_message_ai(message):
-
-    pass
-
-
-# =========================================================
-# HEALTH
-# =========================================================
-
-@APP.route("/health")
+@APP.route(
+    "/health"
+)
 def health():
 
     return jsonify({
         "status": "online",
         "name": "CT BOT",
-        "discord": bot.is_ready()
+        "discord":
+            bot.is_ready()
     })
 
 
-# =========================================================
-# API STATUS
-# =========================================================
-
-@APP.route("/api/status")
+@APP.route(
+    "/api/status"
+)
 @login_required
 def api_status():
 
     return jsonify({
         "website": True,
-        "discord": bot.is_ready(),
-        "guilds": len(bot.guilds)
-        if bot.is_ready()
-        else 0
+        "discord":
+            bot.is_ready(),
+        "guilds":
+            len(bot.guilds)
+            if bot.is_ready()
+            else 0
     })
 
 
 # =========================================================
-# ERROR HANDLERS
+# ERRORS
 # =========================================================
 
 @APP.errorhandler(404)
 def not_found(error):
 
     return jsonify({
-        "error": "Not Found"
+        "error":
+            "Not Found"
     }), 404
 
 
 @APP.errorhandler(500)
 def server_error(error):
 
-    print("SERVER ERROR:", error)
+    print(
+        "SERVER ERROR:",
+        error
+    )
 
     return jsonify({
-        "error": "Internal Server Error"
+        "error":
+            "Internal Server Error"
     }), 500
 
 
 # =========================================================
-# START DISCORD
+# RUN BOT
 # =========================================================
 
 def run_bot():
@@ -1374,7 +1813,8 @@ def run_bot():
 
         print(
             "WARNING: "
-            "DISCORD_BOT_TOKEN is not configured."
+            "DISCORD_BOT_TOKEN "
+            "is not configured."
         )
 
         return
