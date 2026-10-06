@@ -1,1862 +1,1611 @@
+# =========================================================
+# CT DASHBOARD
+# Main Server
+# =========================================================
+
 import os
+import re
+import json
 import sqlite3
 import secrets
-import asyncio
-import json
-from functools import wraps
-from threading import Thread
+from datetime import datetime, timezone
+from threading import Lock
 
 import requests
 from flask import (
     Flask,
+    jsonify,
     render_template,
-    redirect,
     request,
     session,
-    jsonify,
-    url_for
+    redirect,
+    url_for,
 )
-
-import discord
-from discord.ext import commands
-
-from keepalive import keep_alive
-
-
-# =========================================================
-# CONFIG
-# =========================================================
-
-APP = Flask(__name__)
-
-APP.secret_key = os.getenv(
-    "FLASK_SECRET_KEY",
-    secrets.token_hex(32)
-)
-
-DB_FILE = "ct_bot.db"
-
-DISCORD_CLIENT_ID = os.getenv(
-    "DISCORD_CLIENT_ID",
-    ""
-)
-
-DISCORD_CLIENT_SECRET = os.getenv(
-    "DISCORD_CLIENT_SECRET",
-    ""
-)
-
-DISCORD_REDIRECT_URI = os.getenv(
-    "DISCORD_REDIRECT_URI",
-    "http://127.0.0.1:5000/callback"
-)
-
-DISCORD_BOT_TOKEN = os.getenv(
-    "DISCORD_BOT_TOKEN",
-    ""
-)
-
-PORT = int(
-    os.getenv("PORT", "5000")
-)
-
-
-# =========================================================
-# DATABASE
-# =========================================================
-
-def db():
-
-    connection = sqlite3.connect(
-        DB_FILE,
-        check_same_thread=False
-    )
-
-    connection.row_factory = sqlite3.Row
-
-    return connection
-
-
-def init_db():
-
-    connection = db()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS guild_settings (
-            guild_id TEXT PRIMARY KEY,
-            data TEXT NOT NULL DEFAULT '{}'
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS excluded_roles (
-            guild_id TEXT NOT NULL,
-            role_id TEXT NOT NULL,
-            PRIMARY KEY (guild_id, role_id)
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            guild_id TEXT NOT NULL,
-            user_id TEXT NOT NULL,
-            channel_id TEXT,
-            status TEXT NOT NULL DEFAULT 'open',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS laws (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            guild_id TEXT NOT NULL,
-            law_number INTEGER NOT NULL,
-            law_name TEXT NOT NULL,
-            law_text TEXT NOT NULL,
-            UNIQUE(guild_id, law_number)
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS levels (
-            guild_id TEXT NOT NULL,
-            user_id TEXT NOT NULL,
-            xp INTEGER NOT NULL DEFAULT 0,
-            level INTEGER NOT NULL DEFAULT 0,
-            PRIMARY KEY(guild_id, user_id)
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS command_settings (
-            guild_id TEXT NOT NULL,
-            command_name TEXT NOT NULL,
-            enabled INTEGER NOT NULL DEFAULT 1,
-            role_id TEXT,
-            PRIMARY KEY(guild_id, command_name)
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS applications (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            guild_id TEXT NOT NULL,
-            user_id TEXT NOT NULL,
-            application_type TEXT,
-            status TEXT NOT NULL DEFAULT 'pending',
-            data TEXT,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-
-    connection.commit()
-    connection.close()
-
 
 # =========================================================
 # SETTINGS
 # =========================================================
 
-def get_settings(guild_id):
+APP_NAME = "CT"
+VERSION = "1.0.0"
 
-    connection = db()
+HOST = "0.0.0.0"
+PORT = int(os.getenv("PORT", "10000"))
 
-    row = connection.execute(
-        """
-        SELECT data
-        FROM guild_settings
-        WHERE guild_id = ?
-        """,
-        (str(guild_id),)
-    ).fetchone()
-
-    connection.close()
-
-    if not row:
-        return {}
-
-    try:
-        return json.loads(row["data"])
-    except Exception:
-        return {}
-
-
-def save_settings(guild_id, settings):
-
-    connection = db()
-
-    connection.execute(
-        """
-        INSERT INTO guild_settings
-        (guild_id, data)
-        VALUES (?, ?)
-
-        ON CONFLICT(guild_id)
-        DO UPDATE SET
-            data = excluded.data
-        """,
-        (
-            str(guild_id),
-            json.dumps(
-                settings,
-                ensure_ascii=False
-            )
-        )
-    )
-
-    connection.commit()
-    connection.close()
-
-
-def update_setting(
-    guild_id,
-    key,
-    value
-):
-
-    settings = get_settings(
-        guild_id
-    )
-
-    settings[key] = value
-
-    save_settings(
-        guild_id,
-        settings
-    )
-
+DB_FILE = "ct_dashboard.db"
 
 # =========================================================
-# DISCORD BOT
+# FLASK
 # =========================================================
 
-intents = discord.Intents.default()
+app = Flask(__name__)
 
-intents.guilds = True
-intents.members = True
-intents.message_content = True
-
-
-bot = commands.Bot(
-    command_prefix="!",
-    intents=intents
+app.secret_key = os.getenv(
+    "CT_SECRET_KEY",
+    secrets.token_hex(32)
 )
 
+app.config["JSON_SORT_KEYS"] = False
 
-@bot.event
-async def on_ready():
+db_lock = Lock()
 
-    print(
-        f"CT BOT connected as "
-        f"{bot.user} ({bot.user.id})"
+# =========================================================
+# DATABASE
+# =========================================================
+
+
+def get_db():
+    conn = sqlite3.connect(
+        DB_FILE,
+        timeout=30,
+        check_same_thread=False
     )
 
-    try:
+    conn.row_factory = sqlite3.Row
 
-        await bot.tree.sync()
+    return conn
 
-        print(
-            "Slash commands synced."
-        )
 
-    except Exception as error:
+def init_db():
 
-        print(
-            "Slash sync error:",
-            error
-        )
+    with db_lock:
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        # -------------------------------------------------
+        # Dashboard settings
+        # -------------------------------------------------
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+
+        # -------------------------------------------------
+        # Custom dashboard roles
+        # -------------------------------------------------
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dashboard_roles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                permissions TEXT DEFAULT '[]',
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        # -------------------------------------------------
+        # Dashboard users
+        # -------------------------------------------------
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dashboard_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                role_id INTEGER,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(role_id)
+                    REFERENCES dashboard_roles(id)
+            )
+        """)
+
+        # -------------------------------------------------
+        # System settings
+        # -------------------------------------------------
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS system_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bot_id TEXT NOT NULL,
+                system TEXT NOT NULL,
+                settings TEXT DEFAULT '{}',
+                updated_at TEXT NOT NULL,
+                UNIQUE(bot_id, system)
+            )
+        """)
+
+        # -------------------------------------------------
+        # Sections
+        # -------------------------------------------------
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS sections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                icon TEXT DEFAULT '📁',
+                description TEXT DEFAULT '',
+                enabled INTEGER DEFAULT 1,
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        # -------------------------------------------------
+        # Default dashboard settings
+        # -------------------------------------------------
+
+        cur.execute("""
+            INSERT OR IGNORE INTO settings(key, value)
+            VALUES('server_name', 'CT')
+        """)
+
+        cur.execute("""
+            INSERT OR IGNORE INTO settings(key, value)
+            VALUES('version', ?)
+        """, (VERSION,))
+
+        conn.commit()
+        conn.close()
 
 
 # =========================================================
-# DISCORD HELPERS
+# HELPERS
 # =========================================================
 
-def get_guild(guild_id):
 
-    if not bot.is_ready():
-        return None
+def utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def json_load(value, default=None):
+
+    if default is None:
+        default = {}
 
     try:
-
-        return bot.get_guild(
-            int(guild_id)
-        )
-
+        return json.loads(value)
     except Exception:
+        return default
 
-        return None
+
+def get_setting(key, default=None):
+
+    conn = get_db()
+
+    row = conn.execute(
+        "SELECT value FROM settings WHERE key = ?",
+        (key,)
+    ).fetchone()
+
+    conn.close()
+
+    if not row:
+        return default
+
+    return row["value"]
 
 
-def guild_channels(guild):
+def set_setting(key, value):
 
-    if not guild:
-        return []
+    conn = get_db()
+
+    conn.execute("""
+        INSERT INTO settings(key, value)
+        VALUES(?, ?)
+        ON CONFLICT(key)
+        DO UPDATE SET value = excluded.value
+    """, (key, str(value)))
+
+    conn.commit()
+    conn.close()
+
+
+# =========================================================
+# BOT ENVIRONMENT VARIABLES
+# =========================================================
+
+# يدعم:
+#
+# BOT_TOKEN_1
+# BOT_TOKEN_2
+# BOT_TOKEN_3
+# ...
+#
+# وأيضًا:
+#
+# BOT_TOKEN_10
+# BOT_TOKEN_50
+# BOT_TOKEN_100
+#
+# بدون حد برمجي ثابت.
+
+
+def get_bot_tokens():
+
+    tokens = []
+
+    for key, value in os.environ.items():
+
+        if not value:
+            continue
+
+        match = re.fullmatch(
+            r"BOT_TOKEN_(\d+)",
+            key.upper()
+        )
+
+        if match:
+            number = int(match.group(1))
+
+            tokens.append({
+                "number": number,
+                "env": key,
+                "token": value.strip()
+            })
+
+    tokens.sort(
+        key=lambda x: x["number"]
+    )
+
+    return tokens
+
+
+# =========================================================
+# DISCORD API
+# =========================================================
+
+DISCORD_API = "https://discord.com/api/v10"
+
+
+def discord_bot_info(token):
+
+    try:
+
+        response = requests.get(
+            f"{DISCORD_API}/users/@me",
+            headers={
+                "Authorization": f"Bot {token}"
+            },
+            timeout=15
+        )
+
+        if response.status_code != 200:
+            return {
+                "ok": False,
+                "status": response.status_code
+            }
+
+        data = response.json()
+
+        user_id = str(data.get("id", ""))
+
+        avatar = data.get("avatar")
+
+        if avatar:
+            avatar_url = (
+                f"https://cdn.discordapp.com/avatars/"
+                f"{user_id}/{avatar}.png?size=256"
+            )
+        else:
+            discriminator = data.get(
+                "discriminator",
+                "0"
+            )
+
+            try:
+                index = int(discriminator) % 5
+            except Exception:
+                index = 0
+
+            avatar_url = (
+                "https://cdn.discordapp.com/embed/avatars/"
+                f"{index}.png"
+            )
+
+        return {
+            "ok": True,
+            "id": user_id,
+            "username": data.get(
+                "username",
+                "Unknown Bot"
+            ),
+            "global_name": data.get(
+                "global_name"
+            ),
+            "avatar": avatar_url,
+            "verified": data.get(
+                "verified",
+                False
+            ),
+        }
+
+    except Exception as exc:
+
+        return {
+            "ok": False,
+            "error": str(exc)
+        }
+
+
+def get_all_bots():
 
     result = []
 
-    for channel in guild.channels:
+    for item in get_bot_tokens():
 
-        if isinstance(
-            channel,
-            (
-                discord.TextChannel,
-                discord.VoiceChannel,
-                discord.StageChannel
-            )
-        ):
+        info = discord_bot_info(
+            item["token"]
+        )
 
-            result.append(channel)
+        if info.get("ok"):
+
+            result.append({
+                "number": item["number"],
+                "environment": item["env"],
+                "id": info["id"],
+                "name": (
+                    info.get("global_name")
+                    or info.get("username")
+                    or "Discord Bot"
+                ),
+                "username": info.get(
+                    "username",
+                    "Unknown"
+                ),
+                "avatar": info.get(
+                    "avatar"
+                ),
+                "status": "online",
+                "verified": info.get(
+                    "verified",
+                    False
+                ),
+            })
+
+        else:
+
+            result.append({
+                "number": item["number"],
+                "environment": item["env"],
+                "id": None,
+                "name": "Unknown Bot",
+                "username": "Unknown",
+                "avatar": None,
+                "status": "offline",
+                "error": info.get(
+                    "error",
+                    "Invalid token"
+                ),
+            })
 
     return result
 
 
-def guild_categories(guild):
+def get_token_for_bot(bot_number):
 
-    if not guild:
-        return []
+    for item in get_bot_tokens():
 
-    return [
-        channel
-        for channel in guild.channels
-        if isinstance(
-            channel,
-            discord.CategoryChannel
-        )
-    ]
+        if item["number"] == int(bot_number):
+            return item["token"]
 
-
-def guild_roles(guild):
-
-    if not guild:
-        return []
-
-    return guild.roles
+    return None
 
 
 # =========================================================
-# OAUTH
+# SYSTEMS
 # =========================================================
 
-def login_required(function):
+SYSTEMS = [
+    {
+        "id": "moderation",
+        "name": "الإدارة",
+        "icon": "🛡️",
+        "description": "إعدادات الإدارة والعقوبات"
+    },
+    {
+        "id": "welcome",
+        "name": "الترحيب",
+        "icon": "👋",
+        "description": "إعدادات نظام الترحيب"
+    },
+    {
+        "id": "levels",
+        "name": "اللفلات",
+        "icon": "📊",
+        "description": "إعدادات نظام اللفلات"
+    },
+    {
+        "id": "points",
+        "name": "النقاط",
+        "icon": "⭐",
+        "description": "إعدادات النقاط"
+    },
+    {
+        "id": "tickets",
+        "name": "التذاكر",
+        "icon": "🎫",
+        "description": "إعدادات نظام التذاكر"
+    },
+    {
+        "id": "applications",
+        "name": "التقديمات",
+        "icon": "📝",
+        "description": "إعدادات التقديمات"
+    },
+    {
+        "id": "suggestions",
+        "name": "الاقتراحات",
+        "icon": "💡",
+        "description": "إعدادات الاقتراحات"
+    },
+    {
+        "id": "notifications",
+        "name": "الإشعارات",
+        "icon": "🔔",
+        "description": "إعدادات الإشعارات"
+    },
+    {
+        "id": "laws",
+        "name": "القوانين",
+        "icon": "📜",
+        "description": "إعدادات القوانين"
+    },
+    {
+        "id": "logs",
+        "name": "اللوقات",
+        "icon": "🧾",
+        "description": "إعدادات اللوقات"
+    },
+    {
+        "id": "replies",
+        "name": "الردود",
+        "icon": "💬",
+        "description": "إعدادات الردود التلقائية"
+    },
+    {
+        "id": "shortcuts",
+        "name": "الاختصارات",
+        "icon": "⚡",
+        "description": "اختصارات الأوامر"
+    },
+]
 
-    @wraps(function)
-    def wrapper(*args, **kwargs):
 
-        if "user" not in session:
+def get_system(system_id):
 
-            return redirect(
-                "/login"
-            )
+    for system in SYSTEMS:
 
-        return function(
-            *args,
-            **kwargs
-        )
+        if system["id"] == system_id:
+            return system
 
-    return wrapper
+    return None
 
 
-@APP.route("/login")
+# =========================================================
+# PERMISSIONS
+# =========================================================
+
+PERMISSIONS = [
+
+    "dashboard.view",
+
+    "bots.view",
+    "bots.manage",
+
+    "moderation.view",
+    "moderation.manage",
+
+    "welcome.view",
+    "welcome.manage",
+
+    "levels.view",
+    "levels.manage",
+
+    "points.view",
+    "points.manage",
+
+    "tickets.view",
+    "tickets.manage",
+
+    "applications.view",
+    "applications.manage",
+
+    "suggestions.view",
+    "suggestions.manage",
+
+    "notifications.view",
+    "notifications.manage",
+
+    "laws.view",
+    "laws.manage",
+
+    "logs.view",
+    "logs.manage",
+
+    "replies.view",
+    "replies.manage",
+
+    "shortcuts.view",
+    "shortcuts.manage",
+
+    "roles.view",
+    "roles.manage",
+
+    "owner.manage",
+]
+
+
+def current_is_owner():
+
+    return session.get(
+        "owner",
+        False
+    )
+
+
+def has_permission(permission):
+
+    if current_is_owner():
+        return True
+
+    role_id = session.get("role_id")
+
+    if not role_id:
+        return False
+
+    conn = get_db()
+
+    row = conn.execute("""
+        SELECT permissions
+        FROM dashboard_roles
+        WHERE id = ?
+    """, (role_id,)).fetchone()
+
+    conn.close()
+
+    if not row:
+        return False
+
+    permissions = json_load(
+        row["permissions"],
+        []
+    )
+
+    return permission in permissions
+
+
+# =========================================================
+# LOGIN
+# =========================================================
+
+@app.route("/")
+def index():
+
+    return render_template(
+        "index.html",
+        server_name=get_setting(
+            "server_name",
+            "CT"
+        ),
+        systems=SYSTEMS
+    )
+
+
+@app.route("/server")
+def server():
+
+    return render_template(
+        "server.html",
+        server_name=get_setting(
+            "server_name",
+            "CT"
+        ),
+        systems=SYSTEMS
+    )
+
+
+# =========================================================
+# SIMPLE OWNER LOGIN
+# =========================================================
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
 
-    if not DISCORD_CLIENT_ID:
+    if request.method == "GET":
 
-        return """
-        <h2>Discord OAuth غير مضبوط</h2>
-        <p>
-        أضف DISCORD_CLIENT_ID
-        في Environment Variables.
-        </p>
-        """, 500
+        return jsonify({
+            "ok": True,
+            "message": "CT Login API"
+        })
 
-    params = {
-        "client_id": DISCORD_CLIENT_ID,
-        "redirect_uri": DISCORD_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "identify guilds"
-    }
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    query = "&".join(
-        f"{key}={requests.utils.quote(str(value))}"
-        for key, value in params.items()
+    username = str(
+        data.get("username", "")
+    ).strip()
+
+    owner_username = os.getenv(
+        "CT_OWNER_USERNAME",
+        ""
+    ).strip()
+
+    owner_password = os.getenv(
+        "CT_OWNER_PASSWORD",
+        ""
     )
 
-    return redirect(
-        "https://discord.com/oauth2/authorize?"
-        + query
+    password = str(
+        data.get("password", "")
     )
 
+    if (
+        owner_username
+        and owner_password
+        and username == owner_username
+        and password == owner_password
+    ):
 
-@APP.route("/callback")
-def callback():
+        session["logged_in"] = True
+        session["owner"] = True
+        session["username"] = username
+        session["role_id"] = None
 
-    code = request.args.get(
-        "code"
-    )
+        return jsonify({
+            "ok": True,
+            "owner": True
+        })
 
-    if not code:
-        return redirect(
-            "/login"
-        )
+    conn = get_db()
 
-    response = requests.post(
-        "https://discord.com/api/oauth2/token",
-        data={
-            "client_id": DISCORD_CLIENT_ID,
-            "client_secret": DISCORD_CLIENT_SECRET,
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": DISCORD_REDIRECT_URI
-        },
-        timeout=15
-    )
+    row = conn.execute("""
+        SELECT
+            dashboard_users.username,
+            dashboard_users.role_id,
+            dashboard_roles.permissions
+        FROM dashboard_users
+        LEFT JOIN dashboard_roles
+            ON dashboard_roles.id =
+               dashboard_users.role_id
+        WHERE dashboard_users.username = ?
+    """, (username,)).fetchone()
 
-    if response.status_code != 200:
+    conn.close()
 
-        return (
-            "فشل تسجيل الدخول مع Discord.",
-            401
-        )
+    if not row:
 
-    token_data = response.json()
+        return jsonify({
+            "ok": False,
+            "error": "بيانات الدخول غير صحيحة"
+        }), 401
 
-    access_token = token_data.get(
-        "access_token"
-    )
+    session["logged_in"] = True
+    session["owner"] = False
+    session["username"] = username
+    session["role_id"] = row["role_id"]
 
-    if not access_token:
-
-        return (
-            "لم يتم الحصول على Access Token.",
-            401
-        )
-
-    user_response = requests.get(
-        "https://discord.com/api/users/@me",
-        headers={
-            "Authorization":
-                f"Bearer {access_token}"
-        },
-        timeout=15
-    )
-
-    if user_response.status_code != 200:
-
-        return (
-            "تعذر جلب حساب Discord.",
-            401
-        )
-
-    session["user"] = (
-        user_response.json()
-    )
-
-    session["access_token"] = (
-        access_token
-    )
-
-    return redirect("/")
+    return jsonify({
+        "ok": True,
+        "owner": False
+    })
 
 
-@APP.route("/logout")
+@app.route("/logout")
 def logout():
 
     session.clear()
 
-    return redirect("/")
-
-
-# =========================================================
-# USER GUILDS
-# =========================================================
-
-def get_user_guilds():
-
-    access_token = session.get(
-        "access_token"
-    )
-
-    if not access_token:
-        return []
-
-    response = requests.get(
-        "https://discord.com/api/users/@me/guilds",
-        headers={
-            "Authorization":
-                f"Bearer {access_token}"
-        },
-        timeout=15
-    )
-
-    if response.status_code != 200:
-        return []
-
-    return response.json()
-
-
-def user_can_manage_guild(
-    guild_id
-):
-
-    guilds = get_user_guilds()
-
-    for guild in guilds:
-
-        if str(
-            guild["id"]
-        ) != str(guild_id):
-
-            continue
-
-        permissions = int(
-            guild.get(
-                "permissions",
-                0
-            )
-        )
-
-        return bool(
-            permissions & 0x8
-            or permissions & 0x20
-        )
-
-    return False
-
-
-# =========================================================
-# HOME
-# =========================================================
-
-@APP.route("/")
-@login_required
-def index():
-
-    guilds = get_user_guilds()
-
-    for guild in guilds:
-
-        icon = guild.get(
-            "icon"
-        )
-
-        if icon:
-
-            guild["icon"] = (
-                "https://cdn.discordapp.com/icons/"
-                f"{guild['id']}/{icon}.png?size=128"
-            )
-
-        else:
-
-            guild["icon"] = None
-
-    return render_template(
-        "index.html",
-        user=session.get(
-            "user"
-        ),
-        guilds=guilds
-    )
-
-
-# =========================================================
-# SERVER PAGE
-# =========================================================
-
-@APP.route(
-    "/server/<guild_id>"
-)
-@login_required
-def server(guild_id):
-
-    if not user_can_manage_guild(
-        guild_id
-    ):
-
-        return (
-            "ليس لديك صلاحية إدارة هذا السيرفر.",
-            403
-        )
-
-    guild = get_guild(
-        guild_id
-    )
-
-    if not guild:
-
-        return (
-            "البوت غير موجود في هذا السيرفر.",
-            404
-        )
-
-    channels = guild_channels(
-        guild
-    )
-
-    categories = guild_categories(
-        guild
-    )
-
-    roles = guild_roles(
-        guild
-    )
-
-    settings = get_settings(
-        guild_id
-    )
-
-    connection = db()
-
-    excluded_rows = connection.execute(
-        """
-        SELECT role_id
-        FROM excluded_roles
-        WHERE guild_id = ?
-        """,
-        (str(guild_id),)
-    ).fetchall()
-
-    ticket_rows = connection.execute(
-        """
-        SELECT *
-        FROM tickets
-        WHERE guild_id = ?
-        ORDER BY id DESC
-        LIMIT 100
-        """,
-        (str(guild_id),)
-    ).fetchall()
-
-    law_count = connection.execute(
-        """
-        SELECT COUNT(*) AS count
-        FROM laws
-        WHERE guild_id = ?
-        """,
-        (str(guild_id),)
-    ).fetchone()["count"]
-
-    application_count = connection.execute(
-        """
-        SELECT COUNT(*) AS count
-        FROM applications
-        WHERE guild_id = ?
-        """,
-        (str(guild_id),)
-    ).fetchone()["count"]
-
-    connection.close()
-
-    excluded_ids = {
-        str(row["role_id"])
-        for row in excluded_rows
-    }
-
-    excluded_roles = [
-        role
-        for role in roles
-        if str(role.id)
-        in excluded_ids
-    ]
-
-    stats = {
-        "criminal_records": 0,
-        "warnings": 0,
-        "security_logs": 0,
-        "tickets": len(ticket_rows),
-        "deeds": 0,
-        "warrants": 0,
-        "dispatches": 0,
-        "medical_reports": 0,
-        "laws": law_count,
-        "applications": application_count
-    }
-
-    return render_template(
-        "server.html",
-        user=session.get("user"),
-        guild=guild,
-        channels=channels,
-        categories=categories,
-        roles=roles,
-        settings=settings,
-        tickets=ticket_rows,
-        stats=stats,
-        excluded_roles=excluded_roles
-    )
-
-
-# =========================================================
-# SERVER ACTIONS
-# =========================================================
-
-@APP.route(
-    "/server/<guild_id>/action",
-    methods=["POST"]
-)
-@login_required
-def server_action(guild_id):
-
-    if not user_can_manage_guild(
-        guild_id
-    ):
-
-        return "غير مصرح.", 403
-
-    guild = get_guild(
-        guild_id
-    )
-
-    if not guild:
-
-        return "السيرفر غير متاح.", 404
-
-    action = request.form.get(
-        "action",
-        ""
-    )
-
-    # -----------------------------------------------------
-    # EXCLUDED ROLE
-    # -----------------------------------------------------
-
-    if action == "add_excluded_role":
-
-        role_id = request.form.get(
-            "role_id"
-        )
-
-        if role_id:
-
-            connection = db()
-
-            connection.execute(
-                """
-                INSERT OR IGNORE INTO
-                excluded_roles
-                (guild_id, role_id)
-                VALUES (?, ?)
-                """,
-                (
-                    str(guild_id),
-                    str(role_id)
-                )
-            )
-
-            connection.commit()
-            connection.close()
-
-    elif action == "remove_excluded_role":
-
-        role_id = request.form.get(
-            "role_id"
-        )
-
-        connection = db()
-
-        connection.execute(
-            """
-            DELETE FROM excluded_roles
-            WHERE guild_id = ?
-            AND role_id = ?
-            """,
-            (
-                str(guild_id),
-                str(role_id)
-            )
-        )
-
-        connection.commit()
-        connection.close()
-
-    # -----------------------------------------------------
-    # LOGS
-    # -----------------------------------------------------
-
-    elif action in {
-        "security_log_channel",
-        "delete_log_channel",
-        "edit_log_channel",
-        "member_log_channel",
-        "mod_log_channel",
-        "role_log_channel",
-        "channel_log_channel"
-    }:
-
-        channel_id = request.form.get(
-            "channel_id"
-        )
-
-        update_setting(
-            guild_id,
-            action,
-            channel_id or None
-        )
-
-    # -----------------------------------------------------
-    # TICKETS
-    # -----------------------------------------------------
-
-    elif action == "ticket_channel":
-
-        update_setting(
-            guild_id,
-            "ticket_channel",
-            request.form.get(
-                "channel_id"
-            ) or None
-        )
-
-    elif action == "ticket_category":
-
-        update_setting(
-            guild_id,
-            "ticket_category",
-            request.form.get(
-                "category_id"
-            ) or None
-        )
-
-    # -----------------------------------------------------
-    # LEVELS
-    # -----------------------------------------------------
-
-    elif action == "levels_enable":
-
-        update_setting(
-            guild_id,
-            "levels_enabled",
-            request.form.get(
-                "enabled"
-            ) == "1"
-        )
-
-    elif action == "levels_channel":
-
-        update_setting(
-            guild_id,
-            "levels_channel",
-            request.form.get(
-                "channel_id"
-            ) or None
-        )
-
-    # -----------------------------------------------------
-    # GENERAL
-    # -----------------------------------------------------
-
-    elif action == "setting":
-
-        key = request.form.get(
-            "key"
-        )
-
-        value = request.form.get(
-            "value"
-        )
-
-        if key:
-
-            update_setting(
-                guild_id,
-                key,
-                value
-            )
-
-    section = request.form.get(
-        "section",
-        "overview"
-    )
-
     return redirect(
-        url_for(
-            "server",
-            guild_id=guild_id
-        )
-        + "#"
-        + section
+        url_for("index")
     )
 
 
 # =========================================================
-# LAWS
+# API - ME
 # =========================================================
 
-@APP.route(
-    "/api/server/<guild_id>/laws",
-    methods=["GET"]
-)
-@login_required
-def get_laws(guild_id):
-
-    connection = db()
-
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM laws
-        WHERE guild_id = ?
-        ORDER BY law_number ASC
-        """,
-        (str(guild_id),)
-    ).fetchall()
-
-    connection.close()
+@app.route("/api/me")
+def api_me():
 
     return jsonify({
-        "laws": [
-            dict(row)
-            for row in rows
-        ]
-    })
-
-
-@APP.route(
-    "/api/server/<guild_id>/laws",
-    methods=["POST"]
-)
-@login_required
-def create_law(guild_id):
-
-    if not user_can_manage_guild(
-        guild_id
-    ):
-
-        return jsonify({
-            "error": "unauthorized"
-        }), 403
-
-    data = request.get_json(
-        silent=True
-    ) or {}
-
-    try:
-
-        number = int(
-            data.get("law_number")
-        )
-
-    except Exception:
-
-        return jsonify({
-            "error":
-                "رقم القانون غير صحيح"
-        }), 400
-
-    name = str(
-        data.get(
-            "law_name",
-            ""
-        )
-    ).strip()
-
-    text_value = str(
-        data.get(
-            "law_text",
-            ""
-        )
-    ).strip()
-
-    if not 1 <= number <= 30:
-
-        return jsonify({
-            "error":
-                "رقم القانون من 1 إلى 30"
-        }), 400
-
-    if not name or not text_value:
-
-        return jsonify({
-            "error":
-                "اسم القانون ونصه مطلوبان"
-        }), 400
-
-    connection = db()
-
-    connection.execute(
-        """
-        INSERT INTO laws
-        (
-            guild_id,
-            law_number,
-            law_name,
-            law_text
-        )
-        VALUES (?, ?, ?, ?)
-
-        ON CONFLICT(
-            guild_id,
-            law_number
-        )
-        DO UPDATE SET
-            law_name = excluded.law_name,
-            law_text = excluded.law_text
-        """,
-        (
-            str(guild_id),
-            number,
-            name,
-            text_value
-        )
-    )
-
-    connection.commit()
-    connection.close()
-
-    return jsonify({
-        "success": True
-    })
-
-
-@APP.route(
-    "/api/server/<guild_id>/laws/<int:number>",
-    methods=["DELETE"]
-)
-@login_required
-def delete_law(
-    guild_id,
-    number
-):
-
-    if not user_can_manage_guild(
-        guild_id
-    ):
-
-        return jsonify({
-            "error": "unauthorized"
-        }), 403
-
-    connection = db()
-
-    connection.execute(
-        """
-        DELETE FROM laws
-        WHERE guild_id = ?
-        AND law_number = ?
-        """,
-        (
-            str(guild_id),
-            number
-        )
-    )
-
-    connection.commit()
-    connection.close()
-
-    return jsonify({
-        "success": True
-    })
-
-
-# =========================================================
-# LEVELS
-# =========================================================
-
-def add_xp(
-    guild_id,
-    user_id,
-    amount
-):
-
-    connection = db()
-
-    row = connection.execute(
-        """
-        SELECT xp, level
-        FROM levels
-        WHERE guild_id = ?
-        AND user_id = ?
-        """,
-        (
-            str(guild_id),
-            str(user_id)
-        )
-    ).fetchone()
-
-    if row:
-
-        xp = row["xp"] + amount
-        level = row["level"]
-
-    else:
-
-        xp = amount
-        level = 0
-
-    while xp >= (
-        100 + level * 50
-    ):
-
-        xp -= (
-            100 + level * 50
-        )
-
-        level += 1
-
-    connection.execute(
-        """
-        INSERT INTO levels
-        (
-            guild_id,
-            user_id,
-            xp,
-            level
-        )
-        VALUES (?, ?, ?, ?)
-
-        ON CONFLICT(
-            guild_id,
-            user_id
-        )
-        DO UPDATE SET
-            xp = excluded.xp,
-            level = excluded.level
-        """,
-        (
-            str(guild_id),
-            str(user_id),
-            xp,
-            level
-        )
-    )
-
-    connection.commit()
-    connection.close()
-
-    return level, xp
-
-
-@APP.route(
-    "/api/server/<guild_id>/levels/<user_id>",
-    methods=["GET"]
-)
-@login_required
-def get_level(
-    guild_id,
-    user_id
-):
-
-    connection = db()
-
-    row = connection.execute(
-        """
-        SELECT *
-        FROM levels
-        WHERE guild_id = ?
-        AND user_id = ?
-        """,
-        (
-            str(guild_id),
-            str(user_id)
-        )
-    ).fetchone()
-
-    connection.close()
-
-    if not row:
-
-        return jsonify({
-            "guild_id": guild_id,
-            "user_id": user_id,
-            "xp": 0,
-            "level": 0
-        })
-
-    return jsonify(
-        dict(row)
-    )
-
-
-# =========================================================
-# MESSAGE XP
-# =========================================================
-
-@bot.event
-async def on_message(message):
-
-    if message.author.bot:
-        return
-
-    if message.guild:
-
-        settings = get_settings(
-            message.guild.id
-        )
-
-        if settings.get(
-            "levels_enabled",
+        "logged_in": session.get(
+            "logged_in",
             False
-        ):
-
-            try:
-
-                old_level = 0
-
-                connection = db()
-
-                row = connection.execute(
-                    """
-                    SELECT level
-                    FROM levels
-                    WHERE guild_id = ?
-                    AND user_id = ?
-                    """,
-                    (
-                        str(
-                            message.guild.id
-                        ),
-                        str(
-                            message.author.id
-                        )
-                    )
-                ).fetchone()
-
-                connection.close()
-
-                if row:
-                    old_level = row["level"]
-
-                new_level, xp = add_xp(
-                    message.guild.id,
-                    message.author.id,
-                    5
-                )
-
-                if new_level > old_level:
-
-                    channel_id = settings.get(
-                        "levels_channel"
-                    )
-
-                    if channel_id:
-
-                        channel = (
-                            message.guild.get_channel(
-                                int(channel_id)
-                            )
-                        )
-
-                        if channel:
-
-                            await channel.send(
-                                f"🎉 {message.author.mention} "
-                                f"وصل إلى المستوى **{new_level}**!"
-                            )
-
-            except Exception as error:
-
-                print(
-                    "XP error:",
-                    error
-                )
-
-    await bot.process_commands(
-        message
-    )
-
-
-# =========================================================
-# TICKETS
-# =========================================================
-
-@APP.route(
-    "/api/server/<guild_id>/tickets",
-    methods=["GET"]
-)
-@login_required
-def get_tickets(guild_id):
-
-    connection = db()
-
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM tickets
-        WHERE guild_id = ?
-        ORDER BY id DESC
-        LIMIT 100
-        """,
-        (str(guild_id),)
-    ).fetchall()
-
-    connection.close()
-
-    return jsonify({
-        "tickets": [
-            dict(row)
-            for row in rows
-        ]
+        ),
+        "username": session.get(
+            "username"
+        ),
+        "owner": current_is_owner(),
+        "role_id": session.get(
+            "role_id"
+        )
     })
 
 
-@APP.route(
-    "/api/server/<guild_id>/tickets",
-    methods=["POST"]
+# =========================================================
+# API - BOTS
+# =========================================================
+
+@app.route("/api/bots")
+def api_bots():
+
+    return jsonify({
+        "ok": True,
+        "bots": get_all_bots()
+    })
+
+
+@app.route("/api/bots/<int:bot_number>")
+def api_bot(bot_number):
+
+    bots = get_all_bots()
+
+    for bot in bots:
+
+        if bot["number"] == bot_number:
+
+            return jsonify({
+                "ok": True,
+                "bot": bot
+            })
+
+    return jsonify({
+        "ok": False,
+        "error": "البوت غير موجود"
+    }), 404
+
+
+# =========================================================
+# API - SYSTEMS
+# =========================================================
+
+@app.route("/api/systems")
+def api_systems():
+
+    return jsonify({
+        "ok": True,
+        "systems": SYSTEMS
+    })
+
+
+# =========================================================
+# API - GET SYSTEM SETTINGS
+# =========================================================
+
+@app.route(
+    "/api/bots/<int:bot_number>/systems/<system_id>",
+    methods=["GET"]
 )
-@login_required
-def create_ticket(
-    guild_id
+def get_system_settings(
+    bot_number,
+    system_id
 ):
 
-    if not user_can_manage_guild(
-        guild_id
-    ):
+    system = get_system(system_id)
+
+    if not system:
 
         return jsonify({
-            "error": "unauthorized"
-        }), 403
-
-    guild = get_guild(
-        guild_id
-    )
-
-    if not guild:
-
-        return jsonify({
-            "error":
-                "البوت غير موجود في السيرفر"
+            "ok": False,
+            "error": "النظام غير موجود"
         }), 404
 
+    bots = get_all_bots()
+
+    bot = next(
+        (
+            b for b in bots
+            if b["number"] == bot_number
+        ),
+        None
+    )
+
+    if not bot:
+
+        return jsonify({
+            "ok": False,
+            "error": "البوت غير موجود"
+        }), 404
+
+    conn = get_db()
+
+    row = conn.execute("""
+        SELECT settings
+        FROM system_settings
+        WHERE bot_id = ?
+        AND system = ?
+    """, (
+        bot["id"],
+        system_id
+    )).fetchone()
+
+    conn.close()
+
+    settings = {}
+
+    if row:
+        settings = json_load(
+            row["settings"],
+            {}
+        )
+
+    return jsonify({
+        "ok": True,
+        "bot": bot,
+        "system": system,
+        "settings": settings
+    })
+
+
+# =========================================================
+# API - APPLY SYSTEM TO MULTIPLE BOTS
+# =========================================================
+
+@app.route(
+    "/api/apply",
+    methods=["POST"]
+)
+def apply_changes():
+
     data = request.get_json(
         silent=True
     ) or {}
 
-    user_id = data.get(
-        "user_id"
+    bot_numbers = data.get(
+        "bots",
+        []
     )
 
-    if not user_id:
+    system_id = str(
+        data.get(
+            "system",
+            ""
+        )
+    ).strip()
+
+    settings = data.get(
+        "settings",
+        {}
+    )
+
+    if not isinstance(
+        bot_numbers,
+        list
+    ):
 
         return jsonify({
-            "error":
-                "user_id مطلوب"
+            "ok": False,
+            "error": "قائمة البوتات غير صحيحة"
         }), 400
 
-    settings = get_settings(
-        guild_id
+    if not bot_numbers:
+
+        return jsonify({
+            "ok": False,
+            "error": "حدد بوتًا واحدًا على الأقل"
+        }), 400
+
+    system = get_system(
+        system_id
     )
 
-    category = None
+    if not system:
 
-    category_id = settings.get(
-        "ticket_category"
+        return jsonify({
+            "ok": False,
+            "error": "النظام غير موجود"
+        }), 404
+
+    permission = (
+        f"{system_id}.manage"
     )
 
-    if category_id:
+    if not has_permission(
+        permission
+    ):
+
+        return jsonify({
+            "ok": False,
+            "error": "ليس لديك صلاحية لتعديل هذا النظام"
+        }), 403
+
+    bots = get_all_bots()
+
+    bot_map = {
+        bot["number"]: bot
+        for bot in bots
+    }
+
+    conn = get_db()
+
+    applied = []
+    failed = []
+
+    for number in bot_numbers:
 
         try:
 
-            category = guild.get_channel(
-                int(category_id)
+            number = int(number)
+
+            bot = bot_map.get(
+                number
             )
 
-        except Exception:
+            if not bot:
 
-            category = None
+                failed.append({
+                    "number": number,
+                    "reason": "البوت غير موجود"
+                })
 
-    try:
+                continue
 
-        user = guild.get_member(
-            int(user_id)
-        )
+            if not bot.get("id"):
 
-    except Exception:
+                failed.append({
+                    "number": number,
+                    "reason": "البوت غير متصل"
+                })
 
-        user = None
+                continue
 
-    overwrites = {
-        guild.default_role:
-            discord.PermissionOverwrite(
-                view_channel=False
-            )
-    }
+            conn.execute("""
+                INSERT INTO system_settings(
+                    bot_id,
+                    system,
+                    settings,
+                    updated_at
+                )
+                VALUES(?, ?, ?, ?)
+                ON CONFLICT(bot_id, system)
+                DO UPDATE SET
+                    settings = excluded.settings,
+                    updated_at = excluded.updated_at
+            """, (
+                bot["id"],
+                system_id,
+                json.dumps(
+                    settings,
+                    ensure_ascii=False
+                ),
+                utc_now()
+            ))
 
-    if user:
+            applied.append({
+                "number": number,
+                "bot_id": bot["id"],
+                "name": bot["name"]
+            })
 
-        overwrites[user] = (
-            discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True
-            )
-        )
+        except Exception as exc:
 
-    overwrites[guild.me] = (
-        discord.PermissionOverwrite(
-            view_channel=True,
-            send_messages=True,
-            manage_channels=True
-        )
-    )
+            failed.append({
+                "number": number,
+                "reason": str(exc)
+            })
 
-    channel = await_create_ticket_channel(
-        guild,
-        user,
-        category,
-        overwrites
-    )
+    conn.commit()
+    conn.close()
 
-    return jsonify(channel)
-
-
-def await_create_ticket_channel(
-    guild,
-    user,
-    category,
-    overwrites
-):
-
-    loop = bot.loop
-
-    future = asyncio.run_coroutine_threadsafe(
-        guild.create_text_channel(
-            name=(
-                f"ticket-{user.id}"
-                if user
-                else "ticket"
-            ),
-            category=category,
-            overwrites=overwrites
-        ),
-        loop
-    )
-
-    channel = future.result(
-        timeout=20
-    )
-
-    connection = db()
-
-    cursor = connection.execute(
-        """
-        INSERT INTO tickets
-        (
-            guild_id,
-            user_id,
-            channel_id,
-            status
-        )
-        VALUES (?, ?, ?, 'open')
-        """,
-        (
-            str(guild.id),
-            str(
-                user.id
-                if user
-                else "0"
-            ),
-            str(channel.id)
-        )
-    )
-
-    connection.commit()
-
-    ticket_id = cursor.lastrowid
-
-    connection.close()
-
-    return {
-        "success": True,
-        "ticket_id": ticket_id,
-        "channel_id": str(
-            channel.id
-        )
-    }
+    return jsonify({
+        "ok": True,
+        "system": system_id,
+        "applied": applied,
+        "failed": failed
+    })
 
 
 # =========================================================
-# APPLICATIONS
+# OWNER - ROLES
 # =========================================================
 
-@APP.route(
-    "/api/server/<guild_id>/applications",
+@app.route(
+    "/api/owner/roles",
     methods=["GET"]
 )
-@login_required
-def get_applications(
-    guild_id
-):
+def owner_roles():
 
-    connection = db()
+    if not current_is_owner():
 
-    rows = connection.execute(
-        """
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    conn = get_db()
+
+    rows = conn.execute("""
         SELECT *
-        FROM applications
-        WHERE guild_id = ?
+        FROM dashboard_roles
         ORDER BY id DESC
-        LIMIT 100
-        """,
-        (str(guild_id),)
-    ).fetchall()
+    """).fetchall()
 
-    connection.close()
+    conn.close()
 
-    return jsonify({
-        "applications": [
-            dict(row)
-            for row in rows
-        ]
-    })
+    roles = []
 
+    for row in rows:
 
-@APP.route(
-    "/api/server/<guild_id>/applications",
-    methods=["POST"]
-)
-@login_required
-def create_application(
-    guild_id
-):
-
-    data = request.get_json(
-        silent=True
-    ) or {}
-
-    user_id = data.get(
-        "user_id"
-    )
-
-    if not user_id:
-
-        return jsonify({
-            "error":
-                "user_id مطلوب"
-        }), 400
-
-    connection = db()
-
-    cursor = connection.execute(
-        """
-        INSERT INTO applications
-        (
-            guild_id,
-            user_id,
-            application_type,
-            status,
-            data
-        )
-        VALUES (?, ?, ?, 'pending', ?)
-        """,
-        (
-            str(guild_id),
-            str(user_id),
-            data.get(
-                "application_type"
+        roles.append({
+            "id": row["id"],
+            "name": row["name"],
+            "description": row["description"],
+            "permissions": json_load(
+                row["permissions"],
+                []
             ),
-            json.dumps(
-                data,
-                ensure_ascii=False
-            )
-        )
-    )
-
-    connection.commit()
-
-    application_id = (
-        cursor.lastrowid
-    )
-
-    connection.close()
-
-    return jsonify({
-        "success": True,
-        "application_id":
-            application_id
-    })
-
-
-# =========================================================
-# COMMAND SETTINGS
-# =========================================================
-
-def get_bot_commands():
-
-    result = []
-
-    for command in bot.tree.get_commands():
-
-        result.append({
-            "name": command.name,
-            "description":
-                command.description
-                or ""
-        })
-
-    return result
-
-
-@APP.route(
-    "/api/server/<guild_id>/commands",
-    methods=["GET"]
-)
-@login_required
-def get_commands(
-    guild_id
-):
-
-    connection = db()
-
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM command_settings
-        WHERE guild_id = ?
-        """,
-        (str(guild_id),)
-    ).fetchall()
-
-    connection.close()
-
-    saved = {
-        row["command_name"]:
-            row
-        for row in rows
-    }
-
-    commands_list = []
-
-    for command in get_bot_commands():
-
-        saved_command = saved.get(
-            command["name"]
-        )
-
-        if saved_command:
-
-            enabled = bool(
-                saved_command["enabled"]
-            )
-
-            role_id = (
-                saved_command["role_id"]
-            )
-
-        else:
-
-            enabled = True
-            role_id = None
-
-        commands_list.append({
-            "name":
-                command["name"],
-
-            "description":
-                command["description"],
-
-            "enabled":
-                enabled,
-
-            "role_id":
-                role_id
+            "created_at": row["created_at"]
         })
 
     return jsonify({
-        "commands":
-            commands_list
+        "ok": True,
+        "roles": roles
     })
 
 
-@APP.route(
-    "/api/server/<guild_id>/commands",
+@app.route(
+    "/api/owner/roles",
     methods=["POST"]
 )
-@login_required
-def update_command(
-    guild_id
-):
+def create_role():
 
-    if not user_can_manage_guild(
-        guild_id
-    ):
+    if not current_is_owner():
 
         return jsonify({
-            "error":
-                "unauthorized"
+            "ok": False,
+            "error": "Owner فقط"
         }), 403
 
     data = request.get_json(
         silent=True
     ) or {}
 
-    command_name = data.get(
-        "command_name"
+    name = str(
+        data.get(
+            "name",
+            ""
+        )
+    ).strip()
+
+    description = str(
+        data.get(
+            "description",
+            ""
+        )
+    ).strip()
+
+    permissions = data.get(
+        "permissions",
+        []
     )
 
-    if not command_name:
+    if not name:
 
         return jsonify({
-            "error":
-                "command_name مطلوب"
+            "ok": False,
+            "error": "اسم الرتبة مطلوب"
         }), 400
 
-    enabled = (
-        1
-        if data.get(
-            "enabled",
-            True
+    if not isinstance(
+        permissions,
+        list
+    ):
+
+        permissions = []
+
+    permissions = [
+        p for p in permissions
+        if p in PERMISSIONS
+    ]
+
+    conn = get_db()
+
+    cur = conn.execute("""
+        INSERT INTO dashboard_roles(
+            name,
+            description,
+            permissions,
+            created_at
         )
-        else 0
+        VALUES(?, ?, ?, ?)
+    """, (
+        name,
+        description,
+        json.dumps(
+            permissions,
+            ensure_ascii=False
+        ),
+        utc_now()
+    ))
+
+    conn.commit()
+
+    role_id = cur.lastrowid
+
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "role_id": role_id
+    })
+
+
+@app.route(
+    "/api/owner/roles/<int:role_id>",
+    methods=["PUT"]
+)
+def update_role(role_id):
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    name = str(
+        data.get(
+            "name",
+            ""
+        )
+    ).strip()
+
+    description = str(
+        data.get(
+            "description",
+            ""
+        )
+    ).strip()
+
+    permissions = data.get(
+        "permissions",
+        []
     )
+
+    if not isinstance(
+        permissions,
+        list
+    ):
+
+        permissions = []
+
+    permissions = [
+        p for p in permissions
+        if p in PERMISSIONS
+    ]
+
+    conn = get_db()
+
+    conn.execute("""
+        UPDATE dashboard_roles
+        SET
+            name = ?,
+            description = ?,
+            permissions = ?
+        WHERE id = ?
+    """, (
+        name,
+        description,
+        json.dumps(
+            permissions,
+            ensure_ascii=False
+        ),
+        role_id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
+    })
+
+
+@app.route(
+    "/api/owner/roles/<int:role_id>",
+    methods=["DELETE"]
+)
+def delete_role(role_id):
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    conn = get_db()
+
+    conn.execute("""
+        UPDATE dashboard_users
+        SET role_id = NULL
+        WHERE role_id = ?
+    """, (role_id,))
+
+    conn.execute("""
+        DELETE FROM dashboard_roles
+        WHERE id = ?
+    """, (role_id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
+    })
+
+
+# =========================================================
+# OWNER - PERMISSIONS
+# =========================================================
+
+@app.route(
+    "/api/owner/permissions"
+)
+def owner_permissions():
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    return jsonify({
+        "ok": True,
+        "permissions": PERMISSIONS
+    })
+
+
+# =========================================================
+# OWNER - USERS
+# =========================================================
+
+@app.route(
+    "/api/owner/users",
+    methods=["GET"]
+)
+def owner_users():
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    conn = get_db()
+
+    rows = conn.execute("""
+        SELECT
+            dashboard_users.id,
+            dashboard_users.username,
+            dashboard_users.role_id,
+            dashboard_roles.name AS role_name
+        FROM dashboard_users
+        LEFT JOIN dashboard_roles
+            ON dashboard_roles.id =
+               dashboard_users.role_id
+        ORDER BY dashboard_users.id DESC
+    """).fetchall()
+
+    conn.close()
+
+    users = []
+
+    for row in rows:
+
+        users.append({
+            "id": row["id"],
+            "username": row["username"],
+            "role_id": row["role_id"],
+            "role_name": row["role_name"]
+        })
+
+    return jsonify({
+        "ok": True,
+        "users": users
+    })
+
+
+@app.route(
+    "/api/owner/users",
+    methods=["POST"]
+)
+def create_user():
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    username = str(
+        data.get(
+            "username",
+            ""
+        )
+    ).strip()
 
     role_id = data.get(
         "role_id"
     )
 
-    connection = db()
+    if not username:
 
-    connection.execute(
-        """
-        INSERT INTO command_settings
-        (
-            guild_id,
-            command_name,
-            enabled,
-            role_id
-        )
-        VALUES (?, ?, ?, ?)
+        return jsonify({
+            "ok": False,
+            "error": "اسم المستخدم مطلوب"
+        }), 400
 
-        ON CONFLICT(
-            guild_id,
-            command_name
-        )
-        DO UPDATE SET
-            enabled = excluded.enabled,
-            role_id = excluded.role_id
-        """,
-        (
-            str(guild_id),
-            str(command_name),
-            enabled,
-            role_id
-        )
-    )
+    conn = get_db()
 
-    connection.commit()
-    connection.close()
+    try:
+
+        conn.execute("""
+            INSERT INTO dashboard_users(
+                username,
+                role_id,
+                created_at
+            )
+            VALUES(?, ?, ?)
+        """, (
+            username,
+            role_id,
+            utc_now()
+        ))
+
+        conn.commit()
+
+    except sqlite3.IntegrityError:
+
+        conn.close()
+
+        return jsonify({
+            "ok": False,
+            "error": "المستخدم موجود مسبقًا"
+        }), 409
+
+    conn.close()
 
     return jsonify({
-        "success": True
+        "ok": True
+    })
+
+
+@app.route(
+    "/api/owner/users/<int:user_id>",
+    methods=["DELETE"]
+)
+def delete_user(user_id):
+
+    if not current_is_owner():
+
+        return jsonify({
+            "ok": False,
+            "error": "Owner فقط"
+        }), 403
+
+    conn = get_db()
+
+    conn.execute("""
+        DELETE FROM dashboard_users
+        WHERE id = ?
+    """, (user_id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
     })
 
 
 # =========================================================
-# SYSTEM STATUS
+# SECTIONS
 # =========================================================
 
-@APP.route(
+@app.route(
+    "/api/sections",
+    methods=["GET"]
+)
+def get_sections():
+
+    conn = get_db()
+
+    rows = conn.execute("""
+        SELECT *
+        FROM sections
+        ORDER BY id ASC
+    """).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "sections": [
+            dict(row)
+            for row in rows
+        ]
+    })
+
+
+@app.route(
+    "/api/sections",
+    methods=["POST"]
+)
+def create_section():
+
+    if not has_permission(
+        "owner.manage"
+    ):
+
+        return jsonify({
+            "ok": False,
+            "error": "ليس لديك صلاحية"
+        }), 403
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    name = str(
+        data.get(
+            "name",
+            ""
+        )
+    ).strip()
+
+    icon = str(
+        data.get(
+            "icon",
+            "📁"
+        )
+    ).strip()
+
+    description = str(
+        data.get(
+            "description",
+            ""
+        )
+    ).strip()
+
+    if not name:
+
+        return jsonify({
+            "ok": False,
+            "error": "اسم القسم مطلوب"
+        }), 400
+
+    conn = get_db()
+
+    conn.execute("""
+        INSERT INTO sections(
+            name,
+            icon,
+            description,
+            created_at
+        )
+        VALUES(?, ?, ?, ?)
+    """, (
+        name,
+        icon,
+        description,
+        utc_now()
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
+    })
+
+
+# =========================================================
+# HEALTH
+# =========================================================
+
+@app.route(
     "/health"
 )
 def health():
 
     return jsonify({
         "status": "online",
-        "name": "CT BOT",
-        "discord":
-            bot.is_ready()
-    })
-
-
-@APP.route(
-    "/api/status"
-)
-@login_required
-def api_status():
-
-    return jsonify({
-        "website": True,
-        "discord":
-            bot.is_ready(),
-        "guilds":
-            len(bot.guilds)
-            if bot.is_ready()
-            else 0
+        "name": APP_NAME,
+        "version": VERSION,
+        "bots": len(
+            get_bot_tokens()
+        )
     })
 
 
 # =========================================================
-# ERRORS
+# ERROR HANDLERS
 # =========================================================
 
-@APP.errorhandler(404)
+@app.errorhandler(404)
 def not_found(error):
 
     return jsonify({
-        "error":
-            "Not Found"
+        "ok": False,
+        "error": "Not Found"
     }), 404
 
 
-@APP.errorhandler(500)
+@app.errorhandler(500)
 def server_error(error):
 
-    print(
-        "SERVER ERROR:",
-        error
-    )
-
     return jsonify({
-        "error":
-            "Internal Server Error"
+        "ok": False,
+        "error": "Internal Server Error"
     }), 500
 
 
 # =========================================================
-# RUN BOT
+# STARTUP
 # =========================================================
 
-def run_bot():
+def startup():
 
-    if not DISCORD_BOT_TOKEN:
+    init_db()
+
+    print("=" * 60)
+    print("CT DASHBOARD")
+    print("=" * 60)
+    print(f"Version: {VERSION}")
+    print(f"Port: {PORT}")
+
+    tokens = get_bot_tokens()
+
+    print(
+        f"Bot Environment Variables: {len(tokens)}"
+    )
+
+    for item in tokens:
 
         print(
-            "WARNING: "
-            "DISCORD_BOT_TOKEN "
-            "is not configured."
+            f"  • BOT_TOKEN_{item['number']} detected"
         )
 
-        return
-
-    try:
-
-        asyncio.run(
-            bot.start(
-                DISCORD_BOT_TOKEN
-            )
-        )
-
-    except Exception as error:
-
-        print(
-            "Discord bot error:",
-            error
-        )
+    print("=" * 60)
 
 
 # =========================================================
-# START
+# RUN
 # =========================================================
-
-init_db()
-
-keep_alive()
-
 
 if __name__ == "__main__":
 
-    if DISCORD_BOT_TOKEN:
+    startup()
 
-        bot_thread = Thread(
-            target=run_bot,
-            daemon=True
-        )
-
-        bot_thread.start()
-
-    APP.run(
-        host="0.0.0.0",
+    app.run(
+        host=HOST,
         port=PORT,
-        debug=False
+        debug=False,
+        threaded=True
     )
