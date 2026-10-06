@@ -4,112 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CT BOT — لوحة التحكم</title>
+    <title>CT Dashboard</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <div class="app">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
 
-        <div class="sidebar-header">
+    <aside class="sidebar">
 
-            <div class="brand">
-                <div class="ct-logo small">
-                    <span class="ct-c">C</span><span class="ct-t">T</span>
-                </div>
+        <div class="brand">
 
-                <span class="brand-name">BOT PANEL</span>
+            <div class="brand-logo">
+                <span class="logo-c">C</span>
+                <span class="logo-t">T</span>
+            </div>
+
+            <div class="brand-text">
+                <strong>CT</strong>
+                <span>Dashboard</span>
             </div>
 
         </div>
 
-        <div class="sidebar-content">
 
-            <div class="nav-title">الرئيسية</div>
+        <nav class="navigation">
 
-            <div class="nav-list">
+            <button class="nav-item active" data-page="home">
+                <span>⌂</span>
+                <span>الرئيسية</span>
+            </button>
 
-                <a href="#home" class="nav-item active">
-                    <span class="icon">⌂</span>
-                    <span class="label">الرئيسية</span>
-                </a>
+            <button class="nav-item" data-page="bots">
+                <span>🤖</span>
+                <span>البوتات</span>
+            </button>
 
-                <a href="#bots" class="nav-item">
-                    <span class="icon">🤖</span>
-                    <span class="label">البوتات</span>
-                </a>
-
-                <a href="#servers" class="nav-item">
-                    <span class="icon">▣</span>
-                    <span class="label">السيرفرات</span>
-                </a>
-
+            <div class="nav-title">
+                الأنظمة
             </div>
 
-            <div class="nav-title">إدارة النظام</div>
+            <button class="nav-item" data-page="moderation">
+                <span>🛡️</span>
+                <span>الإدارة</span>
+            </button>
 
-            <div class="nav-list">
+            <button class="nav-item" data-page="welcome">
+                <span>👋</span>
+                <span>الترحيب</span>
+            </button>
 
-                <a href="#render" class="nav-item">
-                    <span class="icon">◉</span>
-                    <span class="label">Render</span>
-                </a>
+            <button class="nav-item" data-page="levels">
+                <span>📊</span>
+                <span>اللفلات</span>
+            </button>
 
-                <a href="#status" class="nav-item">
-                    <span class="icon">●</span>
-                    <span class="label">حالة النظام</span>
-                </a>
+            <button class="nav-item" data-page="points">
+                <span>⭐</span>
+                <span>النقاط</span>
+            </button>
 
-                <a href="#settings" class="nav-item">
-                    <span class="icon">⚙</span>
-                    <span class="label">الإعدادات</span>
-                </a>
+            <button class="nav-item" data-page="tickets">
+                <span>🎫</span>
+                <span>التذاكر</span>
+            </button>
 
+            <button class="nav-item" data-page="applications">
+                <span>📝</span>
+                <span>التقديمات</span>
+            </button>
+
+            <button class="nav-item" data-page="suggestions">
+                <span>💡</span>
+                <span>الاقتراحات</span>
+            </button>
+
+            <button class="nav-item" data-page="notifications">
+                <span>🔔</span>
+                <span>الإشعارات</span>
+            </button>
+
+            <button class="nav-item" data-page="laws">
+                <span>📜</span>
+                <span>القوانين</span>
+            </button>
+
+            <button class="nav-item" data-page="logs">
+                <span>🧾</span>
+                <span>اللوقات</span>
+            </button>
+
+            <button class="nav-item" data-page="replies">
+                <span>💬</span>
+                <span>الردود</span>
+            </button>
+
+            <button class="nav-item" data-page="shortcuts">
+                <span>⚡</span>
+                <span>الاختصارات</span>
+            </button>
+
+            <div class="nav-title">
+                التحكم
             </div>
 
-        </div>
+            <button class="nav-item owner-only" data-page="owner">
+                <span>👑</span>
+                <span>Owner</span>
+            </button>
 
-        <div class="sidebar-footer">
+        </nav>
 
-            <div class="user-box">
 
-                {% if user and user.avatar %}
+        <div class="sidebar-bottom">
 
-                    <img
-                        class="user-avatar"
-                        src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png?size=128"
-                        alt="Avatar"
-                    >
-
-                {% else %}
-
-                    <div class="user-avatar"></div>
-
-                {% endif %}
-
-                <div class="user-info">
-
-                    <div class="user-name">
-                        {{ user.global_name or user.username }}
-                    </div>
-
-                    <div class="user-status">
-                        ● متصل
-                    </div>
-
-                </div>
-
-                <a href="/logout" class="btn btn-secondary"
-                   style="min-height:32px;padding:0 9px;">
-                    خروج
-                </a>
-
+            <div class="connection">
+                <span class="status-dot"></span>
+                <span>CT Online</span>
             </div>
 
         </div>
@@ -117,69 +134,97 @@
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- =========================
+         MAIN
+    ========================== -->
+
     <main class="main">
 
-        <!-- TOPBAR -->
         <header class="topbar">
 
-            <div class="topbar-right">
+            <div class="mobile-brand">
+                <span class="logo-c">C</span>
+                <span class="logo-t">T</span>
+            </div>
+
+            <div class="topbar-title">
+
+                <h1 id="pageTitle">
+                    الرئيسية
+                </h1>
+
+                <p id="pageDescription">
+                    لوحة تحكم CT
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
 
                 <button
-                    class="mobile-menu"
-                    onclick="toggleSidebar()">
-                    ☰
+                    class="icon-button"
+                    id="refreshButton"
+                    title="تحديث"
+                >
+                    ↻
                 </button>
 
-                <div>
+                <div class="user-box">
 
-                    <div class="page-title">
-                        لوحة تحكم CT
+                    <div class="user-avatar">
+                        CT
                     </div>
 
-                    <div class="page-subtitle">
-                        إدارة البوتات والسيرفرات والأنظمة
+                    <div class="user-info">
+
+                        <strong id="currentUsername">
+                            Owner
+                        </strong>
+
+                        <span>
+                            لوحة CT
+                        </span>
+
                     </div>
 
                 </div>
 
             </div>
 
-            <div class="topbar-left">
-
-                <span class="badge badge-green">
-                    ● النظام يعمل
-                </span>
-
-            </div>
-
         </header>
 
 
-        <!-- CONTENT -->
-        <div class="content">
+        <section class="content">
 
 
-            <!-- HOME -->
-            <section id="home" class="dashboard-section">
+            <!-- =========================
+                 HOME
+            ========================== -->
 
-                <div class="welcome">
+            <div class="page active" id="page-home">
 
-                    <div class="welcome-content">
+                <div class="hero-card">
 
-                        <div class="ct-logo large">
-                            <span class="ct-c">C</span><span class="ct-t">T</span>
-                        </div>
+                    <div>
 
-                        <h1 style="margin-top:15px;">
-                            أهلاً {{ user.global_name or user.username }}
-                        </h1>
+                        <span class="hero-small">
+                            أهلاً بك في
+                        </span>
+
+                        <h2>
+                            CT Dashboard
+                        </h2>
 
                         <p>
-                            من هنا تقدر تدير البوتات والسيرفرات
-                            والأنظمة المرتبطة بها من مكان واحد.
+                            تحكم كامل بالبوتات والأنظمة من مكان واحد.
                         </p>
 
+                    </div>
+
+                    <div class="hero-logo">
+                        <span class="logo-c">C</span>
+                        <span class="logo-t">T</span>
                     </div>
 
                 </div>
@@ -189,24 +234,15 @@
 
                     <div class="stat-card">
 
-                        <div class="stat-top">
-
-                            <span class="stat-label">
-                                السيرفرات
-                            </span>
-
-                            <div class="stat-icon">
-                                ◈
-                            </div>
-
+                        <div class="stat-icon">
+                            🤖
                         </div>
 
-                        <div class="stat-value">
-                            {{ guilds|length }}
-                        </div>
-
-                        <div class="stat-description">
-                            السيرفرات التي يستطيع البوت الوصول إليها
+                        <div>
+                            <span>البوتات</span>
+                            <strong id="botCount">
+                                0
+                            </strong>
                         </div>
 
                     </div>
@@ -214,24 +250,15 @@
 
                     <div class="stat-card">
 
-                        <div class="stat-top">
-
-                            <span class="stat-label">
-                                حالة البوت
-                            </span>
-
-                            <div class="stat-icon">
-                                ●
-                            </div>
-
+                        <div class="stat-icon">
+                            🟢
                         </div>
 
-                        <div class="stat-value">
-                            متصل
-                        </div>
-
-                        <div class="stat-description">
-                            Discord Gateway
+                        <div>
+                            <span>متصل</span>
+                            <strong id="onlineBotCount">
+                                0
+                            </strong>
                         </div>
 
                     </div>
@@ -239,24 +266,15 @@
 
                     <div class="stat-card">
 
-                        <div class="stat-top">
-
-                            <span class="stat-label">
-                                النظام
-                            </span>
-
-                            <div class="stat-icon">
-                                ⚙
-                            </div>
-
+                        <div class="stat-icon">
+                            ⚙️
                         </div>
 
-                        <div class="stat-value">
-                            يعمل
-                        </div>
-
-                        <div class="stat-description">
-                            لوحة التحكم متاحة
+                        <div>
+                            <span>الأنظمة</span>
+                            <strong>
+                                {{ systems|length }}
+                            </strong>
                         </div>
 
                     </div>
@@ -264,24 +282,15 @@
 
                     <div class="stat-card">
 
-                        <div class="stat-top">
-
-                            <span class="stat-label">
-                                الحماية
-                            </span>
-
-                            <div class="stat-icon">
-                                🛡
-                            </div>
-
+                        <div class="stat-icon">
+                            👑
                         </div>
 
-                        <div class="stat-value">
-                            جاهزة
-                        </div>
-
-                        <div class="stat-description">
-                            إعدادات الحماية متاحة
+                        <div>
+                            <span>الصلاحية</span>
+                            <strong id="permissionLabel">
+                                Owner
+                            </strong>
                         </div>
 
                     </div>
@@ -289,610 +298,554 @@
                 </div>
 
 
-                <!-- QUICK ACTIONS -->
-
-                <div class="section-title">
+                <div class="section-header">
 
                     <div>
-                        <h2>الوصول السريع</h2>
-                        <p>أهم الأقسام الموجودة في اللوحة</p>
-                    </div>
-
-                </div>
-
-
-                <div class="grid-4">
-
-                    <a href="#bots" class="panel">
-                        <div class="panel-body">
-
-                            <div class="stat-icon">
-                                🤖
-                            </div>
-
-                            <h3 style="margin-top:12px;font-size:13px;">
-                                إدارة البوتات
-                            </h3>
-
-                            <p class="text-muted"
-                               style="font-size:10px;margin-top:4px;">
-                                إدارة البوتات المرتبطة باللوحة
-                            </p>
-
-                        </div>
-                    </a>
-
-
-                    <a href="#servers" class="panel">
-                        <div class="panel-body">
-
-                            <div class="stat-icon">
-                                ▣
-                            </div>
-
-                            <h3 style="margin-top:12px;font-size:13px;">
-                                إدارة السيرفرات
-                            </h3>
-
-                            <p class="text-muted"
-                               style="font-size:10px;margin-top:4px;">
-                                الدخول إلى إعدادات كل سيرفر
-                            </p>
-
-                        </div>
-                    </a>
-
-
-                    <a href="#render" class="panel">
-                        <div class="panel-body">
-
-                            <div class="stat-icon">
-                                ◉
-                            </div>
-
-                            <h3 style="margin-top:12px;font-size:13px;">
-                                Render
-                            </h3>
-
-                            <p class="text-muted"
-                               style="font-size:10px;margin-top:4px;">
-                                تشغيل وإيقاف الخدمات
-                            </p>
-
-                        </div>
-                    </a>
-
-
-                    <a href="#status" class="panel">
-                        <div class="panel-body">
-
-                            <div class="stat-icon">
-                                ●
-                            </div>
-
-                            <h3 style="margin-top:12px;font-size:13px;">
-                                حالة النظام
-                            </h3>
-
-                            <p class="text-muted"
-                               style="font-size:10px;margin-top:4px;">
-                                متابعة حالة الخدمات
-                            </p>
-
-                        </div>
-                    </a>
-
-                </div>
-
-            </section>
-
-
-            <!-- BOTS -->
-
-            <section id="bots"
-                     class="dashboard-section"
-                     style="margin-top:45px;">
-
-                <div class="section-title">
-
-                    <div>
-                        <h2>البوتات</h2>
+                        <h2>
+                            البوتات
+                        </h2>
 
                         <p>
-                            إدارة البوتات المرتبطة بلوحة CT
+                            اختر البوت الذي تريد إدارته.
                         </p>
                     </div>
 
                     <button
-                        class="btn btn-primary"
-                        onclick="alert('سيتم تفعيل إضافة البوتات بعد ربط النظام الرئيسي')">
-
-                        + إضافة بوت
-
+                        class="secondary-button"
+                        data-page="bots"
+                    >
+                        عرض الكل
                     </button>
 
                 </div>
 
 
-                <div class="grid-3">
+                <div
+                    class="bots-grid"
+                    id="homeBots"
+                >
 
-                    <div class="bot-card">
-
-                        <div class="bot-head">
-
-                            <div class="bot-avatar"></div>
-
-                            <div>
-
-                                <div class="bot-name">
-                                    البوت الرئيسي
-                                </div>
-
-                                <div class="bot-id">
-                                    سيتم جلب البيانات من Discord
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="server-footer">
-
-                            <span class="badge badge-yellow">
-                                بانتظار الربط
-                            </span>
-
-                            <button class="btn btn-secondary"
-                                    onclick="alert('سيتم تفعيل إعداد البوت بعد ربط main.py')">
-                                إدارة
-                            </button>
-
-                        </div>
-
+                    <div class="loading-card">
+                        جاري تحميل البوتات...
                     </div>
 
                 </div>
 
-            </section>
+            </div>
 
 
-            <!-- SERVERS -->
+            <!-- =========================
+                 BOTS
+            ========================== -->
 
-            <section id="servers"
-                     class="dashboard-section"
-                     style="margin-top:45px;">
+            <div class="page" id="page-bots">
 
-                <div class="section-title">
+                <div class="page-heading">
 
                     <div>
 
-                        <h2>السيرفرات</h2>
+                        <span class="eyebrow">
+                            CT BOTS
+                        </span>
+
+                        <h2>
+                            إدارة البوتات
+                        </h2>
 
                         <p>
-                            السيرفرات التي يتواجد فيها البوت
+                            البوتات يتم اكتشافها تلقائيًا من Environment Variables.
                         </p>
 
                     </div>
 
-                </div>
-
-
-                {% if guilds %}
-
-                <div class="server-grid">
-
-                    {% for guild in guilds %}
-
-                    <div class="server-card">
-
-                        <div class="server-head">
-
-                            {% if guild.icon %}
-
-                            <img
-                                class="server-icon"
-                                src="{{ guild.icon }}"
-                                alt="Server">
-
-                            {% else %}
-
-                            <div class="server-icon"></div>
-
-                            {% endif %}
-
-                            <div class="server-info">
-
-                                <div class="server-name">
-                                    {{ guild.name }}
-                                </div>
-
-                                <div class="server-id">
-                                    {{ guild.id }}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="server-footer">
-
-                            <span class="badge badge-green">
-                                متاح
-                            </span>
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="manageServer('{{ guild.id }}')">
-
-                                إدارة السيرفر
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    {% endfor %}
+                    <button
+                        class="secondary-button"
+                        id="selectAllBots"
+                    >
+                        تحديد الكل
+                    </button>
 
                 </div>
 
-                {% else %}
 
-                <div class="panel">
-
-                    <div class="empty-state">
-
-                        <div class="empty-icon">
-                            ▣
-                        </div>
-
-                        <h3>
-                            لا توجد سيرفرات
-                        </h3>
-
-                        <p>
-                            لم يتم العثور على سيرفرات متاحة للبوت.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-            </section>
-
-
-            <!-- RENDER -->
-
-            <section id="render"
-                     class="dashboard-section"
-                     style="margin-top:45px;">
-
-                <div class="section-title">
+                <div class="bot-selection-bar">
 
                     <div>
 
-                        <h2>Render</h2>
+                        <strong>
+                            البوتات المحددة:
+                        </strong>
 
-                        <p>
-                            إدارة خدمات البوتات على Render
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="render-card">
-
-                    <div class="render-status">
-
-                        <span class="status-dot"></span>
-
-                        <span>
-                            سيتم ربط Render عند إنهاء النظام الرئيسي
+                        <span id="selectedBotCount">
+                            0
                         </span>
 
                     </div>
 
-
-                    <div class="render-actions">
-
-                        <button class="btn btn-success"
-                                onclick="renderAction('start')">
-                            تشغيل
-                        </button>
-
-                        <button class="btn btn-danger"
-                                onclick="renderAction('stop')">
-                            إيقاف
-                        </button>
-
-                        <button class="btn btn-secondary"
-                                onclick="renderAction('restart')">
-                            إعادة تشغيل
-                        </button>
-
-                        <button class="btn btn-secondary"
-                                onclick="renderAction('status')">
-                            تحديث الحالة
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- STATUS -->
-
-            <section id="status"
-                     class="dashboard-section"
-                     style="margin-top:45px;">
-
-                <div class="section-title">
-
-                    <div>
-
-                        <h2>حالة النظام</h2>
-
-                        <p>
-                            الحالة الحالية للخدمات
-                        </p>
-
-                    </div>
+                    <button
+                        class="primary-button"
+                        id="applySelectedButton"
+                    >
+                        تطبيق التغييرات
+                    </button>
 
                 </div>
 
 
-                <div class="grid-3">
+                <div
+                    class="bots-grid"
+                    id="botsGrid"
+                >
 
-                    <div class="render-card">
-
-                        <div class="render-status">
-
-                            <span class="status-dot"></span>
-
-                            Discord Bot
-
-                        </div>
-
-                        <h3 style="margin-top:12px;">
-                            متصل
-                        </h3>
-
-                    </div>
-
-
-                    <div class="render-card">
-
-                        <div class="render-status">
-
-                            <span class="status-dot"></span>
-
-                            Web Panel
-
-                        </div>
-
-                        <h3 style="margin-top:12px;">
-                            يعمل
-                        </h3>
-
-                    </div>
-
-
-                    <div class="render-card">
-
-                        <div class="render-status">
-
-                            <span class="status-dot"></span>
-
-                            Database
-
-                        </div>
-
-                        <h3 style="margin-top:12px;">
-                            جاهزة
-                        </h3>
-
+                    <div class="loading-card">
+                        جاري تحميل البوتات...
                     </div>
 
                 </div>
 
-            </section>
-
-
-            <!-- SETTINGS -->
-
-            <section id="settings"
-                     class="dashboard-section"
-                     style="margin-top:45px;">
-
-                <div class="section-title">
-
-                    <div>
-
-                        <h2>الإعدادات</h2>
-
-                        <p>
-                            إعدادات لوحة CT
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <div class="panel-body">
-
-                        <div class="toggle-row">
-
-                            <div class="toggle-info">
-
-                                <h4>
-                                    إشعارات النظام
-                                </h4>
-
-                                <p>
-                                    إظهار تنبيهات العمليات داخل اللوحة
-                                </p>
-
-                            </div>
-
-                            <label class="toggle">
-
-                                <input
-                                    type="checkbox"
-                                    id="notifications"
-                                    checked>
-
-                                <span class="toggle-slider"></span>
-
-                            </label>
-
-                        </div>
-
-
-                        <div class="toggle-row">
-
-                            <div class="toggle-info">
-
-                                <h4>
-                                    التحديث التلقائي
-                                </h4>
-
-                                <p>
-                                    تحديث بيانات الحالة بشكل تلقائي
-                                </p>
-
-                            </div>
-
-                            <label class="toggle">
-
-                                <input
-                                    type="checkbox"
-                                    id="autoRefresh"
-                                    checked>
-
-                                <span class="toggle-slider"></span>
-
-                            </label>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <div class="footer">
-                CT BOT © 2026 — جميع الحقوق محفوظة
             </div>
 
-        </div>
+
+            <!-- =========================
+                 SYSTEM TEMPLATE PAGES
+            ========================== -->
+
+            <div class="page system-page" id="page-moderation">
+
+                <div class="page-heading">
+
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>🛡️ الإدارة</h2>
+                        <p>إعدادات نظام الإدارة والعقوبات.</p>
+                    </div>
+
+                </div>
+
+                <div class="system-card">
+
+                    <h3>
+                        البوتات المستهدفة
+                    </h3>
+
+                    <div
+                        class="selected-bots"
+                        data-system="moderation"
+                    >
+                        اختر البوتات من قسم البوتات.
+                    </div>
+
+                    <div class="empty-system">
+                        إعدادات الإدارة جاهزة للربط بالنظام.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-welcome">
+
+                <div class="page-heading">
+
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>👋 الترحيب</h2>
+                        <p>تحكم كامل في نظام الترحيب.</p>
+                    </div>
+
+                </div>
+
+                <div class="system-card">
+
+                    <h3>
+                        إعدادات الترحيب
+                    </h3>
+
+                    <div class="setting-row">
+                        <span>تفعيل الترحيب</span>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <span>إظهار صورة العضو</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span></span>
+                        </label>
+                    </div>
+
+                    <div class="empty-system">
+                        محرر الترحيب المتقدم سيتم ربطه بالنظام.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-levels">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>📊 اللفلات</h2>
+                        <p>إعدادات نظام اللفلات والخبرة.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات اللفلات</h3>
+                    <div class="empty-system">
+                        إعدادات اللفلات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-points">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>⭐ النقاط</h2>
+                        <p>إعدادات نظام النقاط.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات النقاط</h3>
+                    <div class="empty-system">
+                        إعدادات النقاط جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-tickets">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>🎫 التذاكر</h2>
+                        <p>إعدادات نظام التذاكر.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات التذاكر</h3>
+                    <div class="empty-system">
+                        إعدادات التذاكر جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-applications">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>📝 التقديمات</h2>
+                        <p>إعدادات نظام التقديمات.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات التقديمات</h3>
+                    <div class="empty-system">
+                        إعدادات التقديمات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-suggestions">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>💡 الاقتراحات</h2>
+                        <p>إعدادات الاقتراحات والتصويت.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات الاقتراحات</h3>
+                    <div class="empty-system">
+                        إعدادات الاقتراحات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-notifications">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>🔔 الإشعارات</h2>
+                        <p>إعدادات الإشعارات.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات الإشعارات</h3>
+                    <div class="empty-system">
+                        إعدادات الإشعارات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-laws">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>📜 القوانين</h2>
+                        <p>إدارة القوانين.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات القوانين</h3>
+                    <div class="empty-system">
+                        إعدادات القوانين جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-logs">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>🧾 اللوقات</h2>
+                        <p>إدارة جميع أنواع اللوقات.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات اللوقات</h3>
+                    <div class="empty-system">
+                        إعدادات اللوقات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-replies">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>💬 الردود</h2>
+                        <p>إدارة الردود التلقائية.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات الردود</h3>
+                    <div class="empty-system">
+                        إعدادات الردود جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="page system-page" id="page-shortcuts">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM</span>
+                        <h2>⚡ الاختصارات</h2>
+                        <p>إدارة اختصارات الأوامر.</p>
+                    </div>
+                </div>
+
+                <div class="system-card">
+                    <h3>إعدادات الاختصارات</h3>
+                    <div class="empty-system">
+                        إعدادات الاختصارات جاهزة للربط.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 OWNER
+            ========================== -->
+
+            <div class="page" id="page-owner">
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            OWNER
+                        </span>
+
+                        <h2>
+                            👑 Owner
+                        </h2>
+
+                        <p>
+                            إدارة الرتب والصلاحيات والمستخدمين.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="owner-grid">
+
+                    <div class="owner-card">
+
+                        <div class="owner-card-icon">
+                            👥
+                        </div>
+
+                        <h3>
+                            الرتب
+                        </h3>
+
+                        <p>
+                            إنشاء الرتب وتحديد صلاحياتها.
+                        </p>
+
+                        <button
+                            class="secondary-button"
+                            id="manageRoles"
+                        >
+                            إدارة الرتب
+                        </button>
+
+                    </div>
+
+
+                    <div class="owner-card">
+
+                        <div class="owner-card-icon">
+                            🔐
+                        </div>
+
+                        <h3>
+                            الصلاحيات
+                        </h3>
+
+                        <p>
+                            التحكم بصلاحيات كل رتبة.
+                        </p>
+
+                        <button
+                            class="secondary-button"
+                            id="managePermissions"
+                        >
+                            الصلاحيات
+                        </button>
+
+                    </div>
+
+
+                    <div class="owner-card">
+
+                        <div class="owner-card-icon">
+                            🤖
+                        </div>
+
+                        <h3>
+                            البوتات
+                        </h3>
+
+                        <p>
+                            إدارة البوتات والأنظمة.
+                        </p>
+
+                        <button
+                            class="secondary-button"
+                            data-page="bots"
+                        >
+                            إدارة البوتات
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="system-card owner-roles-card">
+
+                    <div class="section-header">
+
+                        <div>
+                            <h3>
+                                رتب لوحة CT
+                            </h3>
+
+                            <p>
+                                الرتب التي أنشأها الـ Owner.
+                            </p>
+                        </div>
+
+                        <button
+                            class="primary-button"
+                            id="addRole"
+                        >
+                            + إضافة رتبة
+                        </button>
+
+                    </div>
+
+                    <div id="rolesList">
+
+                        <div class="empty-system">
+                            جاري تحميل الرتب...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
 
     </main>
 
 </div>
 
 
-<script>
+<!-- =========================
+     TOAST
+========================== -->
 
-function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) {
-        sidebar.classList.toggle("open");
-    }
-}
-
-
-function manageServer(id) {
-    window.location.href = "/server/" + id;
-}
+<div
+    id="toast"
+    class="toast"
+>
+    <span id="toastMessage"></span>
+</div>
 
 
-function renderAction(action) {
-
-    alert(
-        "وظيفة Render (" +
-        action +
-        ") سيتم ربطها مع API في main.py."
-    );
-
-}
-
-
-function activateSection() {
-
-    const hash = window.location.hash;
-
-    if (!hash) {
-        return;
-    }
-
-    document.querySelectorAll(".nav-item").forEach(item => {
-        item.classList.remove("active");
-    });
-
-    const active = document.querySelector(
-        '.nav-item[href="' + hash + '"]'
-    );
-
-    if (active) {
-        active.classList.add("active");
-    }
-
-    const element = document.querySelector(hash);
-
-    if (element) {
-        setTimeout(() => {
-
-            element.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-
-        }, 50);
-    }
-
-}
-
-
-document.querySelectorAll(".nav-item").forEach(item => {
-
-    item.addEventListener("click", () => {
-
-        document.querySelectorAll(".nav-item").forEach(nav => {
-            nav.classList.remove("active");
-        });
-
-        item.classList.add("active");
-
-        const sidebar = document.getElementById("sidebar");
-
-        if (sidebar) {
-            sidebar.classList.remove("open");
-        }
-
-    });
-
-});
-
-
-window.addEventListener("hashchange", activateSection);
-
-activateSection();
-
-
-</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
 </html>
