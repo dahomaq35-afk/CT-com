@@ -1,57 +1,45 @@
-# =========================================================
-# CT DASHBOARD - KEEPALIVE
-# =========================================================
-
 import os
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
+
+from flask import Flask
 
 
-HOST = "0.0.0.0"
-PORT = int(os.getenv("PORT", "10000"))
+# =========================================================
+# CT KEEP ALIVE
+# =========================================================
+
+app = Flask(__name__)
 
 
-class KeepAliveHandler(BaseHTTPRequestHandler):
-
-    def do_GET(self):
-
-        self.send_response(200)
-        self.send_header(
-            "Content-Type",
-            "text/plain; charset=utf-8"
-        )
-        self.end_headers()
-
-        self.wfile.write(
-            b"CT Dashboard is Online!"
-        )
-
-    def log_message(self, format, *args):
-        return
+@app.route("/")
+def home():
+    return "CT Dashboard is Online!"
 
 
-def run_keepalive():
+@app.route("/health")
+def health():
+    return {
+        "ok": True,
+        "service": "CT Dashboard",
+        "status": "online"
+    }
 
-    server = HTTPServer(
-        (HOST, PORT),
-        KeepAliveHandler
+
+def run():
+    port = int(os.environ.get("PORT", 10000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False,
+        use_reloader=False
     )
 
-    server.serve_forever()
 
-
-def start_keepalive():
-
+def keep_alive():
     thread = threading.Thread(
-        target=run_keepalive,
+        target=run,
         daemon=True
     )
 
     thread.start()
-
-
-if __name__ == "__main__":
-
-    start_keepalive()
-
-    threading.Event().wait()
