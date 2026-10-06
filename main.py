@@ -590,10 +590,15 @@ def has_permission(permission):
 # =========================================================
 # LOGIN
 # =========================================================
-
 @app.route("/")
 def index():
-
+    # إذا المستخدم مسجل دخول
+    # يتم تحويله مباشرة إلى لوحة التحكم
+    if session.get("logged_in"):
+        return redirect(
+            url_for("server")
+        )
+    # عرض صفحة تسجيل الدخول
     return render_template(
         "index.html",
         server_name=get_setting(
@@ -602,11 +607,15 @@ def index():
         ),
         systems=SYSTEMS
     )
-
-
 @app.route("/server")
 def server():
-
+    # إذا لم يكن مسجل دخول
+    # يرجعه إلى صفحة تسجيل الدخول
+    if not session.get("logged_in"):
+        return redirect(
+            url_for("index")
+        )
+    # عرض لوحة التحكم
     return render_template(
         "server.html",
         server_name=get_setting(
@@ -615,7 +624,135 @@ def server():
         ),
         systems=SYSTEMS
     )
-
+# =========================================================
+# LOGIN API
+# =========================================================
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
+def login():
+    # -----------------------------------------------------
+    # GET
+    # -----------------------------------------------------
+    if request.method == "GET":
+        if session.get("logged_in"):
+            return redirect(
+                url_for("server")
+            )
+        return render_template(
+            "index.html",
+            server_name=get_setting(
+                "server_name",
+                "CT"
+            ),
+            systems=SYSTEMS
+        )
+    # -----------------------------------------------------
+    # POST
+    # -----------------------------------------------------
+    data = request.get_json(
+        silent=True
+    )
+    if not isinstance(
+        data,
+        dict
+    ):
+        data = {}
+    username = str(
+        data.get(
+            "username",
+            ""
+        )
+    ).strip()
+    password = str(
+        data.get(
+            "password",
+            ""
+        )
+    )
+    # -----------------------------------------------------
+    # OWNER ENV
+    # -----------------------------------------------------
+    owner_username = os.getenv(
+        "CT_OWNER_USERNAME",
+        ""
+    ).strip()
+    owner_password = os.getenv(
+        "CT_OWNER_PASSWORD",
+        ""
+    )
+    # -----------------------------------------------------
+    # OWNER LOGIN
+    # -----------------------------------------------------
+    if (
+        owner_username
+        and owner_password
+        and username == owner_username
+        and password == owner_password
+    ):
+        session.clear()
+        session["logged_in"] = True
+        session["owner"] = True
+        session["username"] = username
+        session["role_id"] = None
+        return jsonify({
+            "ok": True,
+            "owner": True,
+            "username": username,
+            "redirect": "/server"
+        })
+    # -----------------------------------------------------
+    # DASHBOARD USERS
+    # -----------------------------------------------------
+    conn = get_db()
+    row = conn.execute("""
+        SELECT
+            dashboard_users.username,
+            dashboard_users.role_id,
+            dashboard_roles.permissions
+        FROM dashboard_users
+        LEFT JOIN dashboard_roles
+            ON dashboard_roles.id =
+               dashboard_users.role_id
+        WHERE dashboard_users.username = ?
+    """, (
+        username,
+    )).fetchone()
+    conn.close()
+    # -----------------------------------------------------
+    # USER NOT FOUND
+    # -----------------------------------------------------
+    if not row:
+        return jsonify({
+            "ok": False,
+            "error": "بيانات الدخول غير صحيحة"
+        }), 401
+    # -----------------------------------------------------
+    # USER LOGIN
+    # -----------------------------------------------------
+    session.clear()
+    session["logged_in"] = True
+    session["owner"] = False
+    session["username"] = row["username"]
+    session["role_id"] = row["role_id"]
+    return jsonify({
+        "ok": True,
+        "owner": False,
+        "username": row["username"],
+        "role_id": row["role_id"],
+        "redirect": "/server"
+    })
+# =========================================================
+# LOGOUT
+# =========================================================
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(
+        url_for("index")
+    )
+    
 
 # =========================================================
 # SIMPLE OWNER LOGIN
