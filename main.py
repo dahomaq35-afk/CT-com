@@ -23,13 +23,15 @@ from flask import (
     url_for,
 )
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 # =========================================================
 # SETTINGS
 # =========================================================
 
 APP_NAME = "CT"
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 
 HOST = "0.0.0.0"
 PORT = int(os.getenv("PORT", "10000"))
@@ -96,15 +98,20 @@ app = Flask(
 
 app.secret_key = SECRET_KEY
 
+# Render يعمل خلف Proxy
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_port=1,
+)
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=(
-        os.getenv(
-            "CT_COOKIE_SECURE",
-            "1"
-        ) == "1"
-    ),
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_NAME="ct_session",
 )
 
 
@@ -235,8 +242,14 @@ PERMISSIONS = {
 # =========================================================
 
 def get_db():
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(
+        DB_FILE,
+        timeout=30,
+        check_same_thread=False,
+    )
+
     db.row_factory = sqlite3.Row
+
     return db
 
 
@@ -379,16 +392,6 @@ def set_setting(key, value):
 # =========================================================
 
 def get_bot_tokens():
-    """
-    Automatically detects:
-
-    BOT_TOKEN_1
-    BOT_TOKEN_2
-    BOT_TOKEN_3
-    ...
-
-    Unlimited.
-    """
 
     tokens = []
 
@@ -406,9 +409,7 @@ def get_bot_tokens():
             continue
 
         try:
-            number = int(
-                match.group(1)
-            )
+            number = int(match.group(1))
         except Exception:
             continue
 
@@ -451,7 +452,7 @@ def get_token_for_bot(bot_number):
 
 
 # =========================================================
-# DISCORD BOT HEADERS
+# DISCORD HEADERS
 # =========================================================
 
 def discord_headers(token):
@@ -459,12 +460,12 @@ def discord_headers(token):
     return {
         "Authorization": f"Bot {token}",
         "Content-Type": "application/json",
-        "User-Agent": "CT-Dashboard/2.1",
+        "User-Agent": "CT-Dashboard/2.2",
     }
 
 
 # =========================================================
-# GET BOT INFO
+# DISCORD BOT INFO
 # =========================================================
 
 def discord_bot_info(token):
@@ -500,20 +501,26 @@ def discord_bot_info(token):
             )
 
         return {
+
             "ok": True,
+
             "id": bot_id,
-            "username": data.get(
-                "username"
-            ),
-            "global_name": data.get(
-                "global_name"
-            ),
-            "display_name": (
-                data.get("global_name")
-                or data.get("username")
-                or "Bot"
-            ),
-            "avatar": avatar_url,
+
+            "username":
+                data.get("username"),
+
+            "global_name":
+                data.get("global_name"),
+
+            "display_name":
+                (
+                    data.get("global_name")
+                    or data.get("username")
+                    or "Bot"
+                ),
+
+            "avatar":
+                avatar_url,
         }
 
     except requests.RequestException as exc:
@@ -525,34 +532,18 @@ def discord_bot_info(token):
 
 
 # =========================================================
-# CHECK BOT IN CT SERVER
+# CHECK BOT IN CT
 # =========================================================
 
 def discord_bot_in_ct(token):
-
-    """
-    IMPORTANT:
-
-    We do NOT use:
-
-        /users/@me/guilds
-
-    because that endpoint is for OAuth2 users.
-
-    Instead, we directly request the configured
-    CT guild using the Bot token.
-
-    If the bot can access the guild, it is in CT.
-    """
 
     if not CT_GUILD_ID:
 
         return {
             "ok": False,
             "in_ct": False,
-            "error": (
-                "CT_GUILD_ID غير مضبوط"
-            ),
+            "error":
+                "CT_GUILD_ID غير مضبوط",
         }
 
     try:
@@ -568,59 +559,79 @@ def discord_bot_in_ct(token):
             guild = response.json()
 
             return {
+
                 "ok": True,
+
                 "in_ct": True,
+
                 "guild": {
-                    "id": guild.get("id"),
-                    "name": guild.get(
-                        "name",
-                        "CT"
-                    ),
-                    "icon": guild.get(
-                        "icon"
-                    ),
+
+                    "id":
+                        guild.get("id"),
+
+                    "name":
+                        guild.get(
+                            "name",
+                            "CT"
+                        ),
+
+                    "icon":
+                        guild.get("icon"),
                 },
-            }
-
-        if response.status_code == 403:
-
-            return {
-                "ok": True,
-                "in_ct": True,
-                "error": (
-                    "البوت موجود في السيرفر "
-                    "لكن لا يملك صلاحية الوصول إليه"
-                ),
             }
 
         if response.status_code == 404:
 
             return {
+
                 "ok": True,
+
                 "in_ct": False,
-                "error": (
-                    "البوت غير موجود في سيرفر CT"
-                ),
+
+                "error":
+                    "البوت غير موجود في سيرفر CT",
+            }
+
+        if response.status_code == 403:
+
+            return {
+
+                "ok": True,
+
+                "in_ct": True,
+
+                "error":
+                    "البوت موجود في السيرفر لكن Discord رفض الوصول",
             }
 
         return {
+
             "ok": False,
+
             "in_ct": False,
-            "status": response.status_code,
-            "error": response.text[:500],
+
+            "status":
+                response.status_code,
+
+            "error":
+                response.text[:500],
         }
 
     except requests.RequestException as exc:
 
         return {
+
             "ok": False,
+
             "in_ct": False,
-            "error": str(exc),
+
+            "error":
+                str(exc),
         }
 
 
 # =========================================================
-# GET ALL CT BOTS
+# GET ALL BOTS
 # =========================================================
 
 def get_all_bots():
@@ -630,7 +641,6 @@ def get_all_bots():
     configured = get_bot_tokens()
 
     if not CT_GUILD_ID:
-
         return bots
 
     for item in configured:
@@ -638,77 +648,66 @@ def get_all_bots():
         number = item["number"]
         token = item["token"]
 
-        # -------------------------------------------------
-        # Get bot account
-        # -------------------------------------------------
-
-        info = discord_bot_info(
-            token
-        )
+        info = discord_bot_info(token)
 
         if not info.get("ok"):
 
-            bots.append({
-                "number": number,
-                "name": f"Bot {number}",
-                "username": None,
-                "global_name": None,
-                "id": None,
-                "avatar": None,
-                "online": False,
-                "valid_token": False,
-                "in_ct": False,
-                "error": (
-                    info.get(
-                        "error",
-                        "توكن البوت غير صالح"
-                    )
-                ),
-            })
-
             continue
 
-        # -------------------------------------------------
-        # Check CT membership
-        # -------------------------------------------------
-
-        ct_result = discord_bot_in_ct(
-            token
-        )
+        ct_result = discord_bot_in_ct(token)
 
         if not ct_result.get(
             "in_ct",
             False
         ):
+
             continue
 
         bots.append({
-            "number": number,
-            "name": info.get(
-                "display_name"
-            ),
-            "username": info.get(
-                "username"
-            ),
-            "global_name": info.get(
-                "global_name"
-            ),
-            "id": info.get(
-                "id"
-            ),
-            "avatar": info.get(
-                "avatar"
-            ),
-            "online": True,
-            "valid_token": True,
-            "in_ct": True,
+
+            "number":
+                number,
+
+            "name":
+                info.get(
+                    "display_name"
+                ),
+
+            "username":
+                info.get(
+                    "username"
+                ),
+
+            "global_name":
+                info.get(
+                    "global_name"
+                ),
+
+            "id":
+                info.get(
+                    "id"
+                ),
+
+            "avatar":
+                info.get(
+                    "avatar"
+                ),
+
+            "online":
+                True,
+
+            "valid_token":
+                True,
+
+            "in_ct":
+                True,
         })
 
     return bots
 
 
 # =========================================================
-# DISCORD OAUTH
+# OAUTH - EXCHANGE CODE
 # =========================================================
 
 def discord_exchange_code(code):
@@ -716,9 +715,11 @@ def discord_exchange_code(code):
     try:
 
         response = requests.post(
+
             f"{DISCORD_API}/oauth2/token",
 
             data={
+
                 "client_id":
                     DISCORD_CLIENT_ID,
 
@@ -736,125 +737,168 @@ def discord_exchange_code(code):
             },
 
             headers={
+
                 "Content-Type":
                     "application/x-www-form-urlencoded"
             },
 
-            timeout=10,
+            timeout=15,
         )
 
         if response.status_code != 200:
 
             return {
+
                 "ok": False,
-                "error": response.text[:1000],
+
+                "error":
+                    response.text[:1000],
             }
 
         data = response.json()
 
         return {
+
             "ok": True,
+
             **data,
         }
 
     except requests.RequestException as exc:
 
         return {
+
             "ok": False,
-            "error": str(exc),
+
+            "error":
+                str(exc),
         }
 
+
+# =========================================================
+# OAUTH - USER
+# =========================================================
 
 def discord_get_user(access_token):
 
     try:
 
         response = requests.get(
+
             f"{DISCORD_API}/users/@me",
+
             headers={
+
                 "Authorization":
                     f"Bearer {access_token}"
             },
+
             timeout=10,
         )
 
         if response.status_code != 200:
 
             return {
+
                 "ok": False,
-                "error": response.text[:500],
+
+                "error":
+                    response.text[:500],
             }
 
         return {
+
             "ok": True,
+
             **response.json(),
         }
 
     except requests.RequestException as exc:
 
         return {
+
             "ok": False,
-            "error": str(exc),
+
+            "error":
+                str(exc),
         }
 
+
+# =========================================================
+# OAUTH - USER GUILDS
+# =========================================================
 
 def discord_get_user_guilds(access_token):
 
     try:
 
         response = requests.get(
+
             f"{DISCORD_API}/users/@me/guilds",
+
             headers={
+
                 "Authorization":
                     f"Bearer {access_token}"
             },
+
             timeout=10,
         )
 
         if response.status_code != 200:
 
             return {
+
                 "ok": False,
+
                 "guilds": [],
-                "error": response.text[:500],
+
+                "error":
+                    response.text[:500],
             }
 
         return {
+
             "ok": True,
-            "guilds": response.json(),
+
+            "guilds":
+                response.json(),
         }
 
     except requests.RequestException as exc:
 
         return {
+
             "ok": False,
+
             "guilds": [],
-            "error": str(exc),
+
+            "error":
+                str(exc),
         }
 
 
 # =========================================================
-# CHECK USER ADMIN
+# CHECK ADMINISTRATOR
 # =========================================================
 
-def find_admin_ct_guild(
-    user_guilds
-):
+def find_admin_ct_guild(user_guilds):
 
     if not CT_GUILD_ID:
 
         return {
+
             "ok": False,
-            "error": (
-                "CT_GUILD_ID غير مضبوط في Render"
-            ),
+
+            "error":
+                "CT_GUILD_ID غير مضبوط في Render",
         }
 
     for guild in user_guilds:
 
         if str(
             guild.get("id", "")
-        ) != CT_GUILD_ID:
+        ) != str(CT_GUILD_ID):
 
             continue
 
@@ -864,41 +908,48 @@ def find_admin_ct_guild(
         )
 
         try:
+
             permissions = int(
                 permissions
             )
+
         except Exception:
+
             permissions = 0
 
-        if (
-            permissions
-            & ADMINISTRATOR_PERMISSION
-        ):
+        if permissions & ADMINISTRATOR_PERMISSION:
 
             return {
+
                 "ok": True,
-                "guild_id": CT_GUILD_ID,
-                "guild_name": guild.get(
-                    "name",
-                    "CT"
-                ),
+
+                "guild_id":
+                    CT_GUILD_ID,
+
+                "guild_name":
+                    guild.get(
+                        "name",
+                        "CT"
+                    ),
+
                 "permissions":
                     permissions,
             }
 
         return {
+
             "ok": False,
-            "error": (
-                "يجب أن تملك Administrator "
-                "في سيرفر CT"
-            ),
+
+            "error":
+                "يجب أن تملك Administrator في سيرفر CT",
         }
 
     return {
+
         "ok": False,
-        "error": (
-            "يجب أن تكون موجودًا في سيرفر CT"
-        ),
+
+        "error":
+            "يجب أن تكون موجودًا في سيرفر CT",
     }
 
 
@@ -918,9 +969,6 @@ def is_logged_in():
 
 def current_is_owner():
 
-    if not is_logged_in():
-        return False
-
     return bool(
         session.get(
             "discord_admin",
@@ -934,10 +982,17 @@ def require_login():
     if not is_logged_in():
 
         return jsonify({
+
             "ok": False,
-            "error": (
-                "يجب تسجيل الدخول عبر Discord"
-            ),
+
+            "error":
+                "يجب تسجيل الدخول عبر Discord",
+
+            "login_url":
+                url_for(
+                    "login",
+                    _external=True
+                ),
         }), 401
 
     if not session.get(
@@ -948,11 +1003,17 @@ def require_login():
         session.clear()
 
         return jsonify({
+
             "ok": False,
-            "error": (
-                "ليس لديك صلاحية Administrator "
-                "في سيرفر CT"
-            ),
+
+            "error":
+                "ليس لديك صلاحية Administrator في سيرفر CT",
+
+            "login_url":
+                url_for(
+                    "login",
+                    _external=True
+                ),
         }), 403
 
     return None
@@ -969,29 +1030,31 @@ def has_permission(permission):
     ):
         return True
 
-    return False
+    return permission in get_user_permissions(
+        session.get("discord_id")
+    )
 
 
-def permission_error(
-    permission
-):
+def permission_error(permission):
 
     return jsonify({
+
         "ok": False,
-        "error": (
-            "ليس لديك صلاحية لهذا الإجراء"
-        ),
-        "permission": permission,
+
+        "error":
+            "ليس لديك صلاحية لهذا الإجراء",
+
+        "permission":
+            permission,
+
     }), 403
 
 
 # =========================================================
-# DASHBOARD ROLE HELPERS
+# DASHBOARD ROLES
 # =========================================================
 
-def get_dashboard_role(
-    role_id
-):
+def get_dashboard_role(role_id):
 
     db = get_db()
 
@@ -1009,9 +1072,7 @@ def get_dashboard_role(
     return row
 
 
-def get_dashboard_user(
-    discord_id
-):
+def get_dashboard_user(discord_id):
 
     db = get_db()
 
@@ -1029,19 +1090,14 @@ def get_dashboard_user(
     return row
 
 
-def get_user_permissions(
-    discord_id
-):
+def get_user_permissions(discord_id):
 
-    if (
-        str(
-            session.get(
-                "discord_id",
-                ""
-            )
+    if str(
+        session.get(
+            "discord_id",
+            ""
         )
-        == str(discord_id)
-    ):
+    ) == str(discord_id):
 
         if session.get(
             "discord_admin",
@@ -1076,18 +1132,33 @@ def get_user_permissions(
 
 
 # =========================================================
-# MAIN PAGES
+# HOME
 # =========================================================
 
 @app.route("/")
 def index():
 
+    if is_logged_in():
+
+        return redirect(
+            url_for("server")
+        )
+
     return render_template(
+
         "index.html",
-        app_name=APP_NAME,
-        version=VERSION,
+
+        app_name:
+            APP_NAME,
+
+        version:
+            VERSION,
     )
 
+
+# =========================================================
+# SERVER
+# =========================================================
 
 @app.route("/server")
 def server():
@@ -1095,7 +1166,7 @@ def server():
     if not is_logged_in():
 
         return redirect(
-            url_for("index")
+            url_for("login")
         )
 
     if not session.get(
@@ -1106,13 +1177,18 @@ def server():
         session.clear()
 
         return redirect(
-            url_for("index")
+            url_for("login")
         )
 
     return render_template(
+
         "server.html",
-        app_name=APP_NAME,
-        version=VERSION,
+
+        app_name:
+            APP_NAME,
+
+        version:
+            VERSION,
     )
 
 
@@ -1123,41 +1199,43 @@ def server():
 @app.route("/login")
 def login():
 
-    required = {
+    missing = []
 
-        "DISCORD_CLIENT_ID":
-            DISCORD_CLIENT_ID,
+    if not DISCORD_CLIENT_ID:
+        missing.append(
+            "DISCORD_CLIENT_ID"
+        )
 
-        "DISCORD_CLIENT_SECRET":
-            DISCORD_CLIENT_SECRET,
+    if not DISCORD_CLIENT_SECRET:
+        missing.append(
+            "DISCORD_CLIENT_SECRET"
+        )
 
-        "DISCORD_REDIRECT_URI":
-            DISCORD_REDIRECT_URI,
+    if not DISCORD_REDIRECT_URI:
+        missing.append(
+            "DISCORD_REDIRECT_URI"
+        )
 
-        "CT_GUILD_ID":
-            CT_GUILD_ID,
-    }
-
-    missing = [
-        name
-        for name, value
-        in required.items()
-        if not value
-    ]
+    if not CT_GUILD_ID:
+        missing.append(
+            "CT_GUILD_ID"
+        )
 
     if missing:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "متغيرات Render ناقصة",
+
             "missing":
                 missing,
+
         }), 500
 
-    state = secrets.token_urlsafe(
-        32
-    )
+    state = secrets.token_urlsafe(32)
 
     session["oauth_state"] = state
 
@@ -1183,8 +1261,10 @@ def login():
     }
 
     discord_url = (
+
         "https://discord.com/oauth2/authorize?"
         + urlencode(params)
+
     )
 
     return redirect(
@@ -1196,9 +1276,7 @@ def login():
 # LOGIN CALLBACK
 # =========================================================
 
-@app.route(
-    "/login/callback"
-)
+@app.route("/login/callback")
 def login_callback():
 
     error = request.args.get(
@@ -1207,14 +1285,18 @@ def login_callback():
 
     if error:
 
+        session.clear()
+
         return jsonify({
+
             "ok": False,
-            "error": (
-                "تم إلغاء تسجيل الدخول "
-                "أو رفض Discord الطلب"
-            ),
+
+            "error":
+                "تم إلغاء تسجيل الدخول أو رفض Discord الطلب",
+
             "discord_error":
                 error,
+
         }), 403
 
     code = request.args.get(
@@ -1232,20 +1314,25 @@ def login_callback():
     if not code:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "لم يتم استلام رمز تسجيل الدخول",
+
         }), 400
 
-    if (
-        not state
-        or state != saved_state
-    ):
+    if not state or state != saved_state:
+
+        session.clear()
 
         return jsonify({
+
             "ok": False,
+
             "error":
-                "جلسة تسجيل الدخول غير صالحة",
+                "جلسة تسجيل الدخول غير صالحة، حاول مرة أخرى",
+
         }), 400
 
     session.pop(
@@ -1253,25 +1340,25 @@ def login_callback():
         None
     )
 
-    token_data = (
-        discord_exchange_code(
-            code
-        )
+    token_data = discord_exchange_code(
+        code
     )
 
-    if not token_data.get(
-        "ok"
-    ):
+    if not token_data.get("ok"):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "فشل تسجيل الدخول عبر Discord",
+
             "details":
                 token_data.get(
                     "error",
                     "Unknown error"
                 ),
+
         }), 502
 
     access_token = token_data.get(
@@ -1281,65 +1368,70 @@ def login_callback():
     if not access_token:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "Discord لم يرجع Access Token",
+
         }), 502
 
     user = discord_get_user(
         access_token
     )
 
-    if not user.get(
-        "ok"
-    ):
+    if not user.get("ok"):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "تعذر قراءة حساب Discord",
+
         }), 502
 
-    guild_result = (
-        discord_get_user_guilds(
-            access_token
-        )
+    guild_result = discord_get_user_guilds(
+        access_token
     )
 
-    if not guild_result.get(
-        "ok"
-    ):
+    if not guild_result.get("ok"):
 
         return jsonify({
+
             "ok": False,
-            "error": (
-                "تعذر قراءة السيرفرات "
-                "من Discord"
-            ),
+
+            "error":
+                "تعذر قراءة السيرفرات من Discord",
+
+            "details":
+                guild_result.get(
+                    "error"
+                ),
+
         }), 502
 
-    admin_result = (
-        find_admin_ct_guild(
-            guild_result.get(
-                "guilds",
-                []
-            )
+    admin_result = find_admin_ct_guild(
+        guild_result.get(
+            "guilds",
+            []
         )
     )
 
-    if not admin_result.get(
-        "ok"
-    ):
+    if not admin_result.get("ok"):
 
         session.clear()
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 admin_result.get(
                     "error",
                     "ليس لديك صلاحية الدخول"
                 ),
+
         }), 403
 
     discord_id = user.get(
@@ -1347,8 +1439,11 @@ def login_callback():
     )
 
     username = (
+
         user.get("global_name")
+
         or user.get("username")
+
         or "Discord User"
     )
 
@@ -1358,13 +1453,12 @@ def login_callback():
 
     avatar_url = None
 
-    if (
-        avatar_hash
-        and discord_id
-    ):
+    if avatar_hash and discord_id:
 
         avatar_url = (
+
             "https://cdn.discordapp.com/avatars/"
+
             f"{discord_id}/{avatar_hash}.png"
         )
 
@@ -1421,7 +1515,7 @@ def login_callback():
     db.close()
 
     # -----------------------------------------------------
-    # SESSION
+    # CREATE SESSION
     # -----------------------------------------------------
 
     session.clear()
@@ -1440,21 +1534,17 @@ def login_callback():
 
     session["role_id"] = None
 
-    session["discord_avatar"] = (
-        avatar_url
-    )
+    session["discord_avatar"] = avatar_url
 
     session["ct_guild_id"] = (
-        admin_result[
-            "guild_id"
-        ]
+        admin_result["guild_id"]
     )
 
     session["ct_guild_name"] = (
-        admin_result[
-            "guild_name"
-        ]
+        admin_result["guild_name"]
     )
+
+    session.permanent = False
 
     return redirect(
         url_for("server")
@@ -1601,9 +1691,7 @@ def api_bots():
 @app.route(
     "/api/bots/<int:bot_number>"
 )
-def api_bot(
-    bot_number
-):
+def api_bot(bot_number):
 
     protection = require_login()
 
@@ -1625,33 +1713,34 @@ def api_bot(
     if not token:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "البوت غير موجود",
+
         }), 404
 
     info = discord_bot_info(
         token
     )
 
-    if not info.get(
-        "ok"
-    ):
+    if not info.get("ok"):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "توكن البوت غير صالح",
+
             "details":
-                info.get(
-                    "error"
-                ),
+                info.get("error"),
+
         }), 502
 
-    ct_result = (
-        discord_bot_in_ct(
-            token
-        )
+    ct_result = discord_bot_in_ct(
+        token
     )
 
     if not ct_result.get(
@@ -1660,9 +1749,12 @@ def api_bot(
     ):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "هذا البوت غير موجود في سيرفر CT",
+
         }), 403
 
     return jsonify({
@@ -1686,9 +1778,7 @@ def api_bot(
 # API SYSTEMS
 # =========================================================
 
-@app.route(
-    "/api/systems"
-)
+@app.route("/api/systems")
 def api_systems():
 
     protection = require_login()
@@ -1719,14 +1809,16 @@ def api_systems():
         })
 
     return jsonify({
+
         "ok": True,
+
         "systems":
             systems,
     })
 
 
 # =========================================================
-# API GET SYSTEM SETTINGS
+# GET SYSTEM SETTINGS
 # =========================================================
 
 @app.route(
@@ -1746,14 +1838,15 @@ def api_get_system(
     if system_id not in SYSTEMS:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "النظام غير موجود",
+
         }), 404
 
-    permission = (
-        f"{system_id}.view"
-    )
+    permission = f"{system_id}.view"
 
     if not has_permission(
         permission
@@ -1770,15 +1863,16 @@ def api_get_system(
     if not token:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "البوت غير موجود",
+
         }), 404
 
-    ct_result = (
-        discord_bot_in_ct(
-            token
-        )
+    ct_result = discord_bot_in_ct(
+        token
     )
 
     if not ct_result.get(
@@ -1787,9 +1881,12 @@ def api_get_system(
     ):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "البوت غير موجود في سيرفر CT",
+
         }), 403
 
     db = get_db()
@@ -1831,14 +1928,10 @@ def api_get_system(
                 system_id,
 
             "name":
-                SYSTEMS[
-                    system_id
-                ]["name"],
+                SYSTEMS[system_id]["name"],
 
             "icon":
-                SYSTEMS[
-                    system_id
-                ]["icon"],
+                SYSTEMS[system_id]["icon"],
         },
 
         "settings":
@@ -1847,7 +1940,7 @@ def api_get_system(
 
 
 # =========================================================
-# API APPLY SETTINGS
+# APPLY SETTINGS
 # =========================================================
 
 @app.route(
@@ -1888,30 +1981,37 @@ def api_apply():
     ):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "bots يجب أن تكون قائمة",
+
         }), 400
 
     if not system_id:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "يجب تحديد النظام",
+
         }), 400
 
     if system_id not in SYSTEMS:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "النظام غير موجود",
+
         }), 404
 
-    permission = (
-        f"{system_id}.manage"
-    )
+    permission = f"{system_id}.manage"
 
     if not has_permission(
         permission
@@ -1924,9 +2024,12 @@ def api_apply():
     if not bots:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "حدد بوتًا واحدًا على الأقل",
+
         }), 400
 
     db = get_db()
@@ -1943,8 +2046,10 @@ def api_apply():
         if bot_number is None:
 
             failed.append({
+
                 "bot":
                     raw_number,
+
                 "error":
                     "رقم بوت غير صالح",
             })
@@ -1958,18 +2063,18 @@ def api_apply():
         if not token:
 
             failed.append({
+
                 "bot":
                     bot_number,
+
                 "error":
                     "البوت غير موجود",
             })
 
             continue
 
-        ct_result = (
-            discord_bot_in_ct(
-                token
-            )
+        ct_result = discord_bot_in_ct(
+            token
         )
 
         if not ct_result.get(
@@ -1978,8 +2083,10 @@ def api_apply():
         ):
 
             failed.append({
+
                 "bot":
                     bot_number,
+
                 "error":
                     "البوت غير موجود في سيرفر CT",
             })
@@ -1994,6 +2101,7 @@ def api_apply():
             )
 
             db.execute(
+
                 """
                 INSERT INTO system_settings
                 (
@@ -2014,6 +2122,7 @@ def api_apply():
                     updated_at =
                         excluded.updated_at
                 """,
+
                 (
                     bot_number,
                     system_id,
@@ -2029,8 +2138,10 @@ def api_apply():
         except Exception as exc:
 
             failed.append({
+
                 "bot":
                     bot_number,
+
                 "error":
                     str(exc),
             })
@@ -2118,7 +2229,9 @@ def api_owner_roles():
         })
 
     return jsonify({
+
         "ok": True,
+
         "roles":
             roles,
     })
@@ -2169,9 +2282,12 @@ def api_owner_create_role():
     if not name:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "اكتب اسم الرتبة",
+
         }), 400
 
     if not isinstance(
@@ -2180,20 +2296,27 @@ def api_owner_create_role():
     ):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "permissions يجب أن تكون قائمة",
+
         }), 400
 
     valid_permissions = [
+
         permission
+
         for permission in permissions
+
         if permission in PERMISSIONS
     ]
 
     db = get_db()
 
     cursor = db.execute(
+
         """
         INSERT INTO dashboard_roles
         (
@@ -2203,12 +2326,15 @@ def api_owner_create_role():
         )
         VALUES (?, ?, ?)
         """,
+
         (
             name,
+
             json.dumps(
                 valid_permissions,
                 ensure_ascii=False
             ),
+
             utc_now(),
         )
     )
@@ -2245,9 +2371,7 @@ def api_owner_create_role():
     "/api/owner/roles/<int:role_id>",
     methods=["PUT"]
 )
-def api_owner_update_role(
-    role_id
-):
+def api_owner_update_role(role_id):
 
     protection = require_login()
 
@@ -2269,14 +2393,6 @@ def api_owner_update_role(
         or {}
     )
 
-    name = data.get(
-        "name"
-    )
-
-    permissions = data.get(
-        "permissions"
-    )
-
     role = get_dashboard_role(
         role_id
     )
@@ -2284,13 +2400,26 @@ def api_owner_update_role(
     if not role:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "الرتبة غير موجودة",
+
         }), 404
 
-    if name is None:
-        name = role["name"]
+    name = data.get(
+        "name",
+        role["name"]
+    )
+
+    permissions = data.get(
+        "permissions",
+        json_load(
+            role["permissions"],
+            []
+        )
+    )
 
     name = str(
         name
@@ -2299,17 +2428,13 @@ def api_owner_update_role(
     if not name:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "اسم الرتبة لا يمكن أن يكون فارغًا",
+
         }), 400
-
-    if permissions is None:
-
-        permissions = json_load(
-            role["permissions"],
-            []
-        )
 
     if not isinstance(
         permissions,
@@ -2317,32 +2442,44 @@ def api_owner_update_role(
     ):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "الصلاحيات غير صحيحة",
+
         }), 400
 
     permissions = [
+
         permission
+
         for permission in permissions
+
         if permission in PERMISSIONS
     ]
 
     db = get_db()
 
     db.execute(
+
         """
         UPDATE dashboard_roles
+
         SET name = ?,
             permissions = ?
+
         WHERE id = ?
         """,
+
         (
             name,
+
             json.dumps(
                 permissions,
                 ensure_ascii=False
             ),
+
             role_id,
         )
     )
@@ -2376,9 +2513,7 @@ def api_owner_update_role(
     "/api/owner/roles/<int:role_id>",
     methods=["DELETE"]
 )
-def api_owner_delete_role(
-    role_id
-):
+def api_owner_delete_role(role_id):
 
     protection = require_login()
 
@@ -2400,9 +2535,12 @@ def api_owner_delete_role(
     if not role:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "الرتبة غير موجودة",
+
         }), 404
 
     db = get_db()
@@ -2428,7 +2566,9 @@ def api_owner_delete_role(
     db.close()
 
     return jsonify({
+
         "ok": True,
+
         "message":
             "تم حذف الرتبة",
     })
@@ -2458,9 +2598,7 @@ def api_owner_permissions():
 
     grouped = {}
 
-    for permission, description in (
-        PERMISSIONS.items()
-    ):
+    for permission, description in PERMISSIONS.items():
 
         system = permission.split(
             ".",
@@ -2517,6 +2655,7 @@ def api_owner_users():
     db = get_db()
 
     rows = db.execute(
+
         """
         SELECT
             u.id,
@@ -2563,7 +2702,9 @@ def api_owner_users():
         })
 
     return jsonify({
+
         "ok": True,
+
         "users":
             users,
     })
@@ -2620,23 +2761,31 @@ def api_owner_assign_user():
     if not discord_id:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "يجب تحديد Discord ID",
+
         }), 400
 
     if role_id is not None:
 
         try:
+
             role_id = int(
                 role_id
             )
+
         except Exception:
 
             return jsonify({
+
                 "ok": False,
+
                 "error":
                     "role_id غير صالح",
+
             }), 400
 
         role = get_dashboard_role(
@@ -2646,25 +2795,31 @@ def api_owner_assign_user():
         if not role:
 
             return jsonify({
+
                 "ok": False,
+
                 "error":
                     "الرتبة غير موجودة",
+
             }), 404
 
     db = get_db()
 
     existing = db.execute(
+
         """
         SELECT id
         FROM dashboard_users
         WHERE discord_id = ?
         """,
+
         (discord_id,)
     ).fetchone()
 
     if existing:
 
         db.execute(
+
             """
             UPDATE dashboard_users
 
@@ -2673,6 +2828,7 @@ def api_owner_assign_user():
 
             WHERE discord_id = ?
             """,
+
             (
                 username,
                 role_id,
@@ -2683,6 +2839,7 @@ def api_owner_assign_user():
     else:
 
         db.execute(
+
             """
             INSERT INTO dashboard_users
             (
@@ -2693,6 +2850,7 @@ def api_owner_assign_user():
             )
             VALUES (?, ?, ?, ?)
             """,
+
             (
                 discord_id,
                 username,
@@ -2705,7 +2863,9 @@ def api_owner_assign_user():
     db.close()
 
     return jsonify({
+
         "ok": True,
+
         "message":
             "تم تحديث صلاحيات المستخدم",
     })
@@ -2719,9 +2879,7 @@ def api_owner_assign_user():
     "/api/owner/users/<int:user_id>",
     methods=["DELETE"]
 )
-def api_owner_delete_user(
-    user_id
-):
+def api_owner_delete_user(user_id):
 
     protection = require_login()
 
@@ -2739,11 +2897,13 @@ def api_owner_delete_user(
     db = get_db()
 
     row = db.execute(
+
         """
         SELECT discord_id
         FROM dashboard_users
         WHERE id = ?
         """,
+
         (user_id,)
     ).fetchone()
 
@@ -2752,9 +2912,12 @@ def api_owner_delete_user(
         db.close()
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "المستخدم غير موجود",
+
         }), 404
 
     if str(
@@ -2768,16 +2931,21 @@ def api_owner_delete_user(
         db.close()
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "لا يمكنك حذف حسابك الحالي",
+
         }), 400
 
     db.execute(
+
         """
         DELETE FROM dashboard_users
         WHERE id = ?
         """,
+
         (user_id,)
     )
 
@@ -2785,7 +2953,9 @@ def api_owner_delete_user(
     db.close()
 
     return jsonify({
+
         "ok": True,
+
         "message":
             "تم حذف المستخدم",
     })
@@ -2843,7 +3013,9 @@ def api_sections():
         })
 
     return jsonify({
+
         "ok": True,
+
         "sections":
             sections,
     })
@@ -2896,14 +3068,18 @@ def api_create_section():
     if not name:
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "اكتب اسم القسم",
+
         }), 400
 
     db = get_db()
 
     cursor = db.execute(
+
         """
         INSERT INTO sections
         (
@@ -2914,6 +3090,7 @@ def api_create_section():
         )
         VALUES (?, ?, 1, ?)
         """,
+
         (
             name,
             description,
@@ -2952,9 +3129,7 @@ def api_create_section():
 # HEALTH
 # =========================================================
 
-@app.route(
-    "/health"
-)
+@app.route("/health")
 def health():
 
     configured = get_bot_tokens()
@@ -2994,9 +3169,7 @@ def health():
 # API STATUS
 # =========================================================
 
-@app.route(
-    "/api/status"
-)
+@app.route("/api/status")
 def api_status():
 
     protection = require_login()
@@ -3051,12 +3224,10 @@ def api_status():
 
 
 # =========================================================
-# DEBUG BOT CHECK
+# DEBUG BOTS
 # =========================================================
 
-@app.route(
-    "/api/debug/bots"
-)
+@app.route("/api/debug/bots")
 def api_debug_bots():
 
     protection = require_login()
@@ -3075,9 +3246,7 @@ def api_debug_bots():
             token
         )
 
-        if not info.get(
-            "ok"
-        ):
+        if not info.get("ok"):
 
             results.append({
 
@@ -3099,10 +3268,8 @@ def api_debug_bots():
 
             continue
 
-        ct_result = (
-            discord_bot_in_ct(
-                token
-            )
+        ct_result = discord_bot_in_ct(
+            token
         )
 
         results.append({
@@ -3114,9 +3281,7 @@ def api_debug_bots():
                 True,
 
             "bot_id":
-                info.get(
-                    "id"
-                ),
+                info.get("id"),
 
             "bot_name":
                 info.get(
@@ -3153,20 +3318,72 @@ def api_debug_bots():
 
 
 # =========================================================
-# ERROR HANDLERS
+# LOGGED-IN CHECK
+# =========================================================
+
+@app.route("/api/auth/check")
+def api_auth_check():
+
+    if not is_logged_in():
+
+        return jsonify({
+
+            "ok": True,
+
+            "logged_in":
+                False,
+
+            "login_url":
+                url_for(
+                    "login",
+                    _external=True
+                ),
+        })
+
+    return jsonify({
+
+        "ok": True,
+
+        "logged_in":
+            True,
+
+        "administrator":
+            bool(
+                session.get(
+                    "discord_admin",
+                    False
+                )
+            ),
+
+        "username":
+            session.get(
+                "username"
+            ),
+
+        "server":
+            session.get(
+                "ct_guild_name",
+                "CT"
+            ),
+    })
+
+
+# =========================================================
+# ERROR 404
 # =========================================================
 
 @app.errorhandler(404)
 def not_found(error):
 
-    if request.path.startswith(
-        "/api/"
-    ):
+    if request.path.startswith("/api/"):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "المسار غير موجود",
+
         }), 404
 
     return (
@@ -3175,17 +3392,22 @@ def not_found(error):
     )
 
 
+# =========================================================
+# ERROR 500
+# =========================================================
+
 @app.errorhandler(500)
 def internal_error(error):
 
-    if request.path.startswith(
-        "/api/"
-    ):
+    if request.path.startswith("/api/"):
 
         return jsonify({
+
             "ok": False,
+
             "error":
                 "حدث خطأ داخلي في الخادم",
+
         }), 500
 
     return (
@@ -3208,7 +3430,10 @@ init_db()
 if __name__ == "__main__":
 
     app.run(
+
         host=HOST,
+
         port=PORT,
+
         debug=False,
     )
