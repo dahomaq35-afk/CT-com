@@ -31,7 +31,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 # =========================================================
 
 APP_NAME = "CT"
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 
 HOST = "0.0.0.0"
 PORT = int(os.getenv("PORT", "10000"))
@@ -107,11 +107,24 @@ app.wsgi_app = ProxyFix(
     x_port=1,
 )
 
+# =========================================================
+# SESSION CONFIG
+# =========================================================
+
 app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=True,
+    SECRET_KEY=SECRET_KEY,
+
     SESSION_COOKIE_NAME="ct_session",
+
+    SESSION_COOKIE_HTTPONLY=True,
+
+    SESSION_COOKIE_SAMESITE="Lax",
+
+    SESSION_COOKIE_SECURE=True,
+
+    SESSION_COOKIE_PATH="/",
+
+    SESSION_REFRESH_EACH_REQUEST=True,
 )
 
 
@@ -330,7 +343,6 @@ def json_load(value, fallback=None):
 def clean_bot_number(value):
 
     try:
-
         number = int(value)
 
         if number < 1:
@@ -460,7 +472,7 @@ def discord_headers(token):
     return {
         "Authorization": f"Bot {token}",
         "Content-Type": "application/json",
-        "User-Agent": "CT-Dashboard/2.2",
+        "User-Agent": "CT-Dashboard/2.3",
     }
 
 
@@ -651,16 +663,11 @@ def get_all_bots():
         info = discord_bot_info(token)
 
         if not info.get("ok"):
-
             continue
 
         ct_result = discord_bot_in_ct(token)
 
-        if not ct_result.get(
-            "in_ct",
-            False
-        ):
-
+        if not ct_result.get("in_ct", False):
             continue
 
         bots.append({
@@ -737,7 +744,6 @@ def discord_exchange_code(code):
             },
 
             headers={
-
                 "Content-Type":
                     "application/x-www-form-urlencoded"
             },
@@ -964,6 +970,9 @@ def is_logged_in():
             "logged_in",
             False
         )
+        and session.get(
+            "discord_id"
+        )
     )
 
 
@@ -1145,14 +1154,9 @@ def index():
         )
 
     return render_template(
-
         "index.html",
-
-        app_name:
-            APP_NAME,
-
-        version:
-            VERSION,
+        app_name=APP_NAME,
+        version=VERSION,
     )
 
 
@@ -1181,14 +1185,9 @@ def server():
         )
 
     return render_template(
-
         "server.html",
-
-        app_name:
-            APP_NAME,
-
-        version:
-            VERSION,
+        app_name=APP_NAME,
+        version=VERSION,
     )
 
 
@@ -1239,6 +1238,8 @@ def login():
 
     session["oauth_state"] = state
 
+    session.modified = True
+
     params = {
 
         "client_id":
@@ -1261,10 +1262,8 @@ def login():
     }
 
     discord_url = (
-
         "https://discord.com/oauth2/authorize?"
         + urlencode(params)
-
     )
 
     return redirect(
@@ -1313,6 +1312,8 @@ def login_callback():
 
     if not code:
 
+        session.clear()
+
         return jsonify({
 
             "ok": False,
@@ -1346,6 +1347,8 @@ def login_callback():
 
     if not token_data.get("ok"):
 
+        session.clear()
+
         return jsonify({
 
             "ok": False,
@@ -1367,6 +1370,8 @@ def login_callback():
 
     if not access_token:
 
+        session.clear()
+
         return jsonify({
 
             "ok": False,
@@ -1382,6 +1387,8 @@ def login_callback():
 
     if not user.get("ok"):
 
+        session.clear()
+
         return jsonify({
 
             "ok": False,
@@ -1396,6 +1403,8 @@ def login_callback():
     )
 
     if not guild_result.get("ok"):
+
+        session.clear()
 
         return jsonify({
 
@@ -1438,12 +1447,22 @@ def login_callback():
         "id"
     )
 
+    if not discord_id:
+
+        session.clear()
+
+        return jsonify({
+
+            "ok": False,
+
+            "error":
+                "تعذر الحصول على Discord ID",
+
+        }), 502
+
     username = (
-
         user.get("global_name")
-
         or user.get("username")
-
         or "Discord User"
     )
 
@@ -1453,18 +1472,16 @@ def login_callback():
 
     avatar_url = None
 
-    if avatar_hash and discord_id:
+    if avatar_hash:
 
         avatar_url = (
-
             "https://cdn.discordapp.com/avatars/"
-
             f"{discord_id}/{avatar_hash}.png"
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # SAVE USER
-    # -----------------------------------------------------
+    # =====================================================
 
     db = get_db()
 
@@ -1514,9 +1531,9 @@ def login_callback():
     db.commit()
     db.close()
 
-    # -----------------------------------------------------
+    # =====================================================
     # CREATE SESSION
-    # -----------------------------------------------------
+    # =====================================================
 
     session.clear()
 
@@ -1536,7 +1553,7 @@ def login_callback():
 
     session["discord_avatar"] = avatar_url
 
-    session["ct_guild_id"] = (
+    session["ct_guild_id"] = str(
         admin_result["guild_id"]
     )
 
@@ -1544,7 +1561,7 @@ def login_callback():
         admin_result["guild_name"]
     )
 
-    session.permanent = False
+    session.modified = True
 
     return redirect(
         url_for("server")
@@ -1560,9 +1577,72 @@ def logout():
 
     session.clear()
 
-    return redirect(
+    response = redirect(
         url_for("index")
     )
+
+    response.delete_cookie(
+        "ct_session",
+        path="/"
+    )
+
+    return response
+
+
+# =========================================================
+# API AUTH CHECK
+# =========================================================
+
+@app.route("/api/auth/check")
+def api_auth_check():
+
+    if not is_logged_in():
+
+        return jsonify({
+
+            "ok": True,
+
+            "logged_in":
+                False,
+
+            "login_url":
+                url_for(
+                    "login",
+                    _external=True
+                ),
+        })
+
+    return jsonify({
+
+        "ok": True,
+
+        "logged_in":
+            True,
+
+        "administrator":
+            bool(
+                session.get(
+                    "discord_admin",
+                    False
+                )
+            ),
+
+        "username":
+            session.get(
+                "username"
+            ),
+
+        "server":
+            session.get(
+                "ct_guild_name",
+                "CT"
+            ),
+
+        "discord_id":
+            session.get(
+                "discord_id"
+            ),
+    })
 
 
 # =========================================================
@@ -3318,57 +3398,6 @@ def api_debug_bots():
 
 
 # =========================================================
-# LOGGED-IN CHECK
-# =========================================================
-
-@app.route("/api/auth/check")
-def api_auth_check():
-
-    if not is_logged_in():
-
-        return jsonify({
-
-            "ok": True,
-
-            "logged_in":
-                False,
-
-            "login_url":
-                url_for(
-                    "login",
-                    _external=True
-                ),
-        })
-
-    return jsonify({
-
-        "ok": True,
-
-        "logged_in":
-            True,
-
-        "administrator":
-            bool(
-                session.get(
-                    "discord_admin",
-                    False
-                )
-            ),
-
-        "username":
-            session.get(
-                "username"
-            ),
-
-        "server":
-            session.get(
-                "ct_guild_name",
-                "CT"
-            ),
-    })
-
-
-# =========================================================
 # ERROR 404
 # =========================================================
 
@@ -3430,10 +3459,7 @@ init_db()
 if __name__ == "__main__":
 
     app.run(
-
         host=HOST,
-
         port=PORT,
-
         debug=False,
     )
