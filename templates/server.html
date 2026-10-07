@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,9 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        CT Dashboard
-    </title>
+    <title>CT Dashboard</title>
 
     <link
         rel="stylesheet"
@@ -20,6 +17,68 @@
     >
 
     <style>
+        /* =====================================================
+           SIDEBAR - LEFT + VERTICAL
+        ====================================================== */
+
+        body {
+            direction: rtl;
+        }
+
+        .sidebar {
+            left: 0 !important;
+            right: auto !important;
+        }
+
+        .main {
+            margin-left: 280px !important;
+            margin-right: 0 !important;
+        }
+
+        .sidebar-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            width: 100% !important;
+            gap: 6px !important;
+        }
+
+        .sidebar-nav .nav-item {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            box-sizing: border-box !important;
+            flex: 0 0 auto !important;
+            cursor: pointer !important;
+        }
+
+        .sidebar-nav .nav-title {
+            width: 100% !important;
+            display: block !important;
+            flex: 0 0 auto !important;
+            box-sizing: border-box !important;
+        }
+
+        .sidebar-bottom {
+            width: 100% !important;
+        }
+
+        @media (max-width: 900px) {
+            .main {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+
+            .sidebar {
+                left: 0 !important;
+                right: auto !important;
+            }
+        }
+
+        /* =====================================================
+           WELCOME
+        ====================================================== */
 
         .welcome-editor {
             display: grid;
@@ -228,21 +287,36 @@
             white-space: nowrap;
         }
 
-        @media (max-width: 900px) {
+        /* =====================================================
+           MAKE EVERY PAGE CLICKABLE / CORRECTLY STACKED
+        ====================================================== */
 
+        .server-page {
+            display: none;
+        }
+
+        .server-page.active {
+            display: block !important;
+        }
+
+        .nav-item {
+            pointer-events: auto !important;
+        }
+
+        .sidebar-nav,
+        .sidebar-nav * {
+            pointer-events: auto;
+        }
+
+        @media (max-width: 900px) {
             .welcome-editor {
                 grid-template-columns: 1fr;
             }
-
         }
-
     </style>
-
 </head>
 
-
 <body>
-
 
 <!-- =========================================================
      SIDEBAR
@@ -251,7 +325,6 @@
 <aside class="sidebar">
 
     <div class="brand">
-
         <div class="brand-mark">
             <span>C</span><b>T</b>
         </div>
@@ -260,24 +333,16 @@
             <strong>CT</strong>
             <small>Dashboard</small>
         </div>
-
     </div>
-
 
     <nav class="sidebar-nav">
 
-        <button
-            class="nav-item active"
-            data-page="home"
-        >
+        <button type="button" class="nav-item active" data-page="home">
             <span>⌂</span>
             <span>الرئيسية</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="bots"
-        >
+        <button type="button" class="nav-item" data-page="bots">
             <span>🤖</span>
             <span>البوتات</span>
         </button>
@@ -286,98 +351,62 @@
             الأنظمة
         </div>
 
-        <button
-            class="nav-item"
-            data-page="moderation"
-        >
+        <button type="button" class="nav-item" data-page="moderation">
             <span>🛡️</span>
             <span>الإدارة</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="welcome"
-        >
+        <button type="button" class="nav-item" data-page="welcome">
             <span>👋</span>
             <span>الترحيب</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="levels"
-        >
+        <button type="button" class="nav-item" data-page="levels">
             <span>📊</span>
             <span>اللفلات</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="points"
-        >
+        <button type="button" class="nav-item" data-page="points">
             <span>⭐</span>
             <span>النقاط</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="tickets"
-        >
+        <button type="button" class="nav-item" data-page="tickets">
             <span>🎫</span>
             <span>التذاكر</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="applications"
-        >
+        <button type="button" class="nav-item" data-page="applications">
             <span>📝</span>
             <span>التقديمات</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="suggestions"
-        >
+        <button type="button" class="nav-item" data-page="suggestions">
             <span>💡</span>
             <span>الاقتراحات</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="notifications"
-        >
+        <button type="button" class="nav-item" data-page="notifications">
             <span>🔔</span>
             <span>الإشعارات</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="laws"
-        >
+        <button type="button" class="nav-item" data-page="laws">
             <span>📜</span>
             <span>القوانين</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="logs"
-        >
+        <button type="button" class="nav-item" data-page="logs">
             <span>🧾</span>
             <span>اللوقات</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="replies"
-        >
+        <button type="button" class="nav-item" data-page="replies">
             <span>💬</span>
             <span>الردود</span>
         </button>
 
-        <button
-            class="nav-item"
-            data-page="shortcuts"
-        >
+        <button type="button" class="nav-item" data-page="shortcuts">
             <span>⚡</span>
             <span>الاختصارات</span>
         </button>
@@ -386,30 +415,20 @@
             المالك
         </div>
 
-        <button
-            class="nav-item"
-            data-page="owner"
-        >
+        <button type="button" class="nav-item" data-page="owner">
             <span>👑</span>
             <span>Owner</span>
         </button>
 
     </nav>
 
-
     <div class="sidebar-bottom">
-
-        <a
-            href="/logout"
-            class="logout-button"
-        >
+        <a href="/logout" class="logout-button">
             تسجيل الخروج
         </a>
-
     </div>
 
 </aside>
-
 
 <!-- =========================================================
      MAIN
@@ -420,7 +439,6 @@
     <header class="topbar">
 
         <div>
-
             <span class="topbar-eyebrow">
                 CT DASHBOARD
             </span>
@@ -428,33 +446,22 @@
             <h1>
                 لوحة التحكم
             </h1>
-
         </div>
 
-
-        <button
-            id="refreshButton"
-            class="refresh-button"
-        >
+        <button type="button" id="refreshButton" class="refresh-button">
             ↻ تحديث
         </button>
 
     </header>
 
-
     <!-- =====================================================
          HOME
     ====================================================== -->
 
-    <section
-        class="server-page active"
-        id="home"
-    >
+    <section class="server-page active" id="home">
 
         <div class="page-heading">
-
             <div>
-
                 <span class="eyebrow">
                     DASHBOARD
                 </span>
@@ -466,112 +473,63 @@
                 <p>
                     إدارة جميع بوتات CT وأنظمتها من مكان واحد.
                 </p>
-
             </div>
-
         </div>
-
 
         <div class="stats-grid">
 
             <div class="stat-card">
-
-                <span>
-                    البوتات
-                </span>
-
-                <strong id="serverBotCount">
-                    0
-                </strong>
-
+                <span>البوتات</span>
+                <strong id="serverBotCount">0</strong>
             </div>
 
             <div class="stat-card">
-
-                <span>
-                    المتصلة
-                </span>
-
-                <strong id="serverOnlineCount">
-                    0
-                </strong>
-
+                <span>المتصلة</span>
+                <strong id="serverOnlineCount">0</strong>
             </div>
 
             <div class="stat-card">
-
-                <span>
-                    المحددة
-                </span>
-
-                <strong id="serverSelectedBots">
-                    0
-                </strong>
-
+                <span>المحددة</span>
+                <strong id="serverSelectedBotsHome">0</strong>
             </div>
 
         </div>
-
 
         <div class="section-heading">
-
-            <h3>
-                البوتات
-            </h3>
-
+            <h3>البوتات</h3>
         </div>
 
-
-        <div
-            class="bots-grid"
-            id="serverBots"
-        >
-
+        <div class="bots-grid" id="serverBots">
             <div class="loading-card">
                 جاري تحميل البوتات...
             </div>
-
         </div>
 
     </section>
-
 
     <!-- =====================================================
          BOTS
     ====================================================== -->
 
-    <section
-        class="server-page"
-        id="bots"
-    >
+    <section class="server-page" id="bots">
 
         <div class="page-heading">
-
             <div>
+                <span class="eyebrow">BOTS</span>
 
-                <span class="eyebrow">
-                    BOTS
-                </span>
-
-                <h2>
-                    البوتات
-                </h2>
+                <h2>البوتات</h2>
 
                 <p>
                     اختر البوتات التي تريد تطبيق إعدادات النظام عليها.
                 </p>
-
             </div>
-
         </div>
-
 
         <div class="system-card">
 
             <div class="setting-row">
 
                 <div>
-
                     <strong>
                         البوتات المحددة:
                     </strong>
@@ -581,23 +539,15 @@
                             0
                         </span>
                     </small>
-
                 </div>
-
 
                 <div class="welcome-actions">
 
-                    <button
-                        id="serverSelectAll"
-                        class="welcome-action"
-                    >
+                    <button type="button" id="serverSelectAll" class="welcome-action">
                         تحديد الكل
                     </button>
 
-                    <button
-                        id="serverClearAll"
-                        class="welcome-action"
-                    >
+                    <button type="button" id="serverClearAll" class="welcome-action">
                         إلغاء الكل
                     </button>
 
@@ -605,11 +555,7 @@
 
             </div>
 
-
-            <div
-                class="bots-grid"
-                id="serverBotsGrid"
-            >
+            <div class="bots-grid" id="serverBotsGrid">
 
                 <div class="loading-card">
                     جاري تحميل البوتات...
@@ -621,20 +567,15 @@
 
     </section>
 
-
     <!-- =====================================================
          WELCOME
     ====================================================== -->
 
-    <section
-        class="server-page"
-        id="welcome"
-    >
+    <section class="server-page" id="welcome">
 
         <div class="page-heading">
 
             <div>
-
                 <span class="eyebrow">
                     SYSTEM
                 </span>
@@ -646,25 +587,17 @@
                 <p>
                     تصميم وإدارة رسائل الترحيب لكل بوت.
                 </p>
-
             </div>
 
         </div>
 
-
         <div class="welcome-editor">
-
-
-            <!-- =================================================
-                 EDITOR
-            ================================================== -->
 
             <div class="welcome-panel">
 
                 <h3>
                     المعاينة والتصميم
                 </h3>
-
 
                 <div class="welcome-canvas-wrap">
 
@@ -676,54 +609,33 @@
 
                 </div>
 
-
                 <div class="welcome-tools">
 
-                    <button
-                        type="button"
-                        id="selectBackgroundTool"
-                    >
+                    <button type="button" id="selectBackgroundTool">
                         🖼️ تحديد الخلفية
                     </button>
 
-                    <button
-                        type="button"
-                        id="selectMemberTool"
-                    >
+                    <button type="button" id="selectMemberTool">
                         👤 تحديد العضو
                     </button>
 
-                    <button
-                        type="button"
-                        id="resetBackground"
-                    >
+                    <button type="button" id="resetBackground">
                         ↺ إعادة الخلفية
                     </button>
 
-                    <button
-                        type="button"
-                        id="resetMember"
-                    >
+                    <button type="button" id="resetMember">
                         ↺ إعادة العضو
                     </button>
 
                 </div>
 
-
                 <div class="welcome-help">
-
                     اسحب العنصر بإصبع واحد لتحريكه.
                     استخدم إصبعين لتكبير أو تصغير العنصر.
                     اضغط على العنصر لتحديده.
-
                 </div>
 
             </div>
-
-
-            <!-- =================================================
-                 SETTINGS
-            ================================================== -->
 
             <div class="welcome-panel">
 
@@ -731,33 +643,23 @@
                     إعدادات الترحيب
                 </h3>
 
-
                 <div class="welcome-field">
 
                     <label>
                         البوت
                     </label>
 
-                    <select
-                        id="welcomeBot"
-                    >
-
+                    <select id="welcomeBot">
                         <option value="">
                             اختر البوت
                         </option>
-
                     </select>
 
-
-                    <div
-                        id="welcomeBotInfo"
-                        class="welcome-bot-info"
-                    >
+                    <div id="welcomeBotInfo" class="welcome-bot-info">
                         اختر البوت الذي تريد تعديل الترحيب الخاص به.
                     </div>
 
                 </div>
-
 
                 <div class="welcome-field">
 
@@ -779,21 +681,16 @@
 
                 </div>
 
-
                 <div class="welcome-field">
 
                     <label>
                         روم الترحيب
                     </label>
 
-                    <select
-                        id="welcomeChannel"
-                    >
-
+                    <select id="welcomeChannel">
                         <option value="">
                             اختر البوت أولًا
                         </option>
-
                     </select>
 
                     <div class="welcome-help">
@@ -801,7 +698,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="welcome-field">
 
@@ -815,7 +711,6 @@
                     >مرحباً {user} في {server}!</textarea>
 
                     <div class="welcome-help">
-
                         المتغيرات المتاحة:
                         <br>
                         {user} — منشن العضو
@@ -825,11 +720,9 @@
                         {server} — اسم السيرفر
                         <br>
                         {member_count} — عدد الأعضاء
-
                     </div>
 
                 </div>
-
 
                 <div class="welcome-field">
 
@@ -837,10 +730,7 @@
                         صورة الخلفية
                     </label>
 
-
-                    <label
-                        class="welcome-upload"
-                    >
+                    <label class="welcome-upload">
 
                         🖼️ رفع صورة الخلفية
 
@@ -852,7 +742,6 @@
 
                     </label>
 
-
                     <img
                         id="welcomeBackgroundPreview"
                         class="welcome-preview-img"
@@ -861,13 +750,11 @@
 
                 </div>
 
-
                 <div class="welcome-field">
 
                     <div class="setting-row">
 
                         <div>
-
                             <strong>
                                 صورة العضو
                             </strong>
@@ -875,9 +762,7 @@
                             <small>
                                 إظهار صورة العضو داخل الترحيب.
                             </small>
-
                         </div>
-
 
                         <label class="switch">
 
@@ -894,7 +779,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="welcome-placeholder-box">
 
@@ -913,7 +797,6 @@
                     • لا توجد أماكن ثابتة للعناصر.
 
                 </div>
-
 
                 <div class="welcome-actions">
 
@@ -935,25 +818,13 @@
 
                 </div>
 
-
-                <div
-                    id="welcomeStatus"
-                    class="welcome-status"
-                ></div>
+                <div id="welcomeStatus" class="welcome-status"></div>
 
             </div>
 
         </div>
 
-
-        <!-- =================================================
-             APPLY TO MULTIPLE BOTS
-        ================================================== -->
-
-        <div
-            class="welcome-panel"
-            style="margin-top:18px;"
-        >
+        <div class="welcome-panel" style="margin-top:18px;">
 
             <h3>
                 تطبيق إعدادات الترحيب على عدة بوتات
@@ -963,12 +834,7 @@
                 حدد أكثر من بوت من القائمة ثم اضغط تطبيق.
             </p>
 
-
-            <div
-                id="welcomeMultiBots"
-                class="welcome-multi-bots"
-            ></div>
-
+            <div id="welcomeMultiBots" class="welcome-multi-bots"></div>
 
             <div class="welcome-actions">
 
@@ -985,7 +851,6 @@
         </div>
 
     </section>
-
 
     <!-- =====================================================
          OTHER SYSTEMS
@@ -1021,7 +886,6 @@
 
             </div>
 
-
             <div class="system-card">
 
                 <div class="settings-placeholder">
@@ -1048,15 +912,11 @@
 
     {% endfor %}
 
-
     <!-- =====================================================
          OWNER
     ====================================================== -->
 
-    <section
-        class="server-page"
-        id="owner"
-    >
+    <section class="server-page" id="owner">
 
         <div class="page-heading">
 
@@ -1078,7 +938,6 @@
 
         </div>
 
-
         <div class="system-card">
 
             <div class="setting-row">
@@ -1095,8 +954,8 @@
 
                 </div>
 
-
                 <button
+                    type="button"
                     id="createRoleButton"
                     class="welcome-action primary"
                 >
@@ -1105,11 +964,7 @@
 
             </div>
 
-
-            <div
-                id="rolesList"
-                style="margin-top:15px;"
-            >
+            <div id="rolesList" style="margin-top:15px;">
 
                 <div class="loading-card">
                     جاري تحميل الرتب...
@@ -1121,18 +976,13 @@
 
     </section>
 
-
 </main>
-
 
 <!-- =========================================================
      ROLE MODAL
 ========================================================== -->
 
-<div
-    class="modal"
-    id="roleModal"
->
+<div class="modal" id="roleModal">
 
     <div class="modal-content">
 
@@ -1142,14 +992,11 @@
                 إنشاء رتبة
             </h3>
 
-            <button
-                id="closeRoleModal"
-            >
+            <button type="button" id="closeRoleModal">
                 ×
             </button>
 
         </div>
-
 
         <form id="roleForm">
 
@@ -1167,7 +1014,6 @@
 
             </div>
 
-
             <div class="welcome-field">
 
                 <label>
@@ -1180,7 +1026,6 @@
                 ></textarea>
 
             </div>
-
 
             <div class="welcome-actions">
 
@@ -1207,2384 +1052,1779 @@
 
 </div>
 
-
 <!-- =========================================================
      TOAST
 ========================================================== -->
 
-<div
-    class="toast"
-    id="toast"
->
-
+<div class="toast" id="toast">
     <span id="toastMessage"></span>
-
 </div>
 
-
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+    /* =====================================================
+       GLOBAL
+    ====================================================== */
 
+    let loadedBots = [];
+    let welcomeEditorInitialized = false;
 
-        /* =====================================================
-           GLOBAL
-        ====================================================== */
+    const welcomeState = {
+        initialized: false,
 
-        let loadedBots = [];
+        botNumber: null,
 
-        let welcomeEditorInitialized =
-            false;
+        enabled: true,
 
+        channelId: "",
 
-        const welcomeState = {
+        text: "مرحباً {user} في {server}!",
 
-            initialized:
-                false,
+        background: {
+            image: null,
+            src: null,
+            x: 600,
+            y: 315,
+            scale: 1,
+            baseWidth: 1200,
+            baseHeight: 630
+        },
 
-            botNumber:
-                null,
+        member: {
+            image: null,
+            src: null,
+            x: 600,
+            y: 315,
+            scale: 1,
+            baseWidth: 220,
+            baseHeight: 220
+        },
 
-            enabled:
-                true,
+        selected: "member",
 
-            channelId:
-                "",
+        pointer: new Map(),
 
-            text:
-                "مرحباً {user} في {server}!",
+        gesture: null
+    };
 
-            background: {
+    /* =====================================================
+       NAVIGATION
+       ====================================================== */
 
-                image:
-                    null,
+    const navItems = document.querySelectorAll(".nav-item");
+    const pages = document.querySelectorAll(".server-page");
 
-                src:
-                    null,
+    navItems.forEach(button => {
 
-                x:
-                    600,
+        button.addEventListener("click", event => {
 
-                y:
-                    315,
+            event.preventDefault();
+            event.stopPropagation();
 
-                scale:
-                    1,
+            const page = button.getAttribute("data-page");
 
-                baseWidth:
-                    1200,
+            if (!page) {
+                return;
+            }
 
-                baseHeight:
-                    630
+            showPage(page);
 
-            },
+        });
 
-            member: {
+    });
 
-                image:
-                    null,
+    function showPage(page) {
 
-                src:
-                    null,
+        let found = false;
 
-                x:
-                    600,
+        pages.forEach(section => {
 
-                y:
-                    315,
+            const active = section.id === page;
 
-                scale:
-                    1,
+            section.classList.toggle("active", active);
 
-                baseWidth:
-                    220,
+            if (active) {
+                found = true;
+            }
 
-                baseHeight:
-                    220
+        });
 
-            },
+        navItems.forEach(item => {
 
-            selected:
-                "member",
+            item.classList.toggle(
+                "active",
+                item.getAttribute("data-page") === page
+            );
 
-            pointer:
-                new Map(),
+        });
 
-            gesture:
-                null
+        if (!found) {
+            return;
+        }
 
-        };
+        if (page === "welcome") {
+            initWelcomeEditor();
+        }
 
+        if (page === "owner") {
+            loadRoles();
+        }
 
-        /* =====================================================
-           NAVIGATION
-        ====================================================== */
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
 
-        document
-            .querySelectorAll(
-                ".nav-item"
-            )
-            .forEach(
-                button => {
+    /* =====================================================
+       LOAD BOTS
+    ====================================================== */
 
-                    button.addEventListener(
-                        "click",
-                        () => {
+    async function loadBots() {
 
-                            const page =
-                                button.dataset.page;
+        try {
 
-                            showPage(
-                                page
-                            );
-
-                        }
-                    );
-
+            const response = await fetch(
+                "/api/bots",
+                {
+                    cache: "no-store",
+                    credentials: "same-origin"
                 }
             );
 
+            const data = await response.json();
 
-        function showPage(
-            page
-        ) {
+            if (!response.ok || !data.ok) {
 
-            document
-                .querySelectorAll(
-                    ".nav-item"
-                )
-                .forEach(
-                    item => {
-
-                        item.classList.toggle(
-                            "active",
-                            item.dataset.page === page
-                        );
-
-                    }
+                throw new Error(
+                    data.error || "تعذر تحميل البوتات"
                 );
-
-
-            document
-                .querySelectorAll(
-                    ".server-page"
-                )
-                .forEach(
-                    section => {
-
-                        section.classList.toggle(
-                            "active",
-                            section.id === page
-                        );
-
-                    }
-                );
-
-
-            if (
-                page === "welcome"
-            ) {
-
-                initWelcomeEditor();
 
             }
 
+            loadedBots = Array.isArray(data.bots)
+                ? data.bots
+                : [];
 
-            if (
-                page === "owner"
-            ) {
+            renderBots(loadedBots);
 
-                loadRoles();
+            populateWelcomeBots();
+            renderWelcomeMultiBots();
 
-            }
+        } catch (error) {
 
-        }
+            console.error("CT BOTS ERROR:", error);
 
-
-        /* =====================================================
-           LOAD BOTS
-        ====================================================== */
-
-        async function loadBots() {
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/bots",
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.ok
-                ) {
-
-                    throw new Error(
-                        data.error ||
-                        "تعذر تحميل البوتات"
-                    );
-
-                }
-
-
-                loadedBots =
-                    Array.isArray(
-                        data.bots
-                    )
-                        ? data.bots
-                        : [];
-
-
-                renderBots(
-                    loadedBots
-                );
-
-
-                populateWelcomeBots();
-
-                renderWelcomeMultiBots();
-
-
-            } catch (error) {
-
-                console.error(
-                    "CT BOTS ERROR:",
-                    error
-                );
-
-
-                const message =
-                    error.message ||
-                    "تعذر تحميل البوتات.";
-
-
-                const home =
-                    document.getElementById(
-                        "serverBots"
-                    );
-
-
-                if (home) {
-
-                    home.innerHTML = `
-                        <div class="empty-card">
-                            تعذر تحميل البوتات.
-                            <br>
-                            <small>
-                                ${escapeHtml(message)}
-                            </small>
-                        </div>
-                    `;
-
-                }
-
-
-                const grid =
-                    document.getElementById(
-                        "serverBotsGrid"
-                    );
-
-
-                if (grid) {
-
-                    grid.innerHTML = `
-                        <div class="empty-card">
-                            تعذر تحميل البوتات.
-                            <br>
-                            <small>
-                                ${escapeHtml(message)}
-                            </small>
-                        </div>
-                    `;
-
-                }
-
-            }
-
-        }
-
-
-        /* =====================================================
-           RENDER BOTS
-        ====================================================== */
-
-        function renderBots(
-            bots
-        ) {
+            const message =
+                error.message ||
+                "تعذر تحميل البوتات.";
 
             const home =
-                document.getElementById(
-                    "serverBots"
-                );
-
-
-            const grid =
-                document.getElementById(
-                    "serverBotsGrid"
-                );
-
-
-            const online =
-                bots.filter(
-                    bot =>
-                        bot.online === true
-                ).length;
-
-
-            document
-                .querySelectorAll(
-                    "#serverBotCount"
-                )
-                .forEach(
-                    element => {
-
-                        element.textContent =
-                            bots.length;
-
-                    }
-                );
-
-
-            const onlineCount =
-                document.getElementById(
-                    "serverOnlineCount"
-                );
-
-
-            if (onlineCount) {
-
-                onlineCount.textContent =
-                    online;
-
-            }
-
-
-            const createCard =
-                (
-                    bot,
-                    selectable = false
-                ) => {
-
-                    const botNumber =
-                        bot.number ?? "";
-
-
-                    const botName =
-                        bot.name ||
-                        bot.global_name ||
-                        bot.username ||
-                        `Bot ${botNumber}`;
-
-
-                    const botUsername =
-                        bot.username ||
-                        bot.global_name ||
-                        "Unknown";
-
-
-                    const botId =
-                        bot.id ||
-                        "غير معروف";
-
-
-                    const avatar =
-                        bot.avatar ||
-                        "https://cdn.discordapp.com/embed/avatars/0.png";
-
-
-                    const isOnline =
-                        bot.online === true;
-
-
-                    const isInCT =
-                        bot.in_ct !== false;
-
-
-                    const statusClass =
-                        isOnline
-                            ? ""
-                            : "offline";
-
-
-                    return `
-                        <div
-                            class="bot-card"
-                            data-bot-number="${escapeHtml(botNumber)}"
-                        >
-
-                            ${
-                                selectable
-                                    ? `
-                                        <label
-                                            class="bot-checkbox"
-                                            title="تحديد البوت"
-                                        >
-
-                                            <input
-                                                type="checkbox"
-                                                value="${escapeHtml(botNumber)}"
-                                                class="bot-selector"
-                                            >
-
-                                            <span></span>
-
-                                        </label>
-                                    `
-                                    : ""
-                            }
-
-
-                            <img
-                                class="bot-avatar"
-                                src="${escapeHtml(avatar)}"
-                                alt="${escapeHtml(botName)}"
-                                loading="lazy"
-                                onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"
-                            >
-
-
-                            <div class="bot-card-info">
-
-                                <h3>
-                                    ${escapeHtml(botName)}
-                                </h3>
-
-                                <span>
-                                    @${escapeHtml(botUsername)}
-                                </span>
-
-                                <span
-                                    style="
-                                        display:block;
-                                        margin-top:3px;
-                                        color:#66666d;
-                                        font-size:9px;
-                                    "
-                                >
-                                    ID: ${escapeHtml(botId)}
-                                </span>
-
-
-                                <div class="bot-status">
-
-                                    <span
-                                        class="status-dot ${statusClass}"
-                                    ></span>
-
-
-                                    ${
-                                        isOnline
-                                            ? "متصل"
-                                            : "غير متصل"
-                                    }
-
-
-                                    ${
-                                        isInCT
-                                            ? ""
-                                            : `
-                                                <span
-                                                    style="
-                                                        margin-right:7px;
-                                                        color:#c52230;
-                                                    "
-                                                >
-                                                    خارج السيرفر
-                                                </span>
-                                            `
-                                    }
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                };
-
+                document.getElementById("serverBots");
 
             if (home) {
 
-                if (!bots.length) {
-
-                    home.innerHTML = `
-                        <div class="empty-card">
-                            لا توجد بوتات متصلة حاليًا.
-                        </div>
-                    `;
-
-                } else {
-
-                    home.innerHTML =
-                        bots
-                            .map(
-                                bot =>
-                                    createCard(
-                                        bot,
-                                        false
-                                    )
-                            )
-                            .join("");
-
-                }
+                home.innerHTML = `
+                    <div class="empty-card">
+                        تعذر تحميل البوتات.
+                        <br>
+                        <small>
+                            ${escapeHtml(message)}
+                        </small>
+                    </div>
+                `;
 
             }
 
+            const grid =
+                document.getElementById("serverBotsGrid");
 
             if (grid) {
 
-                if (!bots.length) {
-
-                    grid.innerHTML = `
-                        <div class="empty-card">
-                            لا توجد بوتات.
-                        </div>
-                    `;
-
-                } else {
-
-                    grid.innerHTML =
-                        bots
-                            .map(
-                                bot =>
-                                    createCard(
-                                        bot,
-                                        true
-                                    )
-                            )
-                            .join("");
-
-                }
-
-
-                grid
-                    .querySelectorAll(
-                        ".bot-selector"
-                    )
-                    .forEach(
-                        input => {
-
-                            input.addEventListener(
-                                "change",
-                                updateSelectedCount
-                            );
-
-                        }
-                    );
+                grid.innerHTML = `
+                    <div class="empty-card">
+                        تعذر تحميل البوتات.
+                        <br>
+                        <small>
+                            ${escapeHtml(message)}
+                        </small>
+                    </div>
+                `;
 
             }
 
-
-            updateSelectedCount();
-
         }
 
+    }
 
-        /* =====================================================
-           SELECTED BOTS
-        ====================================================== */
+    /* =====================================================
+       RENDER BOTS
+    ====================================================== */
 
-        function updateSelectedCount() {
+    function renderBots(bots) {
 
-            const selected =
-                document.querySelectorAll(
-                    ".bot-selector:checked"
-                );
+        const home =
+            document.getElementById("serverBots");
 
+        const grid =
+            document.getElementById("serverBotsGrid");
 
-            document
-                .querySelectorAll(
-                    "#serverSelectedBots"
-                )
-                .forEach(
-                    element => {
+        const online =
+            bots.filter(
+                bot => bot.online === true
+            ).length;
 
-                        element.textContent =
-                            selected.length;
+        document
+            .querySelectorAll("#serverBotCount")
+            .forEach(element => {
+                element.textContent = bots.length;
+            });
 
+        const onlineCount =
+            document.getElementById("serverOnlineCount");
+
+        if (onlineCount) {
+            onlineCount.textContent = online;
+        }
+
+        const createCard = (bot, selectable = false) => {
+
+            const botNumber = bot.number ?? "";
+
+            const botName =
+                bot.name ||
+                bot.global_name ||
+                bot.username ||
+                `Bot ${botNumber}`;
+
+            const botUsername =
+                bot.username ||
+                bot.global_name ||
+                "Unknown";
+
+            const botId =
+                bot.id ||
+                "غير معروف";
+
+            const avatar =
+                bot.avatar ||
+                "https://cdn.discordapp.com/embed/avatars/0.png";
+
+            const isOnline =
+                bot.online === true;
+
+            const isInCT =
+                bot.in_ct !== false;
+
+            const statusClass =
+                isOnline ? "" : "offline";
+
+            return `
+                <div
+                    class="bot-card"
+                    data-bot-number="${escapeHtml(botNumber)}"
+                >
+
+                    ${
+                        selectable
+                            ? `
+                                <label
+                                    class="bot-checkbox"
+                                    title="تحديد البوت"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        value="${escapeHtml(botNumber)}"
+                                        class="bot-selector"
+                                    >
+                                    <span></span>
+                                </label>
+                            `
+                            : ""
                     }
-                );
 
-        }
+                    <img
+                        class="bot-avatar"
+                        src="${escapeHtml(avatar)}"
+                        alt="${escapeHtml(botName)}"
+                        loading="lazy"
+                        onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"
+                    >
 
+                    <div class="bot-card-info">
 
-        const selectAll =
-            document.getElementById(
-                "serverSelectAll"
-            );
+                        <h3>
+                            ${escapeHtml(botName)}
+                        </h3>
 
+                        <span>
+                            @${escapeHtml(botUsername)}
+                        </span>
 
-        if (selectAll) {
+                        <span
+                            style="
+                                display:block;
+                                margin-top:3px;
+                                color:#66666d;
+                                font-size:9px;
+                            "
+                        >
+                            ID: ${escapeHtml(botId)}
+                        </span>
 
-            selectAll.addEventListener(
-                "click",
-                () => {
+                        <div class="bot-status">
 
-                    document
-                        .querySelectorAll(
-                            ".bot-selector"
-                        )
-                        .forEach(
-                            input => {
+                            <span
+                                class="status-dot ${statusClass}"
+                            ></span>
 
-                                input.checked =
-                                    true;
-
+                            ${
+                                isOnline
+                                    ? "متصل"
+                                    : "غير متصل"
                             }
-                        );
 
-
-                    updateSelectedCount();
-
-                }
-            );
-
-        }
-
-
-        const clearAll =
-            document.getElementById(
-                "serverClearAll"
-            );
-
-
-        if (clearAll) {
-
-            clearAll.addEventListener(
-                "click",
-                () => {
-
-                    document
-                        .querySelectorAll(
-                            ".bot-selector"
-                        )
-                        .forEach(
-                            input => {
-
-                                input.checked =
-                                    false;
-
+                            ${
+                                isInCT
+                                    ? ""
+                                    : `
+                                        <span
+                                            style="
+                                                margin-right:7px;
+                                                color:#c52230;
+                                            "
+                                        >
+                                            خارج السيرفر
+                                        </span>
+                                    `
                             }
-                        );
 
+                        </div>
 
-                    updateSelectedCount();
+                    </div>
 
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           WELCOME BOT LIST
-        ====================================================== */
-
-        function populateWelcomeBots() {
-
-            const select =
-                document.getElementById(
-                    "welcomeBot"
-                );
-
-
-            if (!select) {
-                return;
-            }
-
-
-            const current =
-                select.value;
-
-
-            select.innerHTML = `
-                <option value="">
-                    اختر البوت
-                </option>
+                </div>
             `;
 
+        };
 
-            loadedBots.forEach(
-                bot => {
+        if (home) {
 
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
+            if (!bots.length) {
 
+                home.innerHTML = `
+                    <div class="empty-card">
+                        لا توجد بوتات متصلة حاليًا.
+                    </div>
+                `;
 
-                    option.value =
-                        bot.number;
+            } else {
 
-
-                    option.textContent =
-                        `${bot.name || bot.username || "Bot"} — BOT_TOKEN_${bot.number}`;
-
-
-                    select.appendChild(
-                        option
-                    );
-
-                }
-            );
-
-
-            if (current) {
-
-                select.value =
-                    current;
+                home.innerHTML =
+                    bots
+                        .map(bot => createCard(bot, false))
+                        .join("");
 
             }
 
         }
 
+        if (grid) {
 
-        function renderWelcomeMultiBots() {
+            if (!bots.length) {
 
-            const container =
-                document.getElementById(
-                    "welcomeMultiBots"
-                );
-
-
-            if (!container) {
-                return;
-            }
-
-
-            if (!loadedBots.length) {
-
-                container.innerHTML = `
+                grid.innerHTML = `
                     <div class="empty-card">
                         لا توجد بوتات.
                     </div>
                 `;
 
-                return;
+            } else {
+
+                grid.innerHTML =
+                    bots
+                        .map(bot => createCard(bot, true))
+                        .join("");
 
             }
 
+            grid
+                .querySelectorAll(".bot-selector")
+                .forEach(input => {
 
-            container.innerHTML =
-                loadedBots
-                    .map(
-                        bot => {
+                    input.addEventListener(
+                        "change",
+                        updateSelectedCount
+                    );
 
-                            const avatar =
-                                bot.avatar ||
-                                "https://cdn.discordapp.com/embed/avatars/0.png";
-
-
-                            const name =
-                                bot.name ||
-                                bot.username ||
-                                `Bot ${bot.number}`;
-
-
-                            return `
-                                <label
-                                    class="welcome-bot-choice"
-                                >
-
-                                    <input
-                                        type="checkbox"
-                                        class="welcome-multi-selector"
-                                        value="${escapeHtml(bot.number)}"
-                                    >
-
-                                    <img
-                                        src="${escapeHtml(avatar)}"
-                                        alt=""
-                                    >
-
-                                    <span>
-                                        ${escapeHtml(name)}
-                                    </span>
-
-                                </label>
-                            `;
-
-                        }
-                    )
-                    .join("");
+                });
 
         }
 
+        updateSelectedCount();
 
-        /* =====================================================
-           WELCOME EDITOR
-        ====================================================== */
+    }
 
-        function initWelcomeEditor() {
+    /* =====================================================
+       SELECTED BOTS
+    ====================================================== */
 
-            if (
-                welcomeEditorInitialized
-            ) {
+    function updateSelectedCount() {
 
-                return;
-
-            }
-
-
-            welcomeEditorInitialized =
-                true;
-
-
-            const canvas =
-                document.getElementById(
-                    "welcomeCanvas"
-                );
-
-
-            if (!canvas) {
-                return;
-            }
-
-
-            const bgInput =
-                document.getElementById(
-                    "welcomeBackgroundInput"
-                );
-
-
-            const memberEnabled =
-                document.getElementById(
-                    "memberImageEnabled"
-                );
-
-
-            const enabledInput =
-                document.getElementById(
-                    "welcomeEnabled"
-                );
-
-
-            const textInput =
-                document.getElementById(
-                    "welcomeText"
-                );
-
-
-            const channelSelect =
-                document.getElementById(
-                    "welcomeChannel"
-                );
-
-
-            const selectBackground =
-                document.getElementById(
-                    "selectBackgroundTool"
-                );
-
-
-            const selectMember =
-                document.getElementById(
-                    "selectMemberTool"
-                );
-
-
-            const resetBackground =
-                document.getElementById(
-                    "resetBackground"
-                );
-
-
-            const resetMember =
-                document.getElementById(
-                    "resetMember"
-                );
-
-
-            const saveButton =
-                document.getElementById(
-                    "saveWelcome"
-                );
-
-
-            const reloadButton =
-                document.getElementById(
-                    "reloadWelcome"
-                );
-
-
-            const botSelect =
-                document.getElementById(
-                    "welcomeBot"
-                );
-
-
-            if (bgInput) {
-
-                bgInput.addEventListener(
-                    "change",
-                    handleBackgroundUpload
-                );
-
-            }
-
-
-            if (memberEnabled) {
-
-                memberEnabled.addEventListener(
-                    "change",
-                    drawWelcomeCanvas
-                );
-
-            }
-
-
-            if (enabledInput) {
-
-                enabledInput.addEventListener(
-                    "change",
-                    drawWelcomeCanvas
-                );
-
-            }
-
-
-            if (textInput) {
-
-                textInput.addEventListener(
-                    "input",
-                    () => {
-
-                        welcomeState.text =
-                            textInput.value;
-
-                        drawWelcomeCanvas();
-
-                    }
-                );
-
-            }
-
-
-            if (channelSelect) {
-
-                channelSelect.addEventListener(
-                    "change",
-                    () => {
-
-                        welcomeState.channelId =
-                            channelSelect.value;
-
-                    }
-                );
-
-            }
-
-
-            if (selectBackground) {
-
-                selectBackground.addEventListener(
-                    "click",
-                    () => {
-
-                        welcomeState.selected =
-                            "background";
-
-                        drawWelcomeCanvas();
-
-                        setWelcomeStatus(
-                            "تم تحديد الخلفية."
-                        );
-
-                    }
-                );
-
-            }
-
-
-            if (selectMember) {
-
-                selectMember.addEventListener(
-                    "click",
-                    () => {
-
-                        welcomeState.selected =
-                            "member";
-
-                        drawWelcomeCanvas();
-
-                        setWelcomeStatus(
-                            "تم تحديد صورة العضو."
-                        );
-
-                    }
-                );
-
-            }
-
-
-            if (resetBackground) {
-
-                resetBackground.addEventListener(
-                    "click",
-                    () => {
-
-                        resetBackgroundTransform();
-
-                        drawWelcomeCanvas();
-
-                    }
-                );
-
-            }
-
-
-            if (resetMember) {
-
-                resetMember.addEventListener(
-                    "click",
-                    () => {
-
-                        resetMemberTransform();
-
-                        drawWelcomeCanvas();
-
-                    }
-                );
-
-            }
-
-
-            if (saveButton) {
-
-                saveButton.addEventListener(
-                    "click",
-                    saveWelcomeSettings
-                );
-
-            }
-
-
-            if (reloadButton) {
-
-                reloadButton.addEventListener(
-                    "click",
-                    loadWelcomeSettings
-                );
-
-            }
-
-
-            if (botSelect) {
-
-                botSelect.addEventListener(
-                    "change",
-                    async () => {
-
-                        welcomeState.botNumber =
-                            cleanNumber(
-                                botSelect.value
-                            );
-
-
-                        if (
-                            welcomeState.botNumber
-                        ) {
-
-                            await loadWelcomeSettings();
-
-                        }
-
-                    }
-                );
-
-            }
-
-
-            const applySelected =
-                document.getElementById(
-                    "applyWelcomeSelected"
-                );
-
-
-            if (applySelected) {
-
-                applySelected.addEventListener(
-                    "click",
-                    applyWelcomeToSelectedBots
-                );
-
-            }
-
-
-            setupCanvasTouch(
-                canvas
+        const selected =
+            document.querySelectorAll(
+                ".bot-selector:checked"
             );
 
+        const count = selected.length;
+
+        document
+            .querySelectorAll("#serverSelectedBots")
+            .forEach(element => {
+                element.textContent = count;
+            });
+
+        const homeCount =
+            document.getElementById(
+                "serverSelectedBotsHome"
+            );
+
+        if (homeCount) {
+            homeCount.textContent = count;
+        }
+
+    }
+
+    const selectAll =
+        document.getElementById("serverSelectAll");
+
+    if (selectAll) {
+
+        selectAll.addEventListener("click", event => {
+
+            event.preventDefault();
+
+            document
+                .querySelectorAll(".bot-selector")
+                .forEach(input => {
+                    input.checked = true;
+                });
+
+            updateSelectedCount();
+
+        });
+
+    }
+
+    const clearAll =
+        document.getElementById("serverClearAll");
+
+    if (clearAll) {
+
+        clearAll.addEventListener("click", event => {
+
+            event.preventDefault();
+
+            document
+                .querySelectorAll(".bot-selector")
+                .forEach(input => {
+                    input.checked = false;
+                });
+
+            updateSelectedCount();
+
+        });
+
+    }
+
+    /* =====================================================
+       WELCOME BOT LIST
+    ====================================================== */
+
+    function populateWelcomeBots() {
+
+        const select =
+            document.getElementById("welcomeBot");
+
+        if (!select) {
+            return;
+        }
+
+        const current = select.value;
+
+        select.innerHTML = `
+            <option value="">
+                اختر البوت
+            </option>
+        `;
+
+        loadedBots.forEach(bot => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = bot.number;
+
+            option.textContent =
+                `${bot.name || bot.username || "Bot"} — BOT_TOKEN_${bot.number}`;
+
+            select.appendChild(option);
+
+        });
+
+        if (current) {
+            select.value = current;
+        }
+
+    }
+
+    function renderWelcomeMultiBots() {
+
+        const container =
+            document.getElementById(
+                "welcomeMultiBots"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        if (!loadedBots.length) {
+
+            container.innerHTML = `
+                <div class="empty-card">
+                    لا توجد بوتات.
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML =
+            loadedBots
+                .map(bot => {
+
+                    const avatar =
+                        bot.avatar ||
+                        "https://cdn.discordapp.com/embed/avatars/0.png";
+
+                    const name =
+                        bot.name ||
+                        bot.username ||
+                        `Bot ${bot.number}`;
+
+                    return `
+                        <label class="welcome-bot-choice">
+
+                            <input
+                                type="checkbox"
+                                class="welcome-multi-selector"
+                                value="${escapeHtml(bot.number)}"
+                            >
+
+                            <img
+                                src="${escapeHtml(avatar)}"
+                                alt=""
+                            >
+
+                            <span>
+                                ${escapeHtml(name)}
+                            </span>
+
+                        </label>
+                    `;
+
+                })
+                .join("");
+
+    }
+
+    /* =====================================================
+       WELCOME EDITOR
+    ====================================================== */
+
+    function initWelcomeEditor() {
+
+        if (welcomeEditorInitialized) {
+            return;
+        }
+
+        welcomeEditorInitialized = true;
+
+        const canvas =
+            document.getElementById(
+                "welcomeCanvas"
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+        const bgInput =
+            document.getElementById(
+                "welcomeBackgroundInput"
+            );
+
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
+
+        const enabledInput =
+            document.getElementById(
+                "welcomeEnabled"
+            );
+
+        const textInput =
+            document.getElementById(
+                "welcomeText"
+            );
+
+        const channelSelect =
+            document.getElementById(
+                "welcomeChannel"
+            );
+
+        const selectBackground =
+            document.getElementById(
+                "selectBackgroundTool"
+            );
+
+        const selectMember =
+            document.getElementById(
+                "selectMemberTool"
+            );
+
+        const resetBackground =
+            document.getElementById(
+                "resetBackground"
+            );
+
+        const resetMember =
+            document.getElementById(
+                "resetMember"
+            );
+
+        const saveButton =
+            document.getElementById(
+                "saveWelcome"
+            );
+
+        const reloadButton =
+            document.getElementById(
+                "reloadWelcome"
+            );
+
+        const botSelect =
+            document.getElementById(
+                "welcomeBot"
+            );
+
+        if (bgInput) {
+
+            bgInput.addEventListener(
+                "change",
+                handleBackgroundUpload
+            );
+
+        }
+
+        if (memberEnabled) {
+
+            memberEnabled.addEventListener(
+                "change",
+                drawWelcomeCanvas
+            );
+
+        }
+
+        if (enabledInput) {
+
+            enabledInput.addEventListener(
+                "change",
+                drawWelcomeCanvas
+            );
+
+        }
+
+        if (textInput) {
+
+            textInput.addEventListener(
+                "input",
+                () => {
+
+                    welcomeState.text =
+                        textInput.value;
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (channelSelect) {
+
+            channelSelect.addEventListener(
+                "change",
+                () => {
+
+                    welcomeState.channelId =
+                        channelSelect.value;
+
+                }
+            );
+
+        }
+
+        if (selectBackground) {
+
+            selectBackground.addEventListener(
+                "click",
+                () => {
+
+                    welcomeState.selected =
+                        "background";
+
+                    drawWelcomeCanvas();
+
+                    setWelcomeStatus(
+                        "تم تحديد الخلفية."
+                    );
+
+                }
+            );
+
+        }
+
+        if (selectMember) {
+
+            selectMember.addEventListener(
+                "click",
+                () => {
+
+                    welcomeState.selected =
+                        "member";
+
+                    drawWelcomeCanvas();
+
+                    setWelcomeStatus(
+                        "تم تحديد صورة العضو."
+                    );
+
+                }
+            );
+
+        }
+
+        if (resetBackground) {
+
+            resetBackground.addEventListener(
+                "click",
+                () => {
+
+                    resetBackgroundTransform();
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (resetMember) {
+
+            resetMember.addEventListener(
+                "click",
+                () => {
+
+                    resetMemberTransform();
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (saveButton) {
+
+            saveButton.addEventListener(
+                "click",
+                saveWelcomeSettings
+            );
+
+        }
+
+        if (reloadButton) {
+
+            reloadButton.addEventListener(
+                "click",
+                loadWelcomeSettings
+            );
+
+        }
+
+        if (botSelect) {
+
+            botSelect.addEventListener(
+                "change",
+                async () => {
+
+                    welcomeState.botNumber =
+                        cleanNumber(
+                            botSelect.value
+                        );
+
+                    if (welcomeState.botNumber) {
+
+                        await loadWelcomeSettings();
+
+                    }
+
+                }
+            );
+
+        }
+
+        const applySelected =
+            document.getElementById(
+                "applyWelcomeSelected"
+            );
+
+        if (applySelected) {
+
+            applySelected.addEventListener(
+                "click",
+                applyWelcomeToSelectedBots
+            );
+
+        }
+
+        setupCanvasTouch(canvas);
+
+        drawWelcomeCanvas();
+
+    }
+
+    /* =====================================================
+       UPLOAD
+    ====================================================== */
+
+    async function handleBackgroundUpload(event) {
+
+        const file =
+            event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!welcomeState.botNumber) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا قبل رفع الصورة.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+        const allowed = [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+        ];
+
+        if (!allowed.includes(file.type)) {
+
+            setWelcomeStatus(
+                "نوع الصورة غير مدعوم.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            setWelcomeStatus(
+                "حجم الصورة أكبر من 5MB.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+        setWelcomeStatus(
+            "جاري تجهيز الصورة..."
+        );
+
+        try {
+
+            const dataUrl =
+                await compressImage(
+                    file,
+                    1400,
+                    0.88
+                );
+
+            const image =
+                await loadImage(dataUrl);
+
+            welcomeState.background.image =
+                image;
+
+            welcomeState.background.src =
+                dataUrl;
+
+            welcomeState.background.x = 600;
+            welcomeState.background.y = 315;
+            welcomeState.background.scale = 1;
+
+            const preview =
+                document.getElementById(
+                    "welcomeBackgroundPreview"
+                );
+
+            if (preview) {
+
+                preview.src = dataUrl;
+                preview.style.display = "block";
+
+            }
 
             drawWelcomeCanvas();
 
-        }
+            setWelcomeStatus(
+                "تم تجهيز الصورة، اضغط حفظ لحفظها."
+            );
 
+        } catch (error) {
 
-        /* =====================================================
-           UPLOAD
-        ====================================================== */
-
-        async function handleBackgroundUpload(
-            event
-        ) {
-
-            const file =
-                event.target.files?.[0];
-
-
-            if (!file) {
-                return;
-            }
-
-
-            if (!welcomeState.botNumber) {
-
-                setWelcomeStatus(
-                    "اختر البوت أولًا قبل رفع الصورة.",
-                    true
-                );
-
-
-                event.target.value =
-                    "";
-
-
-                return;
-
-            }
-
-
-            const allowed =
-                [
-                    "image/png",
-                    "image/jpeg",
-                    "image/webp"
-                ];
-
-
-            if (
-                !allowed.includes(
-                    file.type
-                )
-            ) {
-
-                setWelcomeStatus(
-                    "نوع الصورة غير مدعوم.",
-                    true
-                );
-
-
-                event.target.value =
-                    "";
-
-
-                return;
-
-            }
-
-
-            if (
-                file.size >
-                5 * 1024 * 1024
-            ) {
-
-                setWelcomeStatus(
-                    "حجم الصورة أكبر من 5MB.",
-                    true
-                );
-
-
-                event.target.value =
-                    "";
-
-
-                return;
-
-            }
-
+            console.error(error);
 
             setWelcomeStatus(
-                "جاري تجهيز الصورة..."
-            );
-
-
-            try {
-
-                const dataUrl =
-                    await compressImage(
-                        file,
-                        1400,
-                        0.88
-                    );
-
-
-                const image =
-                    await loadImage(
-                        dataUrl
-                    );
-
-
-                welcomeState.background.image =
-                    image;
-
-
-                welcomeState.background.src =
-                    dataUrl;
-
-
-                welcomeState.background.x =
-                    600;
-
-
-                welcomeState.background.y =
-                    315;
-
-
-                welcomeState.background.scale =
-                    1;
-
-
-                const preview =
-                    document.getElementById(
-                        "welcomeBackgroundPreview"
-                    );
-
-
-                if (preview) {
-
-                    preview.src =
-                        dataUrl;
-
-                    preview.style.display =
-                        "block";
-
-                }
-
-
-                drawWelcomeCanvas();
-
-
-                setWelcomeStatus(
-                    "تم تجهيز الصورة، اضغط حفظ لحفظها."
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-
-                setWelcomeStatus(
-                    "تعذر تجهيز الصورة.",
-                    true
-                );
-
-            }
-
-        }
-
-
-        function compressImage(
-            file,
-            maxSize,
-            quality
-        ) {
-
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-
-                    const reader =
-                        new FileReader();
-
-
-                    reader.onload =
-                        () => {
-
-                            const image =
-                                new Image();
-
-
-                            image.onload =
-                                () => {
-
-                                    let width =
-                                        image.width;
-
-                                    let height =
-                                        image.height;
-
-
-                                    if (
-                                        width >
-                                        maxSize ||
-                                        height >
-                                        maxSize
-                                    ) {
-
-                                        const ratio =
-                                            Math.min(
-                                                maxSize /
-                                                    width,
-                                                maxSize /
-                                                    height
-                                            );
-
-
-                                        width *=
-                                            ratio;
-
-                                        height *=
-                                            ratio;
-
-                                    }
-
-
-                                    const canvas =
-                                        document.createElement(
-                                            "canvas"
-                                        );
-
-
-                                    canvas.width =
-                                        Math.round(
-                                            width
-                                        );
-
-
-                                    canvas.height =
-                                        Math.round(
-                                            height
-                                        );
-
-
-                                    const ctx =
-                                        canvas.getContext(
-                                            "2d"
-                                        );
-
-
-                                    ctx.drawImage(
-                                        image,
-                                        0,
-                                        0,
-                                        canvas.width,
-                                        canvas.height
-                                    );
-
-
-                                    resolve(
-                                        canvas.toDataURL(
-                                            "image/jpeg",
-                                            quality
-                                        )
-                                    );
-
-                                };
-
-
-                            image.onerror =
-                                reject;
-
-
-                            image.src =
-                                reader.result;
-
-                        };
-
-
-                    reader.onerror =
-                        reject;
-
-
-                    reader.readAsDataURL(
-                        file
-                    );
-
-                }
+                "تعذر تجهيز الصورة.",
+                true
             );
 
         }
 
+    }
 
-        /* =====================================================
-           LOAD WELCOME
-        ====================================================== */
+    function compressImage(file, maxSize, quality) {
 
-        async function loadWelcomeSettings() {
+        return new Promise((resolve, reject) => {
 
-            if (!welcomeState.botNumber) {
+            const reader = new FileReader();
 
-                setWelcomeStatus(
-                    "اختر البوت أولًا."
-                );
+            reader.onload = () => {
 
-                return;
+                const image = new Image();
 
-            }
+                image.onload = () => {
 
+                    let width = image.width;
+                    let height = image.height;
 
-            const info =
-                document.getElementById(
-                    "welcomeBotInfo"
-                );
+                    if (
+                        width > maxSize ||
+                        height > maxSize
+                    ) {
 
-
-            if (info) {
-
-                info.textContent =
-                    "جاري تحميل إعدادات الترحيب...";
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `/api/bots/${welcomeState.botNumber}/systems/welcome`,
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.ok
-                ) {
-
-                    throw new Error(
-                        data.error ||
-                        "تعذر تحميل الإعدادات"
-                    );
-
-                }
-
-
-                const settings =
-                    data.settings || {};
-
-
-                welcomeState.enabled =
-                    settings.enabled !== false;
-
-
-                welcomeState.channelId =
-                    settings.channel_id ||
-                    "";
-
-
-                welcomeState.text =
-                    settings.text ||
-                    "مرحباً {user} في {server}!";
-
-
-                const bg =
-                    settings.background ||
-                    {};
-
-
-                const member =
-                    settings.member ||
-                    {};
-
-
-                welcomeState.background.x =
-                    Number(
-                        bg.x ??
-                        600
-                    );
-
-
-                welcomeState.background.y =
-                    Number(
-                        bg.y ??
-                        315
-                    );
-
-
-                welcomeState.background.scale =
-                    Number(
-                        bg.scale ??
-                        1
-                    );
-
-
-                welcomeState.member.x =
-                    Number(
-                        member.x ??
-                        600
-                    );
-
-
-                welcomeState.member.y =
-                    Number(
-                        member.y ??
-                        315
-                    );
-
-
-                welcomeState.member.scale =
-                    Number(
-                        member.scale ??
-                        1
-                    );
-
-
-                const enabledInput =
-                    document.getElementById(
-                        "welcomeEnabled"
-                    );
-
-
-                if (enabledInput) {
-
-                    enabledInput.checked =
-                        welcomeState.enabled;
-
-                }
-
-
-                const textInput =
-                    document.getElementById(
-                        "welcomeText"
-                    );
-
-
-                if (textInput) {
-
-                    textInput.value =
-                        welcomeState.text;
-
-                }
-
-
-                const memberEnabled =
-                    document.getElementById(
-                        "memberImageEnabled"
-                    );
-
-
-                if (memberEnabled) {
-
-                    memberEnabled.checked =
-                        settings.member_image_enabled !== false;
-
-                }
-
-
-                await loadWelcomeChannels();
-
-
-                const channelSelect =
-                    document.getElementById(
-                        "welcomeChannel"
-                    );
-
-
-                if (channelSelect) {
-
-                    channelSelect.value =
-                        welcomeState.channelId;
-
-                }
-
-
-                if (
-                    settings.background_asset_url
-                ) {
-
-                    try {
-
-                        const image =
-                            await loadImage(
-                                settings.background_asset_url
+                        const ratio =
+                            Math.min(
+                                maxSize / width,
+                                maxSize / height
                             );
 
-
-                        welcomeState.background.image =
-                            image;
-
-
-                        welcomeState.background.src =
-                            settings.background_asset_url;
-
-
-                        const preview =
-                            document.getElementById(
-                                "welcomeBackgroundPreview"
-                            );
-
-
-                        if (preview) {
-
-                            preview.src =
-                                settings.background_asset_url;
-
-                            preview.style.display =
-                                "block";
-
-                        }
-
-                    } catch (imageError) {
-
-                        console.error(
-                            imageError
-                        );
+                        width *= ratio;
+                        height *= ratio;
 
                     }
 
-                } else {
-
-                    welcomeState.background.image =
-                        null;
-
-                    welcomeState.background.src =
-                        null;
-
-                }
-
-
-                await ensureMemberImage();
-
-
-                drawWelcomeCanvas();
-
-
-                if (info) {
-
-                    info.textContent =
-                        "تم تحميل إعدادات البوت.";
-
-                }
-
-
-                setWelcomeStatus(
-                    "تم تحميل الإعدادات المحفوظة."
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "WELCOME LOAD ERROR:",
-                    error
-                );
-
-
-                setWelcomeStatus(
-                    error.message ||
-                    "تعذر تحميل إعدادات الترحيب.",
-                    true
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           CHANNELS
-        ====================================================== */
-
-        async function loadWelcomeChannels() {
-
-            const select =
-                document.getElementById(
-                    "welcomeChannel"
-                );
-
-
-            if (
-                !select ||
-                !welcomeState.botNumber
-            ) {
-
-                return;
-
-            }
-
-
-            select.innerHTML = `
-                <option value="">
-                    جاري تحميل الرومات...
-                </option>
-            `;
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `/api/bots/${welcomeState.botNumber}/channels`,
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.ok
-                ) {
-
-                    throw new Error(
-                        data.error ||
-                        "تعذر تحميل الرومات"
-                    );
-
-                }
-
-
-                const channels =
-                    data.channels ||
-                    [];
-
-
-                const categories =
-                    channels.filter(
-                        channel =>
-                            channel.type === 4
-                    );
-
-
-                const textChannels =
-                    channels.filter(
-                        channel =>
-                            channel.type === 0 ||
-                            channel.type === 5 ||
-                            channel.type === 15
-                    );
-
-
-                select.innerHTML = `
-                    <option value="">
-                        اختر روم الترحيب
-                    </option>
-                `;
-
-
-                textChannels.forEach(
-                    channel => {
-
-                        const option =
-                            document.createElement(
-                                "option"
-                            );
-
-
-                        option.value =
-                            channel.id;
-
-
-                        let prefix =
-                            "# ";
-
-
-                        if (
-                            channel.type === 15
-                        ) {
-
-                            prefix =
-                                "▦ ";
-
-                        }
-
-
-                        const parent =
-                            categories.find(
-                                category =>
-                                    category.id ===
-                                    channel.parent_id
-                            );
-
-
-                        option.textContent =
-                            parent
-                                ? `${prefix}${channel.name} — ${parent.name}`
-                                : `${prefix}${channel.name}`;
-
-
-                        select.appendChild(
-                            option
+                    const canvas =
+                        document.createElement(
+                            "canvas"
                         );
 
-                    }
-                );
+                    canvas.width =
+                        Math.round(width);
 
+                    canvas.height =
+                        Math.round(height);
 
-                select.value =
-                    welcomeState.channelId ||
-                    "";
+                    const ctx =
+                        canvas.getContext("2d");
 
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-
-                select.innerHTML = `
-                    <option value="">
-                        تعذر تحميل الرومات
-                    </option>
-                `;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           SAVE
-        ====================================================== */
-
-        async function saveWelcomeSettings(
-            botNumbers = null
-        ) {
-
-            if (
-                !welcomeState.botNumber &&
-                !Array.isArray(botNumbers)
-            ) {
-
-                setWelcomeStatus(
-                    "اختر البوت أولًا.",
-                    true
-                );
-
-                return false;
-
-            }
-
-
-            const enabledInput =
-                document.getElementById(
-                    "welcomeEnabled"
-                );
-
-
-            const memberEnabled =
-                document.getElementById(
-                    "memberImageEnabled"
-                );
-
-
-            const channelSelect =
-                document.getElementById(
-                    "welcomeChannel"
-                );
-
-
-            const textInput =
-                document.getElementById(
-                    "welcomeText"
-                );
-
-
-            welcomeState.text =
-                textInput
-                    ? textInput.value
-                    : welcomeState.text;
-
-
-            welcomeState.channelId =
-                channelSelect
-                    ? channelSelect.value
-                    : welcomeState.channelId;
-
-
-            const settings = {
-
-                enabled:
-                    enabledInput
-                        ? enabledInput.checked
-                        : welcomeState.enabled,
-
-
-                channel_id:
-                    welcomeState.channelId,
-
-
-                text:
-                    welcomeState.text,
-
-
-                member_image_enabled:
-                    memberEnabled
-                        ? memberEnabled.checked
-                        : true,
-
-
-                background: {
-
-                    x:
-                        welcomeState.background.x,
-
-                    y:
-                        welcomeState.background.y,
-
-                    scale:
-                        welcomeState.background.scale,
-
-                    width:
-                        welcomeState.background.baseWidth,
-
-                    height:
-                        welcomeState.background.baseHeight
-
-                },
-
-
-                member: {
-
-                    x:
-                        welcomeState.member.x,
-
-                    y:
-                        welcomeState.member.y,
-
-                    scale:
-                        welcomeState.member.scale,
-
-                    width:
-                        welcomeState.member.baseWidth,
-
-                    height:
-                        welcomeState.member.baseHeight
-
-                },
-
-
-                background_asset_url:
-                    welcomeState.background.src ||
-                    null
-
-            };
-
-
-            const targetBots =
-                Array.isArray(
-                    botNumbers
-                )
-                    ? botNumbers
-                    : [
-                        welcomeState.botNumber
-                    ];
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/apply",
-                        {
-                            method:
-                                "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json",
-
-                                "Accept":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    {
-                                        bots:
-                                            targetBots,
-
-                                        system:
-                                            "welcome",
-
-                                        settings:
-                                            settings
-                                    }
-                                )
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !response.ok ||
-                    !data.ok
-                ) {
-
-                    throw new Error(
-                        data.error ||
-                        "تعذر حفظ الإعدادات"
-                    );
-
-                }
-
-
-                setWelcomeStatus(
-                    `تم حفظ الترحيب لـ ${data.saved.length} بوت.`
-                );
-
-
-                showToast(
-                    "تم حفظ إعدادات الترحيب بنجاح"
-                );
-
-
-                return true;
-
-
-            } catch (error) {
-
-                console.error(
-                    "WELCOME SAVE ERROR:",
-                    error
-                );
-
-
-                setWelcomeStatus(
-                    error.message ||
-                    "تعذر حفظ الإعدادات.",
-                    true
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           APPLY MULTIPLE
-        ====================================================== */
-
-        async function applyWelcomeToSelectedBots() {
-
-            const selected =
-                Array.from(
-                    document.querySelectorAll(
-                        ".welcome-multi-selector:checked"
-                    )
-                ).map(
-                    input =>
-                        Number(
-                            input.value
-                        )
-                );
-
-
-            if (!selected.length) {
-
-                showToast(
-                    "حدد بوتًا واحدًا على الأقل"
-                );
-
-                return;
-
-            }
-
-
-            if (!welcomeState.botNumber) {
-
-                showToast(
-                    "اختر بوتًا أولًا لتحميل إعداداته"
-                );
-
-                return;
-
-            }
-
-
-            const success =
-                await saveWelcomeSettings(
-                    selected
-                );
-
-
-            if (success) {
-
-                showToast(
-                    `تم تطبيق الترحيب على ${selected.length} بوت`
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           IMAGE
-        ====================================================== */
-
-        function loadImage(
-            src
-        ) {
-
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-
-                    const image =
-                        new Image();
-
-
-                    image.onload =
-                        () => {
-
-                            resolve(
-                                image
-                            );
-
-                        };
-
-
-                    image.onerror =
-                        () => {
-
-                            reject(
-                                new Error(
-                                    "تعذر تحميل الصورة"
-                                )
-                            );
-
-                        };
-
-
-                    image.src =
-                        src;
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           MEMBER
-        ====================================================== */
-
-        function getDefaultMemberImage() {
-
-            const bot =
-                loadedBots.find(
-                    item =>
-                        Number(
-                            item.number
-                        ) ===
-                        Number(
-                            welcomeState.botNumber
-                        )
-                );
-
-
-            return (
-                bot?.avatar ||
-                "https://cdn.discordapp.com/embed/avatars/0.png"
-            );
-
-        }
-
-
-        async function ensureMemberImage() {
-
-            if (
-                welcomeState.member.image
-            ) {
-
-                return;
-
-            }
-
-
-            try {
-
-                const src =
-                    getDefaultMemberImage();
-
-
-                welcomeState.member.image =
-                    await loadImage(
-                        src
-                    );
-
-
-                welcomeState.member.src =
-                    src;
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           RESET
-        ====================================================== */
-
-        function resetBackgroundTransform() {
-
-            welcomeState.background.x =
-                600;
-
-
-            welcomeState.background.y =
-                315;
-
-
-            welcomeState.background.scale =
-                1;
-
-        }
-
-
-        function resetMemberTransform() {
-
-            welcomeState.member.x =
-                600;
-
-
-            welcomeState.member.y =
-                315;
-
-
-            welcomeState.member.scale =
-                1;
-
-        }
-
-
-        /* =====================================================
-           DRAW
-        ====================================================== */
-
-        function drawWelcomeCanvas() {
-
-            const canvas =
-                document.getElementById(
-                    "welcomeCanvas"
-                );
-
-
-            if (!canvas) {
-                return;
-            }
-
-
-            const ctx =
-                canvas.getContext(
-                    "2d"
-                );
-
-
-            ctx.clearRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-
-            if (
-                welcomeState.background.image
-            ) {
-
-                drawCoverImage(
-                    ctx,
-
-                    welcomeState.background.image,
-
-                    welcomeState.background.x,
-
-                    welcomeState.background.y,
-
-                    welcomeState.background.scale,
-
-                    canvas.width,
-
-                    canvas.height
-                );
-
-            } else {
-
-                const gradient =
-                    ctx.createLinearGradient(
+                    ctx.drawImage(
+                        image,
                         0,
                         0,
                         canvas.width,
                         canvas.height
                     );
 
+                    resolve(
+                        canvas.toDataURL(
+                            "image/jpeg",
+                            quality
+                        )
+                    );
 
-                gradient.addColorStop(
-                    0,
-                    "#17171b"
+                };
+
+                image.onerror = reject;
+
+                image.src = reader.result;
+
+            };
+
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+
+        });
+
+    }
+
+    /* =====================================================
+       LOAD WELCOME
+    ====================================================== */
+
+    async function loadWelcomeSettings() {
+
+        if (!welcomeState.botNumber) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا."
+            );
+
+            return;
+        }
+
+        const info =
+            document.getElementById(
+                "welcomeBotInfo"
+            );
+
+        if (info) {
+
+            info.textContent =
+                "جاري تحميل إعدادات الترحيب...";
+
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/bots/${welcomeState.botNumber}/systems/welcome`,
+                    {
+                        cache: "no-store",
+                        credentials: "same-origin"
+                    }
                 );
 
+            const data =
+                await response.json();
 
-                gradient.addColorStop(
-                    1,
-                    "#08080a"
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر تحميل الإعدادات"
                 );
 
+            }
 
-                ctx.fillStyle =
-                    gradient;
+            const settings =
+                data.settings || {};
 
+            welcomeState.enabled =
+                settings.enabled !== false;
 
-                ctx.fillRect(
+            welcomeState.channelId =
+                settings.channel_id || "";
+
+            welcomeState.text =
+                settings.text ||
+                "مرحباً {user} في {server}!";
+
+            const bg =
+                settings.background || {};
+
+            const member =
+                settings.member || {};
+
+            welcomeState.background.x =
+                Number(bg.x ?? 600);
+
+            welcomeState.background.y =
+                Number(bg.y ?? 315);
+
+            welcomeState.background.scale =
+                Number(bg.scale ?? 1);
+
+            welcomeState.member.x =
+                Number(member.x ?? 600);
+
+            welcomeState.member.y =
+                Number(member.y ?? 315);
+
+            welcomeState.member.scale =
+                Number(member.scale ?? 1);
+
+            const enabledInput =
+                document.getElementById(
+                    "welcomeEnabled"
+                );
+
+            if (enabledInput) {
+                enabledInput.checked =
+                    welcomeState.enabled;
+            }
+
+            const textInput =
+                document.getElementById(
+                    "welcomeText"
+                );
+
+            if (textInput) {
+                textInput.value =
+                    welcomeState.text;
+            }
+
+            const memberEnabled =
+                document.getElementById(
+                    "memberImageEnabled"
+                );
+
+            if (memberEnabled) {
+
+                memberEnabled.checked =
+                    settings.member_image_enabled !== false;
+
+            }
+
+            await loadWelcomeChannels();
+
+            const channelSelect =
+                document.getElementById(
+                    "welcomeChannel"
+                );
+
+            if (channelSelect) {
+
+                channelSelect.value =
+                    welcomeState.channelId;
+
+            }
+
+            if (settings.background_asset_url) {
+
+                try {
+
+                    const image =
+                        await loadImage(
+                            settings.background_asset_url
+                        );
+
+                    welcomeState.background.image =
+                        image;
+
+                    welcomeState.background.src =
+                        settings.background_asset_url;
+
+                    const preview =
+                        document.getElementById(
+                            "welcomeBackgroundPreview"
+                        );
+
+                    if (preview) {
+
+                        preview.src =
+                            settings.background_asset_url;
+
+                        preview.style.display =
+                            "block";
+
+                    }
+
+                } catch (imageError) {
+
+                    console.error(imageError);
+
+                }
+
+            } else {
+
+                welcomeState.background.image = null;
+                welcomeState.background.src = null;
+
+                const preview =
+                    document.getElementById(
+                        "welcomeBackgroundPreview"
+                    );
+
+                if (preview) {
+                    preview.style.display = "none";
+                    preview.removeAttribute("src");
+                }
+
+            }
+
+            await ensureMemberImage();
+
+            drawWelcomeCanvas();
+
+            if (info) {
+                info.textContent =
+                    "تم تحميل إعدادات البوت.";
+            }
+
+            setWelcomeStatus(
+                "تم تحميل الإعدادات المحفوظة."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "WELCOME LOAD ERROR:",
+                error
+            );
+
+            setWelcomeStatus(
+                error.message ||
+                "تعذر تحميل إعدادات الترحيب.",
+                true
+            );
+
+        }
+
+    }
+
+    /* =====================================================
+       CHANNELS
+    ====================================================== */
+
+    async function loadWelcomeChannels() {
+
+        const select =
+            document.getElementById(
+                "welcomeChannel"
+            );
+
+        if (
+            !select ||
+            !welcomeState.botNumber
+        ) {
+            return;
+        }
+
+        select.innerHTML = `
+            <option value="">
+                جاري تحميل الرومات...
+            </option>
+        `;
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/bots/${welcomeState.botNumber}/channels`,
+                    {
+                        cache: "no-store",
+                        credentials: "same-origin"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر تحميل الرومات"
+                );
+
+            }
+
+            const channels =
+                data.channels || [];
+
+            const categories =
+                channels.filter(
+                    channel =>
+                        channel.type === 4
+                );
+
+            const textChannels =
+                channels.filter(
+                    channel =>
+                        channel.type === 0 ||
+                        channel.type === 5 ||
+                        channel.type === 15
+                );
+
+            select.innerHTML = `
+                <option value="">
+                    اختر روم الترحيب
+                </option>
+            `;
+
+            textChannels.forEach(channel => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    channel.id;
+
+                let prefix = "# ";
+
+                if (channel.type === 15) {
+                    prefix = "▦ ";
+                }
+
+                const parent =
+                    categories.find(
+                        category =>
+                            category.id ===
+                            channel.parent_id
+                    );
+
+                option.textContent =
+                    parent
+                        ? `${prefix}${channel.name} — ${parent.name}`
+                        : `${prefix}${channel.name}`;
+
+                select.appendChild(option);
+
+            });
+
+            select.value =
+                welcomeState.channelId || "";
+
+        } catch (error) {
+
+            console.error(error);
+
+            select.innerHTML = `
+                <option value="">
+                    تعذر تحميل الرومات
+                </option>
+            `;
+
+        }
+
+    }
+
+    /* =====================================================
+       SAVE
+    ====================================================== */
+
+    async function saveWelcomeSettings(botNumbers = null) {
+
+        if (
+            !welcomeState.botNumber &&
+            !Array.isArray(botNumbers)
+        ) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا.",
+                true
+            );
+
+            return false;
+        }
+
+        const enabledInput =
+            document.getElementById(
+                "welcomeEnabled"
+            );
+
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
+
+        const channelSelect =
+            document.getElementById(
+                "welcomeChannel"
+            );
+
+        const textInput =
+            document.getElementById(
+                "welcomeText"
+            );
+
+        welcomeState.text =
+            textInput
+                ? textInput.value
+                : welcomeState.text;
+
+        welcomeState.channelId =
+            channelSelect
+                ? channelSelect.value
+                : welcomeState.channelId;
+
+        const settings = {
+
+            enabled:
+                enabledInput
+                    ? enabledInput.checked
+                    : welcomeState.enabled,
+
+            channel_id:
+                welcomeState.channelId,
+
+            text:
+                welcomeState.text,
+
+            member_image_enabled:
+                memberEnabled
+                    ? memberEnabled.checked
+                    : true,
+
+            background: {
+
+                x:
+                    welcomeState.background.x,
+
+                y:
+                    welcomeState.background.y,
+
+                scale:
+                    welcomeState.background.scale,
+
+                width:
+                    welcomeState.background.baseWidth,
+
+                height:
+                    welcomeState.background.baseHeight
+
+            },
+
+            member: {
+
+                x:
+                    welcomeState.member.x,
+
+                y:
+                    welcomeState.member.y,
+
+                scale:
+                    welcomeState.member.scale,
+
+                width:
+                    welcomeState.member.baseWidth,
+
+                height:
+                    welcomeState.member.baseHeight
+
+            },
+
+            background_asset_url:
+                welcomeState.background.src || null
+        };
+
+        const targetBots =
+            Array.isArray(botNumbers)
+                ? botNumbers
+                : [welcomeState.botNumber];
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/apply",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+                        },
+
+                        credentials:
+                            "same-origin",
+
+                        body:
+                            JSON.stringify({
+                                bots: targetBots,
+                                system: "welcome",
+                                settings: settings
+                            })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر حفظ الإعدادات"
+                );
+
+            }
+
+            const savedCount =
+                Array.isArray(data.saved)
+                    ? data.saved.length
+                    : targetBots.length;
+
+            setWelcomeStatus(
+                `تم حفظ الترحيب لـ ${savedCount} بوت.`
+            );
+
+            showToast(
+                "تم حفظ إعدادات الترحيب بنجاح"
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "WELCOME SAVE ERROR:",
+                error
+            );
+
+            setWelcomeStatus(
+                error.message ||
+                "تعذر حفظ الإعدادات.",
+                true
+            );
+
+            return false;
+
+        }
+
+    }
+
+    /* =====================================================
+       APPLY MULTIPLE
+    ====================================================== */
+
+    async function applyWelcomeToSelectedBots() {
+
+        const selected =
+            Array.from(
+                document.querySelectorAll(
+                    ".welcome-multi-selector:checked"
+                )
+            ).map(
+                input =>
+                    Number(input.value)
+            );
+
+        if (!selected.length) {
+
+            showToast(
+                "حدد بوتًا واحدًا على الأقل"
+            );
+
+            return;
+        }
+
+        if (!welcomeState.botNumber) {
+
+            showToast(
+                "اختر بوتًا أولًا لتحميل إعداداته"
+            );
+
+            return;
+        }
+
+        const success =
+            await saveWelcomeSettings(
+                selected
+            );
+
+        if (success) {
+
+            showToast(
+                `تم تطبيق الترحيب على ${selected.length} بوت`
+            );
+
+        }
+
+    }
+
+    /* =====================================================
+       IMAGE
+    ====================================================== */
+
+    function loadImage(src) {
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const image =
+                    new Image();
+
+                image.onload = () => {
+                    resolve(image);
+                };
+
+                image.onerror = () => {
+
+                    reject(
+                        new Error(
+                            "تعذر تحميل الصورة"
+                        )
+                    );
+
+                };
+
+                image.src = src;
+
+            }
+        );
+
+    }
+
+    /* =====================================================
+       MEMBER
+    ====================================================== */
+
+    function getDefaultMemberImage() {
+
+        const bot =
+            loadedBots.find(
+                item =>
+                    Number(item.number) ===
+                    Number(welcomeState.botNumber)
+            );
+
+        return (
+            bot?.avatar ||
+            "https://cdn.discordapp.com/embed/avatars/0.png"
+        );
+
+    }
+
+    async function ensureMemberImage() {
+
+        if (welcomeState.member.image) {
+            return;
+        }
+
+        try {
+
+            const src =
+                getDefaultMemberImage();
+
+            welcomeState.member.image =
+                await loadImage(src);
+
+            welcomeState.member.src =
+                src;
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    }
+
+    /* =====================================================
+       RESET
+    ====================================================== */
+
+    function resetBackgroundTransform() {
+
+        welcomeState.background.x = 600;
+        welcomeState.background.y = 315;
+        welcomeState.background.scale = 1;
+
+    }
+
+    function resetMemberTransform() {
+
+        welcomeState.member.x = 600;
+        welcomeState.member.y = 315;
+        welcomeState.member.scale = 1;
+
+    }
+
+    /* =====================================================
+       DRAW
+    ====================================================== */
+
+    function drawWelcomeCanvas() {
+
+        const canvas =
+            document.getElementById(
+                "welcomeCanvas"
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+        const ctx =
+            canvas.getContext("2d");
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        if (welcomeState.background.image) {
+
+            drawCoverImage(
+                ctx,
+                welcomeState.background.image,
+                welcomeState.background.x,
+                welcomeState.background.y,
+                welcomeState.background.scale,
+                canvas.width,
+                canvas.height
+            );
+
+        } else {
+
+            const gradient =
+                ctx.createLinearGradient(
                     0,
                     0,
                     canvas.width,
                     canvas.height
                 );
 
-            }
+            gradient.addColorStop(
+                0,
+                "#17171b"
+            );
 
+            gradient.addColorStop(
+                1,
+                "#08080a"
+            );
 
             ctx.fillStyle =
-                "rgba(0,0,0,.12)";
-
+                gradient;
 
             ctx.fillRect(
                 0,
@@ -3593,1594 +2833,1239 @@ document.addEventListener(
                 canvas.height
             );
 
+        }
 
-            /* =============================================
-               WELCOME TEXT
-            ============================================== */
+        ctx.fillStyle =
+            "rgba(0,0,0,.12)";
 
-            const enabledInput =
-                document.getElementById(
-                    "welcomeEnabled"
-                );
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
+        const enabledInput =
+            document.getElementById(
+                "welcomeEnabled"
+            );
 
-            const enabled =
-                enabledInput
-                    ? enabledInput.checked
-                    : true;
+        const enabled =
+            enabledInput
+                ? enabledInput.checked
+                : true;
 
+        if (enabled) {
 
-            if (enabled) {
-
-                drawWelcomeText(
-                    ctx,
-                    canvas
-                );
-
-            }
-
-
-            /* =============================================
-               MEMBER
-            ============================================== */
-
-            const memberEnabled =
-                document.getElementById(
-                    "memberImageEnabled"
-                );
-
-
-            if (
-                !memberEnabled ||
-                memberEnabled.checked
-            ) {
-
-                if (
-                    welcomeState.member.image
-                ) {
-
-                    drawMemberImage(
-                        ctx,
-
-                        welcomeState.member.image,
-
-                        welcomeState.member.x,
-
-                        welcomeState.member.y,
-
-                        welcomeState.member.scale
-                    );
-
-                }
-
-            }
-
-
-            drawSelectionBorder(
-                ctx
+            drawWelcomeText(
+                ctx,
+                canvas
             );
 
         }
 
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
 
-        function drawWelcomeText(
-            ctx,
-            canvas
+        if (
+            !memberEnabled ||
+            memberEnabled.checked
         ) {
 
-            let text =
-                welcomeState.text ||
-                "مرحباً {user} في {server}!";
+            if (welcomeState.member.image) {
 
-
-            text =
-                text
-                    .replaceAll(
-                        "{user}",
-                        "@العضو"
-                    )
-                    .replaceAll(
-                        "{username}",
-                        "اسم_العضو"
-                    )
-                    .replaceAll(
-                        "{server}",
-                        "CT"
-                    )
-                    .replaceAll(
-                        "{member_count}",
-                        "1000"
-                    );
-
-
-            const lines =
-                text.split(
-                    "\n"
+                drawMemberImage(
+                    ctx,
+                    welcomeState.member.image,
+                    welcomeState.member.x,
+                    welcomeState.member.y,
+                    welcomeState.member.scale
                 );
 
+            }
+
+        }
+
+        drawSelectionBorder(ctx);
+
+    }
+
+    function drawWelcomeText(ctx, canvas) {
+
+        let text =
+            welcomeState.text ||
+            "مرحباً {user} في {server}!";
+
+        text =
+            text
+                .replaceAll("{user}", "@العضو")
+                .replaceAll("{username}", "اسم_العضو")
+                .replaceAll("{server}", "CT")
+                .replaceAll("{member_count}", "1000");
+
+        const lines =
+            text.split("\n");
+
+        ctx.save();
+
+        ctx.direction = "rtl";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 42px Arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,.65)";
+        ctx.shadowBlur = 10;
+
+        const startY = 90;
+        const lineHeight = 55;
+
+        lines.forEach((line, index) => {
+
+            ctx.fillText(
+                line,
+                canvas.width / 2,
+                startY + index * lineHeight
+            );
+
+        });
+
+        ctx.restore();
+
+    }
+
+    function drawCoverImage(
+        ctx,
+        image,
+        centerX,
+        centerY,
+        scale,
+        canvasWidth,
+        canvasHeight
+    ) {
+
+        const baseScale =
+            Math.max(
+                canvasWidth / image.width,
+                canvasHeight / image.height
+            );
+
+        const finalScale =
+            baseScale * scale;
+
+        const width =
+            image.width * finalScale;
+
+        const height =
+            image.height * finalScale;
+
+        const x =
+            centerX - width / 2;
+
+        const y =
+            centerY - height / 2;
+
+        ctx.drawImage(
+            image,
+            x,
+            y,
+            width,
+            height
+        );
+
+    }
+
+    function drawMemberImage(
+        ctx,
+        image,
+        centerX,
+        centerY,
+        scale
+    ) {
+
+        const size =
+            220 * scale;
+
+        const x =
+            centerX - size / 2;
+
+        const y =
+            centerY - size / 2;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            centerX,
+            centerY,
+            size / 2,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.clip();
+
+        ctx.drawImage(
+            image,
+            x,
+            y,
+            size,
+            size
+        );
+
+        ctx.restore();
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            centerX,
+            centerY,
+            size / 2 + 5,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.85)";
+
+        ctx.lineWidth = 8;
+
+        ctx.stroke();
+
+        ctx.restore();
+
+    }
+
+    function drawSelectionBorder(ctx) {
+
+        const selected =
+            welcomeState.selected;
+
+        if (selected === "background") {
 
             ctx.save();
 
+            ctx.strokeStyle =
+                "rgba(255,255,255,.8)";
 
-            ctx.direction =
-                "rtl";
+            ctx.lineWidth = 4;
 
+            ctx.setLineDash([12, 8]);
 
-            ctx.textAlign =
-                "center";
-
-
-            ctx.textBaseline =
-                "middle";
-
-
-            ctx.font =
-                "bold 42px Arial";
-
-
-            ctx.fillStyle =
-                "#ffffff";
-
-
-            ctx.shadowColor =
-                "rgba(0,0,0,.65)";
-
-
-            ctx.shadowBlur =
-                10;
-
-
-            const startY =
-                90;
-
-
-            const lineHeight =
-                55;
-
-
-            lines.forEach(
-                (
-                    line,
-                    index
-                ) => {
-
-                    ctx.fillText(
-                        line,
-                        canvas.width / 2,
-                        startY +
-                            index *
-                            lineHeight
-                    );
-
-                }
+            ctx.strokeRect(
+                8,
+                8,
+                1184,
+                614
             );
-
 
             ctx.restore();
 
+            return;
         }
 
-
-        function drawCoverImage(
-            ctx,
-            image,
-            centerX,
-            centerY,
-            scale,
-            canvasWidth,
-            canvasHeight
-        ) {
-
-            const baseScale =
-                Math.max(
-                    canvasWidth /
-                        image.width,
-
-                    canvasHeight /
-                        image.height
-                );
-
-
-            const finalScale =
-                baseScale *
-                scale;
-
-
-            const width =
-                image.width *
-                finalScale;
-
-
-            const height =
-                image.height *
-                finalScale;
-
-
-            const x =
-                centerX -
-                width / 2;
-
-
-            const y =
-                centerY -
-                height / 2;
-
-
-            ctx.drawImage(
-                image,
-                x,
-                y,
-                width,
-                height
-            );
-
-        }
-
-
-        function drawMemberImage(
-            ctx,
-            image,
-            centerX,
-            centerY,
-            scale
-        ) {
+        if (selected === "member") {
 
             const size =
                 220 *
-                scale;
-
+                welcomeState.member.scale;
 
             const x =
-                centerX -
+                welcomeState.member.x -
                 size / 2;
-
 
             const y =
-                centerY -
+                welcomeState.member.y -
                 size / 2;
 
-
             ctx.save();
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                centerX,
-                centerY,
-                size / 2,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.clip();
-
-
-            ctx.drawImage(
-                image,
-                x,
-                y,
-                size,
-                size
-            );
-
-
-            ctx.restore();
-
-
-            ctx.save();
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                centerX,
-                centerY,
-                size / 2 + 5,
-                0,
-                Math.PI * 2
-            );
-
 
             ctx.strokeStyle =
-                "rgba(255,255,255,.85)";
+                "rgba(255,255,255,.9)";
 
+            ctx.lineWidth = 4;
 
-            ctx.lineWidth =
-                8;
+            ctx.setLineDash([10, 6]);
 
-
-            ctx.stroke();
-
+            ctx.strokeRect(
+                x - 8,
+                y - 8,
+                size + 16,
+                size + 16
+            );
 
             ctx.restore();
 
         }
 
+    }
 
-        function drawSelectionBorder(
-            ctx
-        ) {
+    /* =====================================================
+       TOUCH
+    ====================================================== */
 
-            const selected =
-                welcomeState.selected;
+    function setupCanvasTouch(canvas) {
 
+        canvas.style.touchAction = "none";
 
-            if (
-                selected ===
-                "background"
-            ) {
+        canvas.addEventListener(
+            "pointerdown",
+            async event => {
 
-                ctx.save();
+                event.preventDefault();
 
+                await ensureMemberImage();
 
-                ctx.strokeStyle =
-                    "rgba(255,255,255,.8)";
-
-
-                ctx.lineWidth =
-                    4;
-
-
-                ctx.setLineDash(
-                    [
-                        12,
-                        8
-                    ]
+                canvas.setPointerCapture(
+                    event.pointerId
                 );
 
-
-                ctx.strokeRect(
-                    8,
-                    8,
-                    1184,
-                    614
+                welcomeState.pointer.set(
+                    event.pointerId,
+                    {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
                 );
 
+                const points =
+                    Array.from(
+                        welcomeState.pointer.values()
+                    );
 
-                ctx.restore();
+                if (points.length === 1) {
 
+                    const position =
+                        canvasPoint(
+                            canvas,
+                            event
+                        );
 
-                return;
+                    const selected =
+                        hitTest(
+                            position.x,
+                            position.y
+                        );
+
+                    if (selected) {
+
+                        welcomeState.selected =
+                            selected;
+
+                    }
+
+                    const object =
+                        getSelectedObject();
+
+                    welcomeState.gesture = {
+
+                        mode: "drag",
+
+                        startX:
+                            position.x,
+
+                        startY:
+                            position.y,
+
+                        objectX:
+                            object.x,
+
+                        objectY:
+                            object.y
+
+                    };
+
+                }
+
+                if (points.length === 2) {
+
+                    startPinch(canvas);
+
+                }
+
+                drawWelcomeCanvas();
 
             }
+        );
 
+        canvas.addEventListener(
+            "pointermove",
+            event => {
 
-            if (
-                selected ===
-                "member"
-            ) {
-
-                const size =
-                    220 *
-                    welcomeState.member.scale;
-
-
-                const x =
-                    welcomeState.member.x -
-                    size / 2;
-
-
-                const y =
-                    welcomeState.member.y -
-                    size / 2;
-
-
-                ctx.save();
-
-
-                ctx.strokeStyle =
-                    "rgba(255,255,255,.9)";
-
-
-                ctx.lineWidth =
-                    4;
-
-
-                ctx.setLineDash(
-                    [
-                        10,
-                        6
-                    ]
-                );
-
-
-                ctx.strokeRect(
-                    x - 8,
-                    y - 8,
-                    size + 16,
-                    size + 16
-                );
-
-
-                ctx.restore();
-
-            }
-
-        }
-
-
-        /* =====================================================
-           TOUCH
-        ====================================================== */
-
-        function setupCanvasTouch(
-            canvas
-        ) {
-
-            canvas.style.touchAction =
-                "none";
-
-
-            canvas.addEventListener(
-                "pointerdown",
-                async event => {
-
-                    event.preventDefault();
-
-
-                    await ensureMemberImage();
-
-
-                    canvas.setPointerCapture(
+                if (
+                    !welcomeState.pointer.has(
                         event.pointerId
+                    )
+                ) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                welcomeState.pointer.set(
+                    event.pointerId,
+                    {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
+                );
+
+                const points =
+                    Array.from(
+                        welcomeState.pointer.values()
                     );
 
-
-                    welcomeState.pointer.set(
-                        event.pointerId,
-                        {
-                            x:
-                                event.clientX,
-
-                            y:
-                                event.clientY
-                        }
-                    );
-
-
-                    const points =
-                        Array.from(
-                            welcomeState.pointer.values()
-                        );
-
+                if (points.length === 2) {
 
                     if (
-                        points.length === 1
+                        !welcomeState.gesture ||
+                        welcomeState.gesture.mode !== "pinch"
                     ) {
 
-                        const position =
-                            canvasPoint(
-                                canvas,
-                                event
-                            );
-
-
-                        const selected =
-                            hitTest(
-                                position.x,
-                                position.y
-                            );
-
-
-                        if (selected) {
-
-                            welcomeState.selected =
-                                selected;
-
-                        }
-
-
-                        const object =
-                            getSelectedObject();
-
-
-                        welcomeState.gesture = {
-
-                            mode:
-                                "drag",
-
-                            startX:
-                                position.x,
-
-                            startY:
-                                position.y,
-
-                            objectX:
-                                object.x,
-
-                            objectY:
-                                object.y
-
-                        };
+                        startPinch(canvas);
 
                     }
 
+                    updatePinch(canvas);
 
-                    if (
-                        points.length === 2
-                    ) {
+                    drawWelcomeCanvas();
 
-                        startPinch(
-                            canvas
+                    return;
+                }
+
+                if (
+                    points.length === 1 &&
+                    welcomeState.gesture &&
+                    welcomeState.gesture.mode === "drag"
+                ) {
+
+                    const point =
+                        points[0];
+
+                    const rect =
+                        canvas.getBoundingClientRect();
+
+                    const scaleX =
+                        canvas.width /
+                        rect.width;
+
+                    const scaleY =
+                        canvas.height /
+                        rect.height;
+
+                    const currentX =
+                        (
+                            point.x -
+                            rect.left
+                        ) * scaleX;
+
+                    const currentY =
+                        (
+                            point.y -
+                            rect.top
+                        ) * scaleY;
+
+                    const object =
+                        getSelectedObject();
+
+                    object.x =
+                        welcomeState.gesture.objectX +
+                        (
+                            currentX -
+                            welcomeState.gesture.startX
                         );
 
-                    }
+                    object.y =
+                        welcomeState.gesture.objectY +
+                        (
+                            currentY -
+                            welcomeState.gesture.startY
+                        );
 
+                    clampObject(object);
 
                     drawWelcomeCanvas();
 
                 }
-            );
-
-
-            canvas.addEventListener(
-                "pointermove",
-                event => {
-
-                    if (
-                        !welcomeState.pointer.has(
-                            event.pointerId
-                        )
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    event.preventDefault();
-
-
-                    welcomeState.pointer.set(
-                        event.pointerId,
-                        {
-                            x:
-                                event.clientX,
-
-                            y:
-                                event.clientY
-                        }
-                    );
-
-
-                    const points =
-                        Array.from(
-                            welcomeState.pointer.values()
-                        );
-
-
-                    if (
-                        points.length === 2
-                    ) {
-
-                        if (
-                            !welcomeState.gesture ||
-                            welcomeState.gesture.mode !==
-                                "pinch"
-                        ) {
-
-                            startPinch(
-                                canvas
-                            );
-
-                        }
-
-
-                        updatePinch(
-                            canvas
-                        );
-
-
-                        drawWelcomeCanvas();
-
-
-                        return;
-
-                    }
-
-
-                    if (
-                        points.length === 1 &&
-                        welcomeState.gesture &&
-                        welcomeState.gesture.mode ===
-                            "drag"
-                    ) {
-
-                        const point =
-                            points[0];
-
-
-                        const rect =
-                            canvas.getBoundingClientRect();
-
-
-                        const scaleX =
-                            canvas.width /
-                            rect.width;
-
-
-                        const scaleY =
-                            canvas.height /
-                            rect.height;
-
-
-                        const currentX =
-                            (
-                                point.x -
-                                rect.left
-                            ) *
-                            scaleX;
-
-
-                        const currentY =
-                            (
-                                point.y -
-                                rect.top
-                            ) *
-                            scaleY;
-
-
-                        const object =
-                            getSelectedObject();
-
-
-                        object.x =
-                            welcomeState.gesture.objectX +
-                            (
-                                currentX -
-                                welcomeState.gesture.startX
-                            );
-
-
-                        object.y =
-                            welcomeState.gesture.objectY +
-                            (
-                                currentY -
-                                welcomeState.gesture.startY
-                            );
-
-
-                        clampObject(
-                            object
-                        );
-
-
-                        drawWelcomeCanvas();
-
-                    }
-
-                }
-            );
-
-
-            const endPointer =
-                event => {
-
-                    if (
-                        welcomeState.pointer.has(
-                            event.pointerId
-                        )
-                    ) {
-
-                        welcomeState.pointer.delete(
-                            event.pointerId
-                        );
-
-                    }
-
-
-                    if (
-                        welcomeState.pointer.size ===
-                        0
-                    ) {
-
-                        welcomeState.gesture =
-                            null;
-
-                    }
-
-                };
-
-
-            canvas.addEventListener(
-                "pointerup",
-                endPointer
-            );
-
-
-            canvas.addEventListener(
-                "pointercancel",
-                endPointer
-            );
-
-        }
-
-
-        function canvasPoint(
-            canvas,
-            event
-        ) {
-
-            const rect =
-                canvas.getBoundingClientRect();
-
-
-            return {
-
-                x:
-                    (
-                        event.clientX -
-                        rect.left
-                    ) *
-                    (
-                        canvas.width /
-                        rect.width
-                    ),
-
-                y:
-                    (
-                        event.clientY -
-                        rect.top
-                    ) *
-                    (
-                        canvas.height /
-                        rect.height
-                    )
-
-            };
-
-        }
-
-
-        function hitTest(
-            x,
-            y
-        ) {
-
-            if (
-                welcomeState.member.image
-            ) {
-
-                const size =
-                    220 *
-                    welcomeState.member.scale;
-
-
-                const distance =
-                    Math.hypot(
-                        x -
-                            welcomeState.member.x,
-
-                        y -
-                            welcomeState.member.y
-                    );
-
-
-                if (
-                    distance <=
-                    size / 2 + 25
-                ) {
-
-                    return "member";
-
-                }
 
             }
+        );
 
-
-            return "background";
-
-        }
-
-
-        function getSelectedObject() {
+        const endPointer = event => {
 
             if (
-                welcomeState.selected ===
-                "background"
-            ) {
-
-                return welcomeState.background;
-
-            }
-
-
-            return welcomeState.member;
-
-        }
-
-
-        /* =====================================================
-           PINCH
-        ====================================================== */
-
-        function startPinch(
-            canvas
-        ) {
-
-            const points =
-                Array.from(
-                    welcomeState.pointer.values()
-                );
-
-
-            if (
-                points.length !== 2
-            ) {
-
-                return;
-
-            }
-
-
-            const distance =
-                pointerDistance(
-                    points[0],
-                    points[1]
-                );
-
-
-            const object =
-                getSelectedObject();
-
-
-            const centerX =
-                (
-                    points[0].x +
-                    points[1].x
-                ) / 2;
-
-
-            const centerY =
-                (
-                    points[0].y +
-                    points[1].y
-                ) / 2;
-
-
-            welcomeState.gesture = {
-
-                mode:
-                    "pinch",
-
-                startDistance:
-                    distance,
-
-                startScale:
-                    object.scale,
-
-                startX:
-                    object.x,
-
-                startY:
-                    object.y,
-
-                lastCenterX:
-                    centerX,
-
-                lastCenterY:
-                    centerY
-
-            };
-
-        }
-
-
-        function updatePinch(
-            canvas
-        ) {
-
-            const points =
-                Array.from(
-                    welcomeState.pointer.values()
-                );
-
-
-            if (
-                points.length !== 2
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                !welcomeState.gesture ||
-                welcomeState.gesture.mode !==
-                    "pinch"
-            ) {
-
-                startPinch(
-                    canvas
-                );
-
-                return;
-
-            }
-
-
-            const distance =
-                pointerDistance(
-                    points[0],
-                    points[1]
-                );
-
-
-            const object =
-                getSelectedObject();
-
-
-            const ratio =
-                distance /
-                Math.max(
-                    1,
-                    welcomeState.gesture.startDistance
-                );
-
-
-            object.scale =
-                clamp(
-                    welcomeState.gesture.startScale *
-                        ratio,
-
-                    0.1,
-
-                    5
-                );
-
-
-            const centerX =
-                (
-                    points[0].x +
-                    points[1].x
-                ) / 2;
-
-
-            const centerY =
-                (
-                    points[0].y +
-                    points[1].y
-                ) / 2;
-
-
-            const rect =
-                canvas.getBoundingClientRect();
-
-
-            const scaleX =
-                canvas.width /
-                rect.width;
-
-
-            const scaleY =
-                canvas.height /
-                rect.height;
-
-
-            const dx =
-                (
-                    centerX -
-                    welcomeState.gesture.lastCenterX
-                ) *
-                scaleX;
-
-
-            const dy =
-                (
-                    centerY -
-                    welcomeState.gesture.lastCenterY
-                ) *
-                scaleY;
-
-
-            object.x +=
-                dx;
-
-
-            object.y +=
-                dy;
-
-
-            clampObject(
-                object
-            );
-
-
-            welcomeState.gesture.lastCenterX =
-                centerX;
-
-
-            welcomeState.gesture.lastCenterY =
-                centerY;
-
-        }
-
-
-        function pointerDistance(
-            a,
-            b
-        ) {
-
-            return Math.hypot(
-                a.x -
-                    b.x,
-
-                a.y -
-                    b.y
-            );
-
-        }
-
-
-        function clamp(
-            value,
-            min,
-            max
-        ) {
-
-            return Math.max(
-                min,
-
-                Math.min(
-                    max,
-                    value
+                welcomeState.pointer.has(
+                    event.pointerId
                 )
-            );
-
-        }
-
-
-        function clampObject(
-            object
-        ) {
-
-            object.x =
-                clamp(
-                    object.x,
-                    -600,
-                    1800
-                );
-
-
-            object.y =
-                clamp(
-                    object.y,
-                    -400,
-                    1000
-                );
-
-        }
-
-
-        /* =====================================================
-           STATUS
-        ====================================================== */
-
-        function setWelcomeStatus(
-            message,
-            error = false
-        ) {
-
-            const element =
-                document.getElementById(
-                    "welcomeStatus"
-                );
-
-
-            if (!element) {
-                return;
-            }
-
-
-            element.textContent =
-                message;
-
-
-            element.classList.remove(
-                "ok",
-                "error"
-            );
-
-
-            element.classList.add(
-                error
-                    ? "error"
-                    : "ok"
-            );
-
-        }
-
-
-        /* =====================================================
-           OWNER ROLES
-        ====================================================== */
-
-        async function loadRoles() {
-
-            const list =
-                document.getElementById(
-                    "rolesList"
-                );
-
-
-            if (!list) {
-                return;
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/owner/roles",
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (!data.ok) {
-
-                    list.innerHTML = `
-                        <div class="empty-card">
-                            ليس لديك صلاحية لعرض الرتب.
-                        </div>
-                    `;
-
-                    return;
-
-                }
-
-
-                if (
-                    !Array.isArray(
-                        data.roles
-                    ) ||
-                    !data.roles.length
-                ) {
-
-                    list.innerHTML = `
-                        <div class="empty-card">
-                            لا توجد رتب حاليًا.
-                        </div>
-                    `;
-
-                    return;
-
-                }
-
-
-                list.innerHTML =
-                    data.roles
-                        .map(
-                            role => {
-
-                                const permissions =
-                                    Array.isArray(
-                                        role.permissions
-                                    )
-                                        ? role.permissions
-                                        : [];
-
-
-                                return `
-                                    <div class="role-item">
-
-                                        <div>
-
-                                            <strong>
-                                                ${escapeHtml(
-                                                    role.name
-                                                )}
-                                            </strong>
-
-                                        </div>
-
-                                        <div>
-
-                                            <span class="role-permission-count">
-                                                ${permissions.length}
-                                                صلاحية
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-                                `;
-
-                            }
-                        )
-                        .join("");
-
-
-            } catch (error) {
-
-                console.error(
-                    "CT ROLES ERROR:",
-                    error
-                );
-
-
-                list.innerHTML = `
-                    <div class="empty-card">
-                        تعذر تحميل الرتب.
-                    </div>
-                `;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           ROLE MODAL
-        ====================================================== */
-
-        const roleModal =
-            document.getElementById(
-                "roleModal"
-            );
-
-
-        const createRole =
-            document.getElementById(
-                "createRoleButton"
-            );
-
-
-        const closeRole =
-            document.getElementById(
-                "closeRoleModal"
-            );
-
-
-        const cancelRole =
-            document.getElementById(
-                "cancelRole"
-            );
-
-
-        function openRoleModal() {
-
-            if (roleModal) {
-
-                roleModal.classList.add(
-                    "show"
-                );
-
-            }
-
-        }
-
-
-        function closeRoleModal() {
-
-            if (roleModal) {
-
-                roleModal.classList.remove(
-                    "show"
-                );
-
-            }
-
-        }
-
-
-        if (createRole) {
-
-            createRole.addEventListener(
-                "click",
-                openRoleModal
-            );
-
-        }
-
-
-        if (closeRole) {
-
-            closeRole.addEventListener(
-                "click",
-                closeRoleModal
-            );
-
-        }
-
-
-        if (cancelRole) {
-
-            cancelRole.addEventListener(
-                "click",
-                closeRoleModal
-            );
-
-        }
-
-
-        /* =====================================================
-           CREATE ROLE
-        ====================================================== */
-
-        const roleForm =
-            document.getElementById(
-                "roleForm"
-            );
-
-
-        if (roleForm) {
-
-            roleForm.addEventListener(
-                "submit",
-                async event => {
-
-                    event.preventDefault();
-
-
-                    const name =
-                        document
-                            .getElementById(
-                                "roleName"
-                            )
-                            .value
-                            .trim();
-
-
-                    const description =
-                        document
-                            .getElementById(
-                                "roleDescription"
-                            )
-                            .value
-                            .trim();
-
-
-                    if (!name) {
-
-                        showToast(
-                            "اكتب اسم الرتبة"
-                        );
-
-                        return;
-
-                    }
-
-
-                    try {
-
-                        const response =
-                            await fetch(
-                                "/api/owner/roles",
-                                {
-                                    method:
-                                        "POST",
-
-                                    headers: {
-                                        "Content-Type":
-                                            "application/json",
-
-                                        "Accept":
-                                            "application/json"
-                                    },
-
-                                    body:
-                                        JSON.stringify(
-                                            {
-                                                name,
-                                                description,
-                                                permissions: []
-                                            }
-                                        )
-                                }
-                            );
-
-
-                        const data =
-                            await response.json();
-
-
-                        if (!data.ok) {
-
-                            showToast(
-                                data.error ||
-                                "حدث خطأ"
-                            );
-
-                            return;
-
-                        }
-
-
-                        closeRoleModal();
-
-
-                        roleForm.reset();
-
-
-                        showToast(
-                            "تم إنشاء الرتبة بنجاح"
-                        );
-
-
-                        loadRoles();
-
-
-                    } catch (error) {
-
-                        console.error(
-                            error
-                        );
-
-
-                        showToast(
-                            "تعذر الاتصال بالخادم"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           REFRESH
-        ====================================================== */
-
-        const refresh =
-            document.getElementById(
-                "refreshButton"
-            );
-
-
-        if (refresh) {
-
-            refresh.addEventListener(
-                "click",
-                async () => {
-
-                    refresh.classList.add(
-                        "rotating"
-                    );
-
-
-                    await loadBots();
-
-
-                    if (
-                        welcomeEditorInitialized &&
-                        welcomeState.botNumber
-                    ) {
-
-                        await loadWelcomeSettings();
-
-                    }
-
-
-                    setTimeout(
-                        () => {
-
-                            refresh.classList.remove(
-                                "rotating"
-                            );
-
-                        },
-                        600
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           TOAST
-        ====================================================== */
-
-        function showToast(
-            message
-        ) {
-
-            const toast =
-                document.getElementById(
-                    "toast"
-                );
-
-
-            const text =
-                document.getElementById(
-                    "toastMessage"
-                );
-
-
-            if (
-                !toast ||
-                !text
             ) {
 
-                return;
+                welcomeState.pointer.delete(
+                    event.pointerId
+                );
 
             }
 
+            if (
+                welcomeState.pointer.size === 0
+            ) {
 
-            text.textContent =
-                message;
+                welcomeState.gesture = null;
 
+            }
 
-            toast.classList.add(
-                "show"
-            );
+        };
 
+        canvas.addEventListener(
+            "pointerup",
+            endPointer
+        );
 
-            setTimeout(
-                () => {
-
-                    toast.classList.remove(
-                        "show"
-                    );
-
-                },
-                3000
-            );
-
-        }
-
-
-        /* =====================================================
-           ESCAPE
-        ====================================================== */
-
-        function escapeHtml(
-            value
-        ) {
-
-            return String(
-                value ?? ""
-            )
-                .replaceAll(
-                    "&",
-                    "&amp;"
-                )
-                .replaceAll(
-                    "<",
-                    "&lt;"
-                )
-                .replaceAll(
-                    ">",
-                    "&gt;"
-                )
-                .replaceAll(
-                    '"',
-                    "&quot;"
-                )
-                .replaceAll(
-                    "'",
-                    "&#039;"
-                );
-
-        }
-
-
-        /* =====================================================
-           START
-        ====================================================== */
-
-        loadBots();
+        canvas.addEventListener(
+            "pointercancel",
+            endPointer
+        );
 
     }
 
-);
+    function canvasPoint(canvas, event) {
 
+        const rect =
+            canvas.getBoundingClientRect();
+
+        return {
+
+            x:
+                (
+                    event.clientX -
+                    rect.left
+                ) *
+                (
+                    canvas.width /
+                    rect.width
+                ),
+
+            y:
+                (
+                    event.clientY -
+                    rect.top
+                ) *
+                (
+                    canvas.height /
+                    rect.height
+                )
+
+        };
+
+    }
+
+    function hitTest(x, y) {
+
+        if (welcomeState.member.image) {
+
+            const size =
+                220 *
+                welcomeState.member.scale;
+
+            const distance =
+                Math.hypot(
+                    x -
+                        welcomeState.member.x,
+
+                    y -
+                        welcomeState.member.y
+                );
+
+            if (
+                distance <=
+                size / 2 + 25
+            ) {
+
+                return "member";
+
+            }
+
+        }
+
+        return "background";
+
+    }
+
+    function getSelectedObject() {
+
+        if (
+            welcomeState.selected ===
+            "background"
+        ) {
+
+            return welcomeState.background;
+
+        }
+
+        return welcomeState.member;
+
+    }
+
+    /* =====================================================
+       PINCH
+    ====================================================== */
+
+    function startPinch(canvas) {
+
+        const points =
+            Array.from(
+                welcomeState.pointer.values()
+            );
+
+        if (points.length !== 2) {
+            return;
+        }
+
+        const distance =
+            pointerDistance(
+                points[0],
+                points[1]
+            );
+
+        const object =
+            getSelectedObject();
+
+        const centerX =
+            (
+                points[0].x +
+                points[1].x
+            ) / 2;
+
+        const centerY =
+            (
+                points[0].y +
+                points[1].y
+            ) / 2;
+
+        welcomeState.gesture = {
+
+            mode: "pinch",
+
+            startDistance:
+                distance,
+
+            startScale:
+                object.scale,
+
+            startX:
+                object.x,
+
+            startY:
+                object.y,
+
+            lastCenterX:
+                centerX,
+
+            lastCenterY:
+                centerY
+
+        };
+
+    }
+
+    function updatePinch(canvas) {
+
+        const points =
+            Array.from(
+                welcomeState.pointer.values()
+            );
+
+        if (points.length !== 2) {
+            return;
+        }
+
+        if (
+            !welcomeState.gesture ||
+            welcomeState.gesture.mode !== "pinch"
+        ) {
+
+            startPinch(canvas);
+
+            return;
+
+        }
+
+        const distance =
+            pointerDistance(
+                points[0],
+                points[1]
+            );
+
+        const object =
+            getSelectedObject();
+
+        const ratio =
+            distance /
+            Math.max(
+                1,
+                welcomeState.gesture.startDistance
+            );
+
+        /*
+         * الخلفية والعضو مستقلان تمامًا.
+         * لا يتم تعديل أحدهما عند تكبير الآخر.
+         */
+
+        object.scale =
+            clamp(
+                welcomeState.gesture.startScale *
+                ratio,
+
+                0.05,
+
+                20
+            );
+
+        const centerX =
+            (
+                points[0].x +
+                points[1].x
+            ) / 2;
+
+        const centerY =
+            (
+                points[0].y +
+                points[1].y
+            ) / 2;
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        const scaleX =
+            canvas.width /
+            rect.width;
+
+        const scaleY =
+            canvas.height /
+            rect.height;
+
+        const dx =
+            (
+                centerX -
+                welcomeState.gesture.lastCenterX
+            ) *
+            scaleX;
+
+        const dy =
+            (
+                centerY -
+                welcomeState.gesture.lastCenterY
+            ) *
+            scaleY;
+
+        object.x += dx;
+        object.y += dy;
+
+        clampObject(object);
+
+        welcomeState.gesture.lastCenterX =
+            centerX;
+
+        welcomeState.gesture.lastCenterY =
+            centerY;
+
+    }
+
+    function pointerDistance(a, b) {
+
+        return Math.hypot(
+            a.x - b.x,
+            a.y - b.y
+        );
+
+    }
+
+    function clamp(value, min, max) {
+
+        return Math.max(
+            min,
+            Math.min(max, value)
+        );
+
+    }
+
+    function clampObject(object) {
+
+        object.x =
+            clamp(
+                object.x,
+                -6000,
+                6000
+            );
+
+        object.y =
+            clamp(
+                object.y,
+                -4000,
+                4000
+            );
+
+    }
+
+    /* =====================================================
+       STATUS
+    ====================================================== */
+
+    function setWelcomeStatus(
+        message,
+        error = false
+    ) {
+
+        const element =
+            document.getElementById(
+                "welcomeStatus"
+            );
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent =
+            message;
+
+        element.classList.remove(
+            "ok",
+            "error"
+        );
+
+        element.classList.add(
+            error
+                ? "error"
+                : "ok"
+        );
+
+    }
+
+    /* =====================================================
+       OWNER ROLES
+    ====================================================== */
+
+    async function loadRoles() {
+
+        const list =
+            document.getElementById(
+                "rolesList"
+            );
+
+        if (!list) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/owner/roles",
+                    {
+                        cache: "no-store",
+                        credentials: "same-origin"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!data.ok) {
+
+                list.innerHTML = `
+                    <div class="empty-card">
+                        ليس لديك صلاحية لعرض الرتب.
+                    </div>
+                `;
+
+                return;
+            }
+
+            if (
+                !Array.isArray(data.roles) ||
+                !data.roles.length
+            ) {
+
+                list.innerHTML = `
+                    <div class="empty-card">
+                        لا توجد رتب حاليًا.
+                    </div>
+                `;
+
+                return;
+            }
+
+            list.innerHTML =
+                data.roles
+                    .map(role => {
+
+                        const permissions =
+                            Array.isArray(
+                                role.permissions
+                            )
+                                ? role.permissions
+                                : [];
+
+                        return `
+                            <div class="role-item">
+
+                                <div>
+                                    <strong>
+                                        ${escapeHtml(
+                                            role.name
+                                        )}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span class="role-permission-count">
+                                        ${permissions.length}
+                                        صلاحية
+                                    </span>
+                                </div>
+
+                            </div>
+                        `;
+
+                    })
+                    .join("");
+
+        } catch (error) {
+
+            console.error(
+                "CT ROLES ERROR:",
+                error
+            );
+
+            list.innerHTML = `
+                <div class="empty-card">
+                    تعذر تحميل الرتب.
+                </div>
+            `;
+
+        }
+
+    }
+
+    /* =====================================================
+       ROLE MODAL
+    ====================================================== */
+
+    const roleModal =
+        document.getElementById(
+            "roleModal"
+        );
+
+    const createRole =
+        document.getElementById(
+            "createRoleButton"
+        );
+
+    const closeRole =
+        document.getElementById(
+            "closeRoleModal"
+        );
+
+    const cancelRole =
+        document.getElementById(
+            "cancelRole"
+        );
+
+    function openRoleModal() {
+
+        if (roleModal) {
+
+            roleModal.classList.add(
+                "show"
+            );
+
+        }
+
+    }
+
+    function closeRoleModal() {
+
+        if (roleModal) {
+
+            roleModal.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+
+    if (createRole) {
+
+        createRole.addEventListener(
+            "click",
+            openRoleModal
+        );
+
+    }
+
+    if (closeRole) {
+
+        closeRole.addEventListener(
+            "click",
+            closeRoleModal
+        );
+
+    }
+
+    if (cancelRole) {
+
+        cancelRole.addEventListener(
+            "click",
+            closeRoleModal
+        );
+
+    }
+
+    /* =====================================================
+       CREATE ROLE
+    ====================================================== */
+
+    const roleForm =
+        document.getElementById(
+            "roleForm"
+        );
+
+    if (roleForm) {
+
+        roleForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+                const name =
+                    document
+                        .getElementById(
+                            "roleName"
+                        )
+                        .value
+                        .trim();
+
+                const description =
+                    document
+                        .getElementById(
+                            "roleDescription"
+                        )
+                        .value
+                        .trim();
+
+                if (!name) {
+
+                    showToast(
+                        "اكتب اسم الرتبة"
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/owner/roles",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                credentials:
+                                    "same-origin",
+
+                                body:
+                                    JSON.stringify({
+                                        name,
+                                        description,
+                                        permissions: []
+                                    })
+                            }
+                        );
+
+                    const data =
+                        await response.json();
+
+                    if (!data.ok) {
+
+                        showToast(
+                            data.error ||
+                            "حدث خطأ"
+                        );
+
+                        return;
+                    }
+
+                    closeRoleModal();
+
+                    roleForm.reset();
+
+                    showToast(
+                        "تم إنشاء الرتبة بنجاح"
+                    );
+
+                    loadRoles();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    showToast(
+                        "تعذر الاتصال بالخادم"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+    /* =====================================================
+       REFRESH
+    ====================================================== */
+
+    const refresh =
+        document.getElementById(
+            "refreshButton"
+        );
+
+    if (refresh) {
+
+        refresh.addEventListener(
+            "click",
+            async () => {
+
+                refresh.classList.add(
+                    "rotating"
+                );
+
+                await loadBots();
+
+                if (
+                    welcomeEditorInitialized &&
+                    welcomeState.botNumber
+                ) {
+
+                    await loadWelcomeSettings();
+
+                }
+
+                setTimeout(
+                    () => {
+
+                        refresh.classList.remove(
+                            "rotating"
+                        );
+
+                    },
+                    600
+                );
+
+            }
+        );
+
+    }
+
+    /* =====================================================
+       TOAST
+    ====================================================== */
+
+    function showToast(message) {
+
+        const toast =
+            document.getElementById(
+                "toast"
+            );
+
+        const text =
+            document.getElementById(
+                "toastMessage"
+            );
+
+        if (
+            !toast ||
+            !text
+        ) {
+            return;
+        }
+
+        text.textContent =
+            message;
+
+        toast.classList.add(
+            "show"
+        );
+
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+    }
+
+    /* =====================================================
+       ESCAPE
+    ====================================================== */
+
+    function escapeHtml(value) {
+
+        return String(
+            value ?? ""
+        )
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+    /* =====================================================
+       NUMBER
+    ====================================================== */
+
+    function cleanNumber(value) {
+
+        const number =
+            Number.parseInt(
+                value,
+                10
+            );
+
+        return Number.isFinite(number)
+            ? number
+            : null;
+
+    }
+
+    /* =====================================================
+       START
+    ====================================================== */
+
+    showPage("home");
+
+    loadBots();
+
+});
 </script>
 
 </body>
