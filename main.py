@@ -3,6 +3,7 @@
 # Main Server - Full Stable Version
 # Multi Bots + Per-System Bot Selection
 # Welcome Editor + Touch + Pinch Zoom + Image Upload + Save
+# OAuth State Fix
 # =========================================================
 
 import os
@@ -30,7 +31,6 @@ from flask import (
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-
 # =========================================================
 # SETTINGS
 # =========================================================
@@ -55,7 +55,6 @@ ALLOWED_IMAGE_TYPES = {
     "image/webp": "webp",
 }
 
-
 # =========================================================
 # DISCORD OAUTH
 # =========================================================
@@ -75,7 +74,6 @@ DISCORD_REDIRECT_URI = os.getenv(
     ""
 ).strip()
 
-
 # =========================================================
 # CT SERVER
 # =========================================================
@@ -84,7 +82,6 @@ CT_GUILD_ID = os.getenv(
     "CT_GUILD_ID",
     ""
 ).strip()
-
 
 # =========================================================
 # FLASK SECRET
@@ -97,7 +94,6 @@ SECRET_KEY = os.getenv(
 
 if not SECRET_KEY:
     SECRET_KEY = secrets.token_hex(32)
-
 
 # =========================================================
 # FLASK
@@ -129,7 +125,6 @@ app.config.update(
     SESSION_REFRESH_EACH_REQUEST=True,
     MAX_CONTENT_LENGTH=MAX_IMAGE_SIZE + 1024 * 1024,
 )
-
 
 # =========================================================
 # SYSTEMS
@@ -198,7 +193,6 @@ SYSTEMS = {
     },
 }
 
-
 # =========================================================
 # PERMISSIONS
 # =========================================================
@@ -251,7 +245,6 @@ PERMISSIONS = {
     "shortcuts.view": "عرض الاختصارات",
     "shortcuts.manage": "إدارة الاختصارات",
 }
-
 
 # =========================================================
 # DATABASE
@@ -320,10 +313,6 @@ def init_db():
         )
     """)
 
-    # =====================================================
-    # WELCOME ASSETS
-    # =====================================================
-
     db.execute("""
         CREATE TABLE IF NOT EXISTS welcome_assets (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -334,6 +323,20 @@ def init_db():
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             UNIQUE(bot_number, asset_type)
+        )
+    """)
+
+    # =====================================================
+    # OAUTH STATES
+    # =====================================================
+    # OAuth state is stored in SQLite instead of Flask session.
+    # This prevents the "جلسة تسجيل الدخول غير صالحة" problem
+    # when Discord redirects back to Render.
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS oauth_states (
+            state TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL
         )
     """)
 
@@ -525,6 +528,155 @@ def save_system_settings(
 
     db.commit()
     db.close()
+
+
+# =========================================================
+# OAUTH STATE HELPERS
+# =========================================================
+
+def create_oauth_state():
+
+    state = secrets.token_urlsafe(32)
+
+    db = get_db()
+
+    # Remove old states older than 15 minutes.
+    db.execute(
+        """
+        DELETE FROM oauth_states
+        WHERE created_at < ?
+        """,
+        (
+            (
+                datetime.now(timezone.utc)
+                .timestamp()
+                - 900
+            ),
+        )
+    )
+
+    # SQLite stores ISO text in created_at, so the timestamp
+    # cleanup above is not suitable for text comparison.
+    # Clean old records safely in Python instead.
+    rows = db.execute(
+        """
+        SELECT state, created_at
+        FROM oauth_states
+        """
+    ).fetchall()
+
+    now_timestamp = datetime.now(
+        timezone.utc
+    ).timestamp()
+
+    for row in rows:
+
+        try:
+
+            created = datetime.fromisoformat(
+                row["created_at"]
+            ).timestamp()
+
+            if (
+                now_timestamp - created
+                > 900
+            ):
+
+                db.execute(
+                    """
+                    DELETE FROM oauth_states
+                    WHERE state = ?
+                    """,
+                    (row["state"],)
+                )
+
+        except Exception:
+
+            db.execute(
+                """
+                DELETE FROM oauth_states
+                WHERE state = ?
+                """,
+                (row["state"],)
+            )
+
+    db.execute(
+        """
+        INSERT INTO oauth_states
+        (
+            state,
+            created_at
+        )
+        VALUES (?, ?)
+        """,
+        (
+            state,
+            utc_now(),
+        )
+    )
+
+    db.commit()
+    db.close()
+
+    return state
+
+
+def consume_oauth_state(state):
+
+    if not state:
+        return False
+
+    db = get_db()
+
+    row = db.execute(
+        """
+        SELECT state, created_at
+        FROM oauth_states
+        WHERE state = ?
+        """,
+        (state,)
+    ).fetchone()
+
+    if not row:
+
+        db.close()
+
+        return False
+
+    valid = False
+
+    try:
+
+        created = datetime.fromisoformat(
+            row["created_at"]
+        ).timestamp()
+
+        now_timestamp = datetime.now(
+            timezone.utc
+        ).timestamp()
+
+        if (
+            now_timestamp - created
+            <= 900
+        ):
+            valid = True
+
+    except Exception:
+
+        valid = False
+
+    db.execute(
+        """
+        DELETE FROM oauth_states
+        WHERE state = ?
+        """,
+        (state,)
+    )
+
+    db.commit()
+    db.close()
+
+    return valid
 
 
 # =========================================================
@@ -847,14 +999,6 @@ def discord_get_channels(token):
 
         channels = []
         categories = []
-
-        # Discord:
-        # 0  = text
-        # 4  = category
-        # 5  = announcement
-        # 10 = announcement thread
-        # 11 = public thread
-        # 12 = private thread
 
         for channel in raw_channels:
 
@@ -1412,13 +1556,14 @@ def login():
                 missing,
         }), 500
 
-    state = secrets.token_urlsafe(
-        32
-    )
+    # =====================================================
+    # IMPORTANT:
+    # Do NOT store OAuth state in Flask session.
+    # Store it in SQLite so Discord's callback does not
+    # depend on the session cookie surviving the redirect.
+    # =====================================================
 
-    session["oauth_state"] = state
-
-    session.modified = True
+    state = create_oauth_state()
 
     params = {
         "client_id":
@@ -1481,10 +1626,6 @@ def login_callback():
         "state"
     )
 
-    saved_state = session.get(
-        "oauth_state"
-    )
-
     if not code:
 
         session.clear()
@@ -1495,7 +1636,14 @@ def login_callback():
                 "لم يتم استلام رمز تسجيل الدخول",
         }), 400
 
-    if not state or state != saved_state:
+    # =====================================================
+    # OAuth state is now checked against SQLite.
+    # This fixes the Render/Discord callback 400 issue.
+    # =====================================================
+
+    if not state or not consume_oauth_state(
+        state
+    ):
 
         session.clear()
 
@@ -1504,11 +1652,6 @@ def login_callback():
             "error":
                 "جلسة تسجيل الدخول غير صالحة، حاول مرة أخرى",
         }), 400
-
-    session.pop(
-        "oauth_state",
-        None
-    )
 
     token_data = discord_exchange_code(
         code
@@ -2162,10 +2305,6 @@ def api_get_system(
         system_id
     )
 
-    # =====================================================
-    # WELCOME ASSET INFORMATION
-    # =====================================================
-
     if system_id == "welcome":
 
         asset = get_uploaded_asset(
@@ -2209,7 +2348,6 @@ def api_get_system(
                 background
             )
 
-            # Compatibility with old version
             settings["background_asset_id"] = (
                 asset["id"]
             )
@@ -2228,7 +2366,6 @@ def api_get_system(
                 "scale": 1.0,
             }
 
-        # Default welcome values
         settings.setdefault(
             "enabled",
             True
@@ -2603,7 +2740,6 @@ def api_welcome_delete_image(
     db.commit()
     db.close()
 
-    # Remove asset references from saved welcome settings
     current_settings = get_system_settings(
         bot_number,
         "welcome"
@@ -2750,10 +2886,6 @@ def api_apply():
                 "settings يجب أن تكون كائنًا",
         }), 400
 
-    # =====================================================
-    # NORMALIZE WELCOME SETTINGS
-    # =====================================================
-
     if system_id == "welcome":
 
         settings = dict(
@@ -2805,7 +2937,6 @@ def api_apply():
             )
         )
 
-        # Independent background transform
         background.setdefault(
             "x",
             600
@@ -2851,8 +2982,6 @@ def api_apply():
 
             background["scale"] = 1.0
 
-        # Prevent invalid/negative scale.
-        # Large values are intentionally allowed.
         background["scale"] = max(
             0.01,
             background["scale"]
@@ -2940,7 +3069,6 @@ def api_apply():
 
             member_avatar["scale"] = 1.0
 
-        # Member avatar has its own independent scale.
         member_avatar["scale"] = max(
             0.01,
             member_avatar["scale"]
