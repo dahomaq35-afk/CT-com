@@ -1,22 +1,209 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
     <title>{{ server_name }} • CT Dashboard</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <style>
+
+        /* =====================================================
+           WELCOME EDITOR
+        ===================================================== */
+
+        .welcome-editor-card {
+            margin-top: 20px;
+        }
+
+        .welcome-toolbar {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .welcome-tool {
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .welcome-tool strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .welcome-tool small {
+            display: block;
+            color: #8c8c94;
+            margin-bottom: 10px;
+        }
+
+        .welcome-tool input[type="file"],
+        .welcome-tool select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .welcome-editor-wrap {
+            margin-top: 20px;
+        }
+
+        .welcome-canvas-shell {
+            width: 100%;
+            max-width: 760px;
+            margin: auto;
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            background:
+                repeating-conic-gradient(
+                    #18181c 0 25%,
+                    #202025 0 50%
+                )
+                0 / 24px 24px;
+            border: 1px solid rgba(255,255,255,.1);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #welcomeCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .canvas-help {
+            text-align: center;
+            color: #909098;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .welcome-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .welcome-controls button {
+            flex: 1 1 150px;
+        }
+
+        .welcome-status {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.035);
+            color: #a5a5ad;
+            font-size: 13px;
+        }
+
+        .welcome-status.ok {
+            color: #74e69a;
+        }
+
+        .welcome-status.error {
+            color: #ff7d89;
+        }
+
+        .welcome-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        .welcome-checkbox input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .welcome-section {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,.07);
+        }
+
+        .welcome-section-title {
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .welcome-bot-select {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .welcome-selected-info {
+            margin-top: 8px;
+            color: #888890;
+            font-size: 12px;
+        }
+
+        .welcome-action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .welcome-action-row button {
+            flex: 1 1 180px;
+        }
+
+        .image-preview-mini {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: none;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+        @media (max-width: 700px) {
+
+            .welcome-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-canvas-shell {
+                border-radius: 12px;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 <body>
 
 <div class="app">
 
-    <!-- =========================================================
+    <!-- =====================================================
          SIDEBAR
-    ========================================================== -->
+    ====================================================== -->
 
     <aside class="sidebar">
 
@@ -133,9 +320,9 @@
     </aside>
 
 
-    <!-- =========================================================
+    <!-- =====================================================
          MAIN
-    ========================================================== -->
+    ====================================================== -->
 
     <main class="main">
 
@@ -230,13 +417,8 @@
 
                     <div class="server-logo-large">
 
-                        <span class="logo-c">
-                            C
-                        </span>
-
-                        <span class="logo-t">
-                            T
-                        </span>
+                        <span class="logo-c">C</span>
+                        <span class="logo-t">T</span>
 
                     </div>
 
@@ -433,9 +615,7 @@
 
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>🛡️ الإدارة</h2>
-
                         <p>
                             إدارة أدوات الإشراف والعقوبات.
                         </p>
@@ -444,27 +624,6 @@
                 </div>
 
                 <div class="system-card">
-
-                    <div class="system-card-header">
-
-                        <div>
-                            <h3>
-                                البوتات المستهدفة
-                            </h3>
-
-                            <p>
-                                حدد البوتات التي تريد تعديلها.
-                            </p>
-                        </div>
-
-                        <span
-                            class="selected-count"
-                            data-count-for="moderation"
-                        >
-                            0
-                        </span>
-
-                    </div>
 
                     <div class="settings-placeholder">
 
@@ -475,7 +634,7 @@
                         </strong>
 
                         <p>
-                            سيتم التحكم بالإعدادات من هنا وتطبيقها على البوتات المحددة.
+                            سيتم التحكم بالإعدادات من هنا.
                         </p>
 
                     </div>
@@ -494,56 +653,292 @@
                 <div class="page-heading">
 
                     <div>
-                        <span class="eyebrow">SYSTEM</span>
 
-                        <h2>👋 الترحيب</h2>
+                        <span class="eyebrow">
+                            SYSTEM
+                        </span>
+
+                        <h2>
+                            👋 الترحيب
+                        </h2>
 
                         <p>
-                            تصميم وإدارة رسائل الترحيب.
+                            صمم صورة الترحيب وحرك العناصر بيدك.
                         </p>
+
                     </div>
 
                 </div>
 
-                <div class="system-card">
 
-                    <div class="setting-row">
+                <div class="system-card welcome-editor-card">
 
-                        <div>
-                            <strong>
-                                تفعيل الترحيب
-                            </strong>
+                    <!-- BOT -->
 
-                            <small>
-                                تشغيل أو إيقاف نظام الترحيب.
-                            </small>
+                    <div class="welcome-section">
+
+                        <div class="welcome-section-title">
+                            🤖 البوت المستهدف
                         </div>
 
-                        <label class="switch">
+                        <select
+                            id="welcomeBot"
+                            class="welcome-bot-select"
+                        >
 
-                            <input
-                                type="checkbox"
-                                id="welcomeEnabled"
-                            >
+                            <option value="">
+                                اختر البوت
+                            </option>
 
-                            <span></span>
+                        </select>
 
-                        </label>
+                        <div
+                            class="welcome-selected-info"
+                            id="welcomeBotInfo"
+                        >
+                            اختر بوتًا لتحميل إعدادات الترحيب.
+                        </div>
 
                     </div>
 
-                    <div class="settings-placeholder">
 
-                        <span>🎨</span>
+                    <!-- ENABLE -->
 
-                        <strong>
-                            محرر الترحيب
-                        </strong>
+                    <div class="welcome-section">
 
-                        <p>
-                            تصميم الخلفية والصورة والنص ومواقع العناصر.
-                        </p>
+                        <div class="setting-row">
 
+                            <div>
+
+                                <strong>
+                                    تفعيل الترحيب
+                                </strong>
+
+                                <small>
+                                    تشغيل أو إيقاف نظام الترحيب.
+                                </small>
+
+                            </div>
+
+                            <label class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="welcomeEnabled"
+                                    checked
+                                >
+
+                                <span></span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CHANNEL -->
+
+                    <div class="welcome-section">
+
+                        <div class="welcome-section-title">
+                            📢 قسم الترحيب
+                        </div>
+
+                        <select
+                            id="welcomeChannel"
+                            class="welcome-bot-select"
+                        >
+
+                            <option value="">
+                                اختر قسم الترحيب
+                            </option>
+
+                        </select>
+
+                        <div class="welcome-selected-info">
+                            البوت المختار يحتاج صلاحية مشاهدة وإرسال الرسائل في هذا القسم.
+                        </div>
+
+                    </div>
+
+
+                    <!-- BACKGROUND -->
+
+                    <div class="welcome-section">
+
+                        <div class="welcome-section-title">
+                            🖼️ صورة الترحيب
+                        </div>
+
+                        <div class="welcome-tool">
+
+                            <strong>
+                                رفع الخلفية
+                            </strong>
+
+                            <small>
+                                PNG / JPG / WebP — الحد الأقصى 5MB
+                            </small>
+
+                            <input
+                                type="file"
+                                id="welcomeBackgroundInput"
+                                accept="image/png,image/jpeg,image/webp"
+                            >
+
+                            <img
+                                id="welcomeBackgroundPreview"
+                                class="image-preview-mini"
+                                alt="معاينة"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MEMBER IMAGE -->
+
+                    <div class="welcome-section">
+
+                        <div class="welcome-section-title">
+                            👤 صورة العضو
+                        </div>
+
+                        <label class="welcome-checkbox">
+
+                            <input
+                                type="checkbox"
+                                id="memberImageEnabled"
+                                checked
+                            >
+
+                            <span>
+                                إظهار صورة العضو داخل صورة الترحيب
+                            </span>
+
+                        </label>
+
+                        <div class="welcome-tool">
+
+                            <strong>
+                                صورة العضو
+                            </strong>
+
+                            <small>
+                                الصورة الافتراضية تأتي من Discord عند إرسال الترحيب.
+                            </small>
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="resetMemberImage"
+                            >
+                                إعادة ضبط صورة العضو
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EDITOR -->
+
+                    <div class="welcome-section">
+
+                        <div class="welcome-section-title">
+                            🎨 محرر الترحيب
+                        </div>
+
+                        <div class="welcome-editor-wrap">
+
+                            <div
+                                class="welcome-canvas-shell"
+                                id="welcomeCanvasShell"
+                            >
+
+                                <canvas
+                                    id="welcomeCanvas"
+                                    width="1200"
+                                    height="630"
+                                ></canvas>
+
+                            </div>
+
+                            <div class="canvas-help">
+                                👆 اسحب العنصر بإصبعك لتحريكه — 🤏 استخدم إصبعين للتكبير والتصغير
+                            </div>
+
+                            <div class="welcome-controls">
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    id="selectBackgroundTool"
+                                >
+                                    🖼️ تحديد الخلفية
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    id="selectMemberTool"
+                                >
+                                    👤 تحديد صورة العضو
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    id="resetBackground"
+                                >
+                                    🔄 إعادة الخلفية
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    id="resetMember"
+                                >
+                                    🔄 إعادة العضو
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="welcome-action-row">
+
+                        <button
+                            type="button"
+                            class="primary-button"
+                            id="saveWelcome"
+                        >
+                            💾 حفظ إعدادات الترحيب
+                        </button>
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="reloadWelcome"
+                        >
+                            ↻ إعادة تحميل
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="welcome-status"
+                        id="welcomeStatus"
+                    >
+                        جاهز.
                     </div>
 
                 </div>
@@ -552,412 +947,214 @@
 
 
             <!-- =================================================
-                 LEVELS
+                 OTHER SYSTEMS
             ================================================== -->
 
             <div class="server-page" id="levels">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>📊 اللفلات</h2>
-
-                        <p>
-                            إدارة الخبرة والمستويات.
-                        </p>
+                        <p>إدارة الخبرة والمستويات.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>📊</span>
-
-                        <strong>
-                            نظام اللفلات
-                        </strong>
-
-                        <p>
-                            إعدادات الخبرة والمستويات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام اللفلات</strong>
+                        <p>إعدادات الخبرة والمستويات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 POINTS
-            ================================================== -->
 
             <div class="server-page" id="points">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>⭐ النقاط</h2>
-
-                        <p>
-                            إدارة نظام النقاط.
-                        </p>
+                        <p>إدارة نظام النقاط.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>⭐</span>
-
-                        <strong>
-                            نظام النقاط
-                        </strong>
-
-                        <p>
-                            إعدادات النقاط جاهزة للربط.
-                        </p>
-
+                        <strong>نظام النقاط</strong>
+                        <p>إعدادات النقاط جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 TICKETS
-            ================================================== -->
 
             <div class="server-page" id="tickets">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>🎫 التذاكر</h2>
-
-                        <p>
-                            إدارة نظام التذاكر.
-                        </p>
+                        <p>إدارة نظام التذاكر.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>🎫</span>
-
-                        <strong>
-                            نظام التذاكر
-                        </strong>
-
-                        <p>
-                            إعدادات التذاكر جاهزة للربط.
-                        </p>
-
+                        <strong>نظام التذاكر</strong>
+                        <p>إعدادات التذاكر جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 APPLICATIONS
-            ================================================== -->
 
             <div class="server-page" id="applications">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>📝 التقديمات</h2>
-
-                        <p>
-                            إدارة نماذج التقديم والقبول والرفض.
-                        </p>
+                        <p>إدارة نماذج التقديم والقبول والرفض.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>📝</span>
-
-                        <strong>
-                            نظام التقديمات
-                        </strong>
-
-                        <p>
-                            إعدادات التقديمات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام التقديمات</strong>
+                        <p>إعدادات التقديمات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 SUGGESTIONS
-            ================================================== -->
 
             <div class="server-page" id="suggestions">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>💡 الاقتراحات</h2>
-
-                        <p>
-                            إدارة الاقتراحات والتصويت.
-                        </p>
+                        <p>إدارة الاقتراحات والتصويت.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>💡</span>
-
-                        <strong>
-                            نظام الاقتراحات
-                        </strong>
-
-                        <p>
-                            إعدادات الاقتراحات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام الاقتراحات</strong>
+                        <p>إعدادات الاقتراحات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 NOTIFICATIONS
-            ================================================== -->
 
             <div class="server-page" id="notifications">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>🔔 الإشعارات</h2>
-
-                        <p>
-                            إدارة الإشعارات والتنبيهات.
-                        </p>
+                        <p>إدارة الإشعارات والتنبيهات.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>🔔</span>
-
-                        <strong>
-                            نظام الإشعارات
-                        </strong>
-
-                        <p>
-                            إعدادات الإشعارات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام الإشعارات</strong>
+                        <p>إعدادات الإشعارات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 LAWS
-            ================================================== -->
 
             <div class="server-page" id="laws">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>📜 القوانين</h2>
-
-                        <p>
-                            إدارة قوانين السيرفر.
-                        </p>
+                        <p>إدارة قوانين السيرفر.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>📜</span>
-
-                        <strong>
-                            نظام القوانين
-                        </strong>
-
-                        <p>
-                            إعدادات القوانين جاهزة للربط.
-                        </p>
-
+                        <strong>نظام القوانين</strong>
+                        <p>إعدادات القوانين جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 LOGS
-            ================================================== -->
 
             <div class="server-page" id="logs">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>🧾 اللوقات</h2>
-
-                        <p>
-                            إدارة جميع أنواع اللوقات.
-                        </p>
+                        <p>إدارة جميع أنواع اللوقات.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>🧾</span>
-
-                        <strong>
-                            نظام اللوقات
-                        </strong>
-
-                        <p>
-                            إعدادات اللوقات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام اللوقات</strong>
+                        <p>إعدادات اللوقات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- =================================================
-                 REPLIES
-            ================================================== -->
 
             <div class="server-page" id="replies">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>💬 الردود</h2>
-
-                        <p>
-                            إدارة الردود التلقائية.
-                        </p>
-
+                        <p>إدارة الردود التلقائية.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>💬</span>
-
-                        <strong>
-                            نظام الردود
-                        </strong>
-
-                        <p>
-                            إعدادات الردود جاهزة للربط.
-                        </p>
-
+                        <strong>نظام الردود</strong>
+                        <p>إعدادات الردود جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
 
 
-            <!-- =================================================
-                 SHORTCUTS
-            ================================================== -->
-
             <div class="server-page" id="shortcuts">
 
                 <div class="page-heading">
-
                     <div>
                         <span class="eyebrow">SYSTEM</span>
-
                         <h2>⚡ الاختصارات</h2>
-
-                        <p>
-                            إدارة اختصارات الأوامر.
-                        </p>
-
+                        <p>إدارة اختصارات الأوامر.</p>
                     </div>
-
                 </div>
 
                 <div class="system-card">
-
                     <div class="settings-placeholder">
-
                         <span>⚡</span>
-
-                        <strong>
-                            نظام الاختصارات
-                        </strong>
-
-                        <p>
-                            إعدادات الاختصارات جاهزة للربط.
-                        </p>
-
+                        <strong>نظام الاختصارات</strong>
+                        <p>إعدادات الاختصارات جاهزة للربط.</p>
                     </div>
-
                 </div>
 
             </div>
@@ -1115,10 +1312,7 @@
      ROLE MODAL
 ========================================================= -->
 
-<div
-    class="modal"
-    id="roleModal"
->
+<div class="modal" id="roleModal">
 
     <div class="modal-box">
 
@@ -1198,10 +1392,7 @@
      TOAST
 ========================================================= -->
 
-<div
-    class="toast"
-    id="toast"
->
+<div class="toast" id="toast">
     <span id="toastMessage"></span>
 </div>
 
@@ -1214,9 +1405,14 @@ document.addEventListener("DOMContentLoaded", () => {
        PAGE SYSTEM
     ========================================================== */
 
-    const pages = document.querySelectorAll(".server-page");
-    const navItems = document.querySelectorAll(".nav-item");
-    const pageTitle = document.getElementById("pageTitle");
+    const pages =
+        document.querySelectorAll(".server-page");
+
+    const navItems =
+        document.querySelectorAll(".nav-item");
+
+    const pageTitle =
+        document.getElementById("pageTitle");
 
     const titles = {
         overview: "الرئيسية",
@@ -1243,7 +1439,8 @@ document.addEventListener("DOMContentLoaded", () => {
             item.classList.remove("active");
         });
 
-        const target = document.getElementById(page);
+        const target =
+            document.getElementById(page);
 
         if (target) {
             target.classList.add("active");
@@ -1273,6 +1470,10 @@ document.addEventListener("DOMContentLoaded", () => {
             loadRoles();
         }
 
+        if (page === "welcome") {
+            initWelcomeEditor();
+        }
+
     }
 
 
@@ -1280,7 +1481,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         item.addEventListener("click", () => {
 
-            const page = item.dataset.page;
+            const page =
+                item.dataset.page;
 
             if (page) {
                 showPage(page);
@@ -1291,9 +1493,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    /*
-     * أزرار data-page الموجودة داخل الصفحة
-     */
     document
         .querySelectorAll("[data-page]")
         .forEach(button => {
@@ -1304,7 +1503,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             button.addEventListener("click", () => {
 
-                const page = button.dataset.page;
+                const page =
+                    button.dataset.page;
 
                 if (page) {
                     showPage(page);
@@ -1319,6 +1519,9 @@ document.addEventListener("DOMContentLoaded", () => {
        BOT SYSTEM
     ========================================================== */
 
+    let loadedBots = [];
+
+
     async function loadBots() {
 
         const home =
@@ -1327,35 +1530,41 @@ document.addEventListener("DOMContentLoaded", () => {
         const grid =
             document.getElementById("serverBotsGrid");
 
-
         try {
 
             if (home) {
+
                 home.innerHTML = `
                     <div class="loading-card">
                         جاري تحميل البوتات...
                     </div>
                 `;
+
             }
 
             if (grid) {
+
                 grid.innerHTML = `
                     <div class="loading-card">
                         جاري تحميل البوتات...
                     </div>
                 `;
+
             }
 
-
             const response =
-                await fetch("/api/bots", {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    },
-                    cache: "no-store"
-                });
-
+                await fetch(
+                    "/api/bots",
+                    {
+                        method: "GET",
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        },
+                        cache:
+                            "no-store"
+                    }
+                );
 
             if (!response.ok) {
 
@@ -1365,16 +1574,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
-
             const data =
                 await response.json();
-
-
-            console.log(
-                "CT /api/bots:",
-                data
-            );
-
 
             if (!data.ok) {
 
@@ -1385,15 +1586,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
-
-            const bots =
+            loadedBots =
                 Array.isArray(data.bots)
                     ? data.bots
                     : [];
 
+            renderBots(
+                loadedBots
+            );
 
-            renderBots(bots);
-
+            populateWelcomeBots();
 
         } catch (error) {
 
@@ -1402,11 +1604,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 error
             );
 
-
             const message =
                 error.message ||
                 "تعذر تحميل البوتات";
-
 
             if (home) {
 
@@ -1421,7 +1621,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
 
             }
-
 
             if (grid) {
 
@@ -1450,27 +1649,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const grid =
             document.getElementById("serverBotsGrid");
 
-
-        /*
-         * API الحالي يرجع:
-         *
-         * number
-         * name
-         * username
-         * global_name
-         * id
-         * avatar
-         * online
-         * valid_token
-         * in_ct
-         */
-
-
         const online =
-            bots.filter(bot =>
-                bot.online === true
+            bots.filter(
+                bot => bot.online === true
             ).length;
-
 
         const count =
             document.getElementById(
@@ -1482,12 +1664,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "serverOnlineCount"
             );
 
-
         if (count) {
             count.textContent =
                 bots.length;
         }
-
 
         if (onlineCount) {
             onlineCount.textContent =
@@ -1501,43 +1681,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 const botNumber =
                     bot.number ?? "";
 
-
                 const botName =
                     bot.name ||
                     bot.global_name ||
                     bot.username ||
                     `Bot ${botNumber}`;
 
-
                 const botUsername =
                     bot.username ||
                     bot.global_name ||
                     "Unknown";
 
-
                 const botId =
                     bot.id ||
                     "غير معروف";
-
 
                 const avatar =
                     bot.avatar ||
                     "https://cdn.discordapp.com/embed/avatars/0.png";
 
-
                 const isOnline =
                     bot.online === true;
 
-
                 const isInCT =
                     bot.in_ct !== false;
-
-
-                const statusText =
-                    isOnline
-                        ? "متصل"
-                        : "غير متصل";
-
 
                 const statusClass =
                     isOnline
@@ -1572,7 +1739,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 : ""
                         }
 
-
                         <img
                             class="bot-avatar"
                             src="${escapeHtml(avatar)}"
@@ -1581,18 +1747,15 @@ document.addEventListener("DOMContentLoaded", () => {
                             onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"
                         >
 
-
                         <div class="bot-card-info">
 
                             <h3>
                                 ${escapeHtml(botName)}
                             </h3>
 
-
                             <span>
                                 @${escapeHtml(botUsername)}
                             </span>
-
 
                             <span
                                 style="
@@ -1605,20 +1768,17 @@ document.addEventListener("DOMContentLoaded", () => {
                                 ID: ${escapeHtml(botId)}
                             </span>
 
-
                             <div class="bot-status">
 
                                 <span
                                     class="status-dot ${statusClass}"
                                 ></span>
 
-
                                 ${
                                     isOnline
                                         ? "متصل"
                                         : "غير متصل"
                                 }
-
 
                                 ${
                                     isInCT
@@ -1645,10 +1805,6 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
 
-        /* =====================================================
-           HOME
-        ====================================================== */
-
         if (home) {
 
             if (!bots.length) {
@@ -1656,27 +1812,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 home.innerHTML = `
                     <div class="empty-card">
                         لا توجد بوتات متصلة حاليًا.
-                        <br>
-                        تأكد من إضافة BOT_TOKEN_1
-                        أو BOT_TOKEN_2
-                        أو أي BOT_TOKEN_N في Render.
                     </div>
                 `;
 
             } else {
 
-                /*
-                 * لا يوجد slice هنا.
-                 * جميع البوتات تظهر مهما كان عددها.
-                 */
-
                 home.innerHTML =
                     bots
-                        .map(bot =>
-                            createCard(
-                                bot,
-                                false
-                            )
+                        .map(
+                            bot =>
+                                createCard(
+                                    bot,
+                                    false
+                                )
                         )
                         .join("");
 
@@ -1684,10 +1832,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-
-        /* =====================================================
-           BOTS PAGE
-        ====================================================== */
 
         if (grid) {
 
@@ -1703,11 +1847,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 grid.innerHTML =
                     bots
-                        .map(bot =>
-                            createCard(
-                                bot,
-                                true
-                            )
+                        .map(
+                            bot =>
+                                createCard(
+                                    bot,
+                                    true
+                                )
                         )
                         .join("");
 
@@ -1715,7 +1860,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             grid
-                .querySelectorAll(".bot-selector")
+                .querySelectorAll(
+                    ".bot-selector"
+                )
                 .forEach(input => {
 
                     input.addEventListener(
@@ -1726,7 +1873,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
         }
-
 
         updateSelectedCount();
 
@@ -1740,12 +1886,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ".bot-selector:checked"
             );
 
-
         const count =
             document.getElementById(
                 "serverSelectedBots"
             );
-
 
         if (count) {
             count.textContent =
@@ -1755,15 +1899,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =========================================================
-       SELECT ALL
-    ========================================================== */
-
     const selectAll =
         document.getElementById(
             "serverSelectAll"
         );
-
 
     if (selectAll) {
 
@@ -1775,12 +1914,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     .querySelectorAll(
                         ".bot-selector"
                     )
-                    .forEach(input => {
-
-                        input.checked = true;
-
-                    });
-
+                    .forEach(
+                        input =>
+                            input.checked = true
+                    );
 
                 updateSelectedCount();
 
@@ -1790,15 +1927,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =========================================================
-       CLEAR ALL
-    ========================================================== */
-
     const clearAll =
         document.getElementById(
             "serverClearAll"
         );
-
 
     if (clearAll) {
 
@@ -1810,17 +1942,2152 @@ document.addEventListener("DOMContentLoaded", () => {
                     .querySelectorAll(
                         ".bot-selector"
                     )
-                    .forEach(input => {
-
-                        input.checked = false;
-
-                    });
-
+                    .forEach(
+                        input =>
+                            input.checked = false
+                    );
 
                 updateSelectedCount();
 
             }
         );
+
+    }
+
+
+    /* =========================================================
+       WELCOME EDITOR
+    ========================================================== */
+
+    const welcomeState = {
+
+        initialized:
+            false,
+
+        botNumber:
+            null,
+
+        enabled:
+            true,
+
+        channelId:
+            "",
+
+        background: {
+            image:
+                null,
+
+            src:
+                null,
+
+            x:
+                0,
+
+            y:
+                0,
+
+            scale:
+                1,
+
+            baseWidth:
+                1200,
+
+            baseHeight:
+                630
+        },
+
+        member: {
+            image:
+                null,
+
+            src:
+                null,
+
+            x:
+                600,
+
+            y:
+                315,
+
+            scale:
+                1,
+
+            baseWidth:
+                220,
+
+            baseHeight:
+                220
+        },
+
+        selected:
+            "member",
+
+        pointer:
+            new Map(),
+
+        gesture:
+            null
+    };
+
+
+    let welcomeEditorInitialized = false;
+
+
+    function initWelcomeEditor() {
+
+        if (welcomeEditorInitialized) {
+            return;
+        }
+
+        welcomeEditorInitialized =
+            true;
+
+        const canvas =
+            document.getElementById(
+                "welcomeCanvas"
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+        const bgInput =
+            document.getElementById(
+                "welcomeBackgroundInput"
+            );
+
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
+
+        const selectBackground =
+            document.getElementById(
+                "selectBackgroundTool"
+            );
+
+        const selectMember =
+            document.getElementById(
+                "selectMemberTool"
+            );
+
+        const resetBackground =
+            document.getElementById(
+                "resetBackground"
+            );
+
+        const resetMember =
+            document.getElementById(
+                "resetMember"
+            );
+
+        const resetMemberImage =
+            document.getElementById(
+                "resetMemberImage"
+            );
+
+        const saveButton =
+            document.getElementById(
+                "saveWelcome"
+            );
+
+        const reloadButton =
+            document.getElementById(
+                "reloadWelcome"
+            );
+
+        const botSelect =
+            document.getElementById(
+                "welcomeBot"
+            );
+
+        if (bgInput) {
+
+            bgInput.addEventListener(
+                "change",
+                handleBackgroundUpload
+            );
+
+        }
+
+        if (memberEnabled) {
+
+            memberEnabled.addEventListener(
+                "change",
+                () => {
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (selectBackground) {
+
+            selectBackground.addEventListener(
+                "click",
+                () => {
+
+                    welcomeState.selected =
+                        "background";
+
+                    drawWelcomeCanvas();
+
+                    setWelcomeStatus(
+                        "تم تحديد صورة الترحيب للتحريك والتكبير."
+                    );
+
+                }
+            );
+
+        }
+
+        if (selectMember) {
+
+            selectMember.addEventListener(
+                "click",
+                () => {
+
+                    welcomeState.selected =
+                        "member";
+
+                    drawWelcomeCanvas();
+
+                    setWelcomeStatus(
+                        "تم تحديد صورة العضو للتحريك والتكبير."
+                    );
+
+                }
+            );
+
+        }
+
+        if (resetBackground) {
+
+            resetBackground.addEventListener(
+                "click",
+                () => {
+
+                    resetBackgroundTransform();
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (resetMember) {
+
+            resetMember.addEventListener(
+                "click",
+                () => {
+
+                    resetMemberTransform();
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (resetMemberImage) {
+
+            resetMemberImage.addEventListener(
+                "click",
+                () => {
+
+                    resetMemberTransform();
+
+                    drawWelcomeCanvas();
+
+                }
+            );
+
+        }
+
+        if (saveButton) {
+
+            saveButton.addEventListener(
+                "click",
+                saveWelcomeSettings
+            );
+
+        }
+
+        if (reloadButton) {
+
+            reloadButton.addEventListener(
+                "click",
+                async () => {
+
+                    await loadWelcomeSettings();
+
+                }
+            );
+
+        }
+
+        if (botSelect) {
+
+            botSelect.addEventListener(
+                "change",
+                async () => {
+
+                    welcomeState.botNumber =
+                        cleanNumber(
+                            botSelect.value
+                        );
+
+                    if (
+                        welcomeState.botNumber
+                    ) {
+
+                        await loadWelcomeSettings();
+
+                    }
+
+                }
+            );
+
+        }
+
+        setupCanvasTouch(canvas);
+
+        drawWelcomeCanvas();
+
+        populateWelcomeBots();
+
+    }
+
+
+    function cleanNumber(value) {
+
+        const number =
+            Number(value);
+
+        if (
+            !Number.isFinite(number) ||
+            number < 1
+        ) {
+            return null;
+        }
+
+        return Math.floor(number);
+
+    }
+
+
+    function populateWelcomeBots() {
+
+        const select =
+            document.getElementById(
+                "welcomeBot"
+            );
+
+        if (!select) {
+            return;
+        }
+
+        const current =
+            select.value;
+
+        select.innerHTML = `
+            <option value="">
+                اختر البوت
+            </option>
+        `;
+
+        loadedBots.forEach(bot => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                bot.number;
+
+            option.textContent =
+                `${bot.name || bot.username || "Bot"} — BOT_TOKEN_${bot.number}`;
+
+            select.appendChild(option);
+
+        });
+
+        if (current) {
+            select.value =
+                current;
+        }
+
+    }
+
+
+    /* =========================================================
+       BACKGROUND UPLOAD
+    ========================================================== */
+
+    async function handleBackgroundUpload(event) {
+
+        const file =
+            event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!welcomeState.botNumber) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا قبل رفع الصورة.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+        if (
+            ![
+                "image/png",
+                "image/jpeg",
+                "image/webp"
+            ].includes(file.type)
+        ) {
+
+            setWelcomeStatus(
+                "نوع الصورة غير مدعوم.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+        if (
+            file.size >
+            5 * 1024 * 1024
+        ) {
+
+            setWelcomeStatus(
+                "حجم الصورة أكبر من 5MB.",
+                true
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        setWelcomeStatus(
+            "جاري رفع صورة الترحيب..."
+        );
+
+
+        const localUrl =
+            URL.createObjectURL(file);
+
+        const localImage =
+            await loadImage(localUrl);
+
+        welcomeState.background.image =
+            localImage;
+
+        welcomeState.background.src =
+            localUrl;
+
+        welcomeState.background.x =
+            600;
+
+        welcomeState.background.y =
+            315;
+
+        welcomeState.background.scale =
+            Math.max(
+                1200 / localImage.width,
+                630 / localImage.height
+            );
+
+
+        drawWelcomeCanvas();
+
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "image",
+            file
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/bots/${welcomeState.botNumber}/welcome/upload`,
+                    {
+                        method:
+                            "POST",
+                        body:
+                            formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "فشل رفع الصورة"
+                );
+
+            }
+
+
+            setWelcomeStatus(
+                "تم رفع وحفظ صورة الترحيب."
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            setWelcomeStatus(
+                error.message ||
+                "تعذر رفع الصورة.",
+                true
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       LOAD WELCOME SETTINGS
+    ========================================================== */
+
+    async function loadWelcomeSettings() {
+
+        if (!welcomeState.botNumber) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا."
+            );
+
+            return;
+        }
+
+
+        const info =
+            document.getElementById(
+                "welcomeBotInfo"
+            );
+
+        if (info) {
+
+            info.textContent =
+                "جاري تحميل إعدادات الترحيب...";
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/bots/${welcomeState.botNumber}/systems/welcome`,
+                    {
+                        cache:
+                            "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر تحميل الإعدادات"
+                );
+
+            }
+
+
+            const settings =
+                data.settings || {};
+
+
+            welcomeState.enabled =
+                settings.enabled !== false;
+
+            welcomeState.channelId =
+                settings.channel_id || "";
+
+
+            const bg =
+                settings.background || {};
+
+            const member =
+                settings.member || {};
+
+
+            if (
+                bg.x !== undefined
+            ) {
+                welcomeState.background.x =
+                    Number(bg.x);
+            }
+
+            if (
+                bg.y !== undefined
+            ) {
+                welcomeState.background.y =
+                    Number(bg.y);
+            }
+
+            if (
+                bg.scale !== undefined
+            ) {
+                welcomeState.background.scale =
+                    Number(bg.scale);
+            }
+
+
+            if (
+                member.x !== undefined
+            ) {
+                welcomeState.member.x =
+                    Number(member.x);
+            }
+
+            if (
+                member.y !== undefined
+            ) {
+                welcomeState.member.y =
+                    Number(member.y);
+            }
+
+            if (
+                member.scale !== undefined
+            ) {
+                welcomeState.member.scale =
+                    Number(member.scale);
+            }
+
+
+            const enabledInput =
+                document.getElementById(
+                    "welcomeEnabled"
+                );
+
+            if (enabledInput) {
+
+                enabledInput.checked =
+                    welcomeState.enabled;
+
+            }
+
+
+            const channelSelect =
+                document.getElementById(
+                    "welcomeChannel"
+                );
+
+            if (channelSelect) {
+
+                channelSelect.value =
+                    welcomeState.channelId;
+
+            }
+
+
+            if (
+                settings.member_image_enabled !==
+                undefined
+            ) {
+
+                const memberEnabled =
+                    document.getElementById(
+                        "memberImageEnabled"
+                    );
+
+                if (memberEnabled) {
+
+                    memberEnabled.checked =
+                        settings.member_image_enabled !== false;
+
+                }
+
+            }
+
+
+            if (
+                settings.background_asset_url
+            ) {
+
+                try {
+
+                    const image =
+                        await loadImage(
+                            settings.background_asset_url
+                        );
+
+                    welcomeState.background.image =
+                        image;
+
+                    welcomeState.background.src =
+                        settings.background_asset_url;
+
+                    const preview =
+                        document.getElementById(
+                            "welcomeBackgroundPreview"
+                        );
+
+                    if (preview) {
+
+                        preview.src =
+                            settings.background_asset_url;
+
+                        preview.style.display =
+                            "block";
+
+                    }
+
+                } catch (imageError) {
+
+                    console.error(
+                        imageError
+                    );
+
+                }
+
+            }
+
+
+            await loadWelcomeChannels();
+
+
+            if (channelSelect) {
+
+                channelSelect.value =
+                    welcomeState.channelId;
+
+            }
+
+
+            drawWelcomeCanvas();
+
+
+            if (info) {
+
+                info.textContent =
+                    "تم تحميل إعدادات البوت.";
+
+            }
+
+
+            setWelcomeStatus(
+                "تم تحميل الإعدادات المحفوظة."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "WELCOME LOAD ERROR:",
+                error
+            );
+
+
+            setWelcomeStatus(
+                error.message ||
+                "تعذر تحميل إعدادات الترحيب.",
+                true
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CHANNELS
+    ========================================================== */
+
+    async function loadWelcomeChannels() {
+
+        const select =
+            document.getElementById(
+                "welcomeChannel"
+            );
+
+        if (!select ||
+            !welcomeState.botNumber
+        ) {
+            return;
+        }
+
+
+        select.innerHTML = `
+            <option value="">
+                جاري تحميل الأقسام...
+            </option>
+        `;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/bots/${welcomeState.botNumber}/channels`,
+                    {
+                        cache:
+                            "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر تحميل الأقسام"
+                );
+
+            }
+
+
+            select.innerHTML = `
+                <option value="">
+                    اختر قسم الترحيب
+                </option>
+            `;
+
+
+            (
+                data.channels || []
+            ).forEach(channel => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    channel.id;
+
+                option.textContent =
+                    `# ${channel.name}`;
+
+                select.appendChild(
+                    option
+                );
+
+            });
+
+
+            select.value =
+                welcomeState.channelId || "";
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            select.innerHTML = `
+                <option value="">
+                    تعذر تحميل الأقسام
+                </option>
+            `;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       SAVE WELCOME
+    ========================================================== */
+
+    async function saveWelcomeSettings() {
+
+        if (!welcomeState.botNumber) {
+
+            setWelcomeStatus(
+                "اختر البوت أولًا.",
+                true
+            );
+
+            return;
+        }
+
+
+        const enabledInput =
+            document.getElementById(
+                "welcomeEnabled"
+            );
+
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
+
+        const channelSelect =
+            document.getElementById(
+                "welcomeChannel"
+            );
+
+
+        const settings = {
+
+            enabled:
+                enabledInput
+                    ? enabledInput.checked
+                    : true,
+
+            channel_id:
+                channelSelect
+                    ? channelSelect.value
+                    : "",
+
+            member_image_enabled:
+                memberEnabled
+                    ? memberEnabled.checked
+                    : true,
+
+            background: {
+
+                x:
+                    welcomeState.background.x,
+
+                y:
+                    welcomeState.background.y,
+
+                scale:
+                    welcomeState.background.scale,
+
+                width:
+                    welcomeState.background.baseWidth,
+
+                height:
+                    welcomeState.background.baseHeight
+
+            },
+
+            member: {
+
+                x:
+                    welcomeState.member.x,
+
+                y:
+                    welcomeState.member.y,
+
+                scale:
+                    welcomeState.member.scale,
+
+                width:
+                    welcomeState.member.baseWidth,
+
+                height:
+                    welcomeState.member.baseHeight
+
+            },
+
+            background_asset_url:
+                welcomeState.background.src || null
+
+        };
+
+
+        setWelcomeStatus(
+            "جاري حفظ إعدادات الترحيب..."
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/apply",
+                    {
+                        method:
+                            "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                            "Accept":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                bots: [
+                                    welcomeState.botNumber
+                                ],
+
+                                system:
+                                    "welcome",
+
+                                settings:
+                                    settings
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "تعذر حفظ الإعدادات"
+                );
+
+            }
+
+
+            setWelcomeStatus(
+                "تم حفظ إعدادات الترحيب بنجاح."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "WELCOME SAVE ERROR:",
+                error
+            );
+
+
+            setWelcomeStatus(
+                error.message ||
+                "تعذر حفظ الإعدادات.",
+                true
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       IMAGE LOADER
+    ========================================================== */
+
+    function loadImage(src) {
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const image =
+                    new Image();
+
+                image.onload = () => {
+                    resolve(image);
+                };
+
+                image.onerror = () => {
+                    reject(
+                        new Error(
+                            "تعذر تحميل الصورة"
+                        )
+                    );
+                };
+
+                image.src =
+                    src;
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       DEFAULT MEMBER
+    ========================================================== */
+
+    function getDefaultMemberImage() {
+
+        const bot =
+            loadedBots.find(
+                item =>
+                    Number(item.number) ===
+                    Number(
+                        welcomeState.botNumber
+                    )
+            );
+
+        return (
+            bot?.avatar ||
+            "https://cdn.discordapp.com/embed/avatars/0.png"
+        );
+
+    }
+
+
+    async function ensureMemberImage() {
+
+        if (welcomeState.member.image) {
+            return;
+        }
+
+        try {
+
+            const src =
+                getDefaultMemberImage();
+
+            welcomeState.member.image =
+                await loadImage(src);
+
+            welcomeState.member.src =
+                src;
+
+        } catch (error) {
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       RESET
+    ========================================================== */
+
+    function resetBackgroundTransform() {
+
+        if (
+            welcomeState.background.image
+        ) {
+
+            const image =
+                welcomeState.background.image;
+
+            welcomeState.background.x =
+                600;
+
+            welcomeState.background.y =
+                315;
+
+            welcomeState.background.scale =
+                Math.max(
+                    1200 / image.width,
+                    630 / image.height
+                );
+
+        } else {
+
+            welcomeState.background.x =
+                600;
+
+            welcomeState.background.y =
+                315;
+
+            welcomeState.background.scale =
+                1;
+
+        }
+
+    }
+
+
+    function resetMemberTransform() {
+
+        welcomeState.member.x =
+            600;
+
+        welcomeState.member.y =
+            315;
+
+        welcomeState.member.scale =
+            1;
+
+    }
+
+
+    /* =========================================================
+       CANVAS DRAW
+    ========================================================== */
+
+    function drawWelcomeCanvas() {
+
+        const canvas =
+            document.getElementById(
+                "welcomeCanvas"
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        // Background
+        if (
+            welcomeState.background.image
+        ) {
+
+            drawCoverImage(
+                ctx,
+                welcomeState.background.image,
+                welcomeState.background.x,
+                welcomeState.background.y,
+                welcomeState.background.scale,
+                canvas.width,
+                canvas.height
+            );
+
+        } else {
+
+            const gradient =
+                ctx.createLinearGradient(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+
+            gradient.addColorStop(
+                0,
+                "#17171b"
+            );
+
+            gradient.addColorStop(
+                1,
+                "#08080a"
+            );
+
+            ctx.fillStyle =
+                gradient;
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        }
+
+
+        // Dark overlay
+        ctx.fillStyle =
+            "rgba(0,0,0,.12)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        // Member
+        const memberEnabled =
+            document.getElementById(
+                "memberImageEnabled"
+            );
+
+        if (
+            !memberEnabled ||
+            memberEnabled.checked
+        ) {
+
+            if (
+                welcomeState.member.image
+            ) {
+
+                drawMemberImage(
+                    ctx,
+                    welcomeState.member.image,
+                    welcomeState.member.x,
+                    welcomeState.member.y,
+                    welcomeState.member.scale
+                );
+
+            }
+
+        }
+
+
+        // Selected element border
+        drawSelectionBorder(
+            ctx
+        );
+
+    }
+
+
+    function drawCoverImage(
+        ctx,
+        image,
+        centerX,
+        centerY,
+        scale,
+        canvasWidth,
+        canvasHeight
+    ) {
+
+        const baseScale =
+            Math.max(
+                canvasWidth / image.width,
+                canvasHeight / image.height
+            );
+
+        const finalScale =
+            baseScale * scale;
+
+        const width =
+            image.width *
+            finalScale;
+
+        const height =
+            image.height *
+            finalScale;
+
+        const x =
+            centerX -
+            width / 2;
+
+        const y =
+            centerY -
+            height / 2;
+
+        ctx.drawImage(
+            image,
+            x,
+            y,
+            width,
+            height
+        );
+
+    }
+
+
+    function drawMemberImage(
+        ctx,
+        image,
+        centerX,
+        centerY,
+        scale
+    ) {
+
+        const size =
+            220 * scale;
+
+        const x =
+            centerX -
+            size / 2;
+
+        const y =
+            centerY -
+            size / 2;
+
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            centerX,
+            centerY,
+            size / 2,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.clip();
+
+        ctx.drawImage(
+            image,
+            x,
+            y,
+            size,
+            size
+        );
+
+        ctx.restore();
+
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            centerX,
+            centerY,
+            size / 2 + 5,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.85)";
+
+        ctx.lineWidth =
+            8;
+
+        ctx.stroke();
+
+        ctx.restore();
+
+    }
+
+
+    function drawSelectionBorder(ctx) {
+
+        const selected =
+            welcomeState.selected;
+
+
+        if (
+            selected === "background"
+        ) {
+
+            ctx.save();
+
+            ctx.strokeStyle =
+                "rgba(255,255,255,.8)";
+
+            ctx.lineWidth =
+                4;
+
+            ctx.setLineDash(
+                [12, 8]
+            );
+
+            ctx.strokeRect(
+                8,
+                8,
+                1184,
+                614
+            );
+
+            ctx.restore();
+
+            return;
+        }
+
+
+        if (
+            selected === "member"
+        ) {
+
+            const size =
+                220 *
+                welcomeState.member.scale;
+
+            const x =
+                welcomeState.member.x -
+                size / 2;
+
+            const y =
+                welcomeState.member.y -
+                size / 2;
+
+            ctx.save();
+
+            ctx.strokeStyle =
+                "rgba(255,255,255,.9)";
+
+            ctx.lineWidth =
+                4;
+
+            ctx.setLineDash(
+                [10, 6]
+            );
+
+            ctx.strokeRect(
+                x - 8,
+                y - 8,
+                size + 16,
+                size + 16
+            );
+
+            ctx.restore();
+
+        }
+
+    }
+
+
+    /* =========================================================
+       TOUCH / POINTER EDITOR
+    ========================================================== */
+
+    function setupCanvasTouch(canvas) {
+
+        canvas.style.touchAction =
+            "none";
+
+
+        canvas.addEventListener(
+            "pointerdown",
+            async event => {
+
+                event.preventDefault();
+
+                await ensureMemberImage();
+
+                canvas.setPointerCapture(
+                    event.pointerId
+                );
+
+                welcomeState.pointer.set(
+                    event.pointerId,
+                    {
+                        x:
+                            event.clientX,
+                        y:
+                            event.clientY
+                    }
+                );
+
+                const points =
+                    Array.from(
+                        welcomeState.pointer.values()
+                    );
+
+
+                if (points.length === 1) {
+
+                    const position =
+                        canvasPoint(
+                            canvas,
+                            event
+                        );
+
+                    const selected =
+                        hitTest(
+                            position.x,
+                            position.y
+                        );
+
+                    if (selected) {
+
+                        welcomeState.selected =
+                            selected;
+
+                    }
+
+
+                    welcomeState.gesture = {
+
+                        mode:
+                            "drag",
+
+                        startX:
+                            position.x,
+
+                        startY:
+                            position.y,
+
+                        objectX:
+                            getSelectedObject().x,
+
+                        objectY:
+                            getSelectedObject().y
+
+                    };
+
+                }
+
+
+                if (points.length === 2) {
+
+                    startPinch(
+                        canvas
+                    );
+
+                }
+
+
+                drawWelcomeCanvas();
+
+            }
+        );
+
+
+        canvas.addEventListener(
+            "pointermove",
+            event => {
+
+                if (
+                    !welcomeState.pointer.has(
+                        event.pointerId
+                    )
+                ) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                welcomeState.pointer.set(
+                    event.pointerId,
+                    {
+                        x:
+                            event.clientX,
+                        y:
+                            event.clientY
+                    }
+                );
+
+
+                const points =
+                    Array.from(
+                        welcomeState.pointer.values()
+                    );
+
+
+                if (points.length === 2) {
+
+                    if (
+                        !welcomeState.gesture ||
+                        welcomeState.gesture.mode !==
+                            "pinch"
+                    ) {
+
+                        startPinch(
+                            canvas
+                        );
+
+                    }
+
+                    updatePinch(
+                        canvas
+                    );
+
+                    drawWelcomeCanvas();
+
+                    return;
+
+                }
+
+
+                if (
+                    points.length === 1 &&
+                    welcomeState.gesture &&
+                    welcomeState.gesture.mode ===
+                        "drag"
+                ) {
+
+                    const point =
+                        points[0];
+
+                    const rect =
+                        canvas.getBoundingClientRect();
+
+                    const scaleX =
+                        canvas.width /
+                        rect.width;
+
+                    const scaleY =
+                        canvas.height /
+                        rect.height;
+
+                    const currentX =
+                        (point.x -
+                            rect.left) *
+                        scaleX;
+
+                    const currentY =
+                        (point.y -
+                            rect.top) *
+                        scaleY;
+
+
+                    const object =
+                        getSelectedObject();
+
+
+                    object.x =
+                        welcomeState.gesture.objectX +
+                        (
+                            currentX -
+                            welcomeState.gesture.startX
+                        );
+
+                    object.y =
+                        welcomeState.gesture.objectY +
+                        (
+                            currentY -
+                            welcomeState.gesture.startY
+                        );
+
+
+                    clampObject(
+                        object
+                    );
+
+
+                    drawWelcomeCanvas();
+
+                }
+
+            }
+        );
+
+
+        const endPointer =
+            event => {
+
+                if (
+                    welcomeState.pointer.has(
+                        event.pointerId
+                    )
+                ) {
+
+                    welcomeState.pointer.delete(
+                        event.pointerId
+                    );
+
+                }
+
+                if (
+                    welcomeState.pointer.size === 0
+                ) {
+
+                    welcomeState.gesture =
+                        null;
+
+                }
+
+            };
+
+
+        canvas.addEventListener(
+            "pointerup",
+            endPointer
+        );
+
+        canvas.addEventListener(
+            "pointercancel",
+            endPointer
+        );
+
+        canvas.addEventListener(
+            "pointerleave",
+            event => {
+
+                // لا ننهي الحركة عند الخروج البسيط
+                // لأن pointer capture مستخدم.
+
+            }
+        );
+
+    }
+
+
+    function canvasPoint(
+        canvas,
+        event
+    ) {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        return {
+
+            x:
+                (
+                    event.clientX -
+                    rect.left
+                ) *
+                (
+                    canvas.width /
+                    rect.width
+                ),
+
+            y:
+                (
+                    event.clientY -
+                    rect.top
+                ) *
+                (
+                    canvas.height /
+                    rect.height
+                )
+
+        };
+
+    }
+
+
+    function hitTest(x, y) {
+
+        if (
+            welcomeState.member.image
+        ) {
+
+            const size =
+                220 *
+                welcomeState.member.scale;
+
+            const distance =
+                Math.hypot(
+                    x -
+                        welcomeState.member.x,
+                    y -
+                        welcomeState.member.y
+                );
+
+            if (
+                distance <=
+                size / 2 + 25
+            ) {
+
+                return "member";
+
+            }
+
+        }
+
+
+        return "background";
+
+    }
+
+
+    function getSelectedObject() {
+
+        if (
+            welcomeState.selected ===
+            "background"
+        ) {
+
+            return welcomeState.background;
+
+        }
+
+        return welcomeState.member;
+
+    }
+
+
+    /* =========================================================
+       PINCH
+    ========================================================== */
+
+    function startPinch(canvas) {
+
+        const points =
+            Array.from(
+                welcomeState.pointer.values()
+            );
+
+        if (points.length !== 2) {
+            return;
+        }
+
+
+        const distance =
+            pointerDistance(
+                points[0],
+                points[1]
+            );
+
+
+        const object =
+            getSelectedObject();
+
+
+        welcomeState.gesture = {
+
+            mode:
+                "pinch",
+
+            startDistance:
+                distance,
+
+            startScale:
+                object.scale,
+
+            startX:
+                object.x,
+
+            startY:
+                object.y
+
+        };
+
+    }
+
+
+    function updatePinch(canvas) {
+
+        const points =
+            Array.from(
+                welcomeState.pointer.values()
+            );
+
+        if (points.length !== 2) {
+            return;
+        }
+
+
+        const distance =
+            pointerDistance(
+                points[0],
+                points[1]
+            );
+
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !welcomeState.gesture ||
+            welcomeState.gesture.mode !==
+                "pinch"
+        ) {
+
+            startPinch(
+                canvas
+            );
+
+            return;
+
+        }
+
+
+        const ratio =
+            distance /
+            Math.max(
+                1,
+                welcomeState.gesture.startDistance
+            );
+
+
+        object.scale =
+            clamp(
+                welcomeState.gesture.startScale *
+                    ratio,
+                0.1,
+                5
+            );
+
+
+        const centerX =
+            (
+                points[0].x +
+                points[1].x
+            ) / 2;
+
+        const centerY =
+            (
+                points[0].y +
+                points[1].y
+            ) / 2;
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        const scaleX =
+            canvas.width /
+            rect.width;
+
+        const scaleY =
+            canvas.height /
+            rect.height;
+
+
+        const canvasCenterX =
+            (
+                centerX -
+                rect.left
+            ) *
+            scaleX;
+
+        const canvasCenterY =
+            (
+                centerY -
+                rect.top
+            ) *
+            scaleY;
+
+
+        const oldCenterX =
+            (
+                points[0].x +
+                points[1].x
+            ) / 2;
+
+        const oldCenterY =
+            (
+                points[0].y +
+                points[1].y
+            ) / 2;
+
+
+        if (
+            welcomeState.gesture.lastCenterX !==
+                undefined
+        ) {
+
+            const dx =
+                (
+                    centerX -
+                    welcomeState.gesture.lastCenterX
+                ) *
+                scaleX;
+
+            const dy =
+                (
+                    centerY -
+                    welcomeState.gesture.lastCenterY
+                ) *
+                scaleY;
+
+            object.x += dx;
+            object.y += dy;
+
+            clampObject(
+                object
+            );
+
+        }
+
+
+        welcomeState.gesture.lastCenterX =
+            centerX;
+
+        welcomeState.gesture.lastCenterY =
+            centerY;
+
+    }
+
+
+    function pointerDistance(
+        a,
+        b
+    ) {
+
+        return Math.hypot(
+            a.x - b.x,
+            a.y - b.y
+        );
+
+    }
+
+
+    function clamp(
+        value,
+        min,
+        max
+    ) {
+
+        return Math.max(
+            min,
+            Math.min(
+                max,
+                value
+            )
+        );
+
+    }
+
+
+    function clampObject(
+        object
+    ) {
+
+        object.x =
+            clamp(
+                object.x,
+                -600,
+                1800
+            );
+
+        object.y =
+            clamp(
+                object.y,
+                -400,
+                1000
+            );
+
+    }
+
+
+    /* =========================================================
+       STATUS
+    ========================================================== */
+
+    function setWelcomeStatus(
+        message,
+        error = false
+    ) {
+
+        const element =
+            document.getElementById(
+                "welcomeStatus"
+            );
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent =
+            message;
+
+        element.classList.remove(
+            "ok",
+            "error"
+        );
+
+        if (error) {
+
+            element.classList.add(
+                "error"
+            );
+
+        } else {
+
+            element.classList.add(
+                "ok"
+            );
+
+        }
 
     }
 
@@ -1836,11 +4103,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 "rolesList"
             );
 
-
         if (!list) {
             return;
         }
-
 
         try {
 
@@ -1848,14 +4113,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 await fetch(
                     "/api/owner/roles",
                     {
-                        cache: "no-store"
+                        cache:
+                            "no-store"
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (!data.ok) {
 
@@ -1869,9 +4133,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
-
-            if (!Array.isArray(data.roles) ||
-                !data.roles.length) {
+            if (
+                !Array.isArray(data.roles) ||
+                !data.roles.length
+            ) {
 
                 list.innerHTML = `
                     <div class="empty-card">
@@ -1883,16 +4148,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
-
             list.innerHTML =
                 data.roles
                     .map(role => {
 
                         const permissions =
-                            Array.isArray(role.permissions)
+                            Array.isArray(
+                                role.permissions
+                            )
                                 ? role.permissions
                                 : [];
-
 
                         return `
                             <div class="role-item">
@@ -1904,12 +4169,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                             role.name
                                         )}
                                     </strong>
-
-                                    <span>
-                                        ${escapeHtml(
-                                            role.description || ""
-                                        )}
-                                    </span>
 
                                 </div>
 
@@ -1928,14 +4187,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                     .join("");
 
-
         } catch (error) {
 
             console.error(
                 "CT ROLES ERROR:",
                 error
             );
-
 
             list.innerHTML = `
                 <div class="empty-card">
@@ -1957,18 +4214,15 @@ document.addEventListener("DOMContentLoaded", () => {
             "roleModal"
         );
 
-
     const createRole =
         document.getElementById(
             "createRoleButton"
         );
 
-
     const closeRole =
         document.getElementById(
             "closeRoleModal"
         );
-
 
     const cancelRole =
         document.getElementById(
@@ -1979,7 +4233,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function openRoleModal() {
 
         if (roleModal) {
-            roleModal.classList.add("show");
+            roleModal.classList.add(
+                "show"
+            );
         }
 
     }
@@ -1988,7 +4244,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function closeRoleModal() {
 
         if (roleModal) {
-            roleModal.classList.remove("show");
+            roleModal.classList.remove(
+                "show"
+            );
         }
 
     }
@@ -2003,7 +4261,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-
     if (closeRole) {
 
         closeRole.addEventListener(
@@ -2012,7 +4269,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
     }
-
 
     if (cancelRole) {
 
@@ -2042,20 +4298,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 event.preventDefault();
 
-
                 const name =
                     document
-                        .getElementById("roleName")
+                        .getElementById(
+                            "roleName"
+                        )
                         .value
                         .trim();
-
 
                 const description =
                     document
-                        .getElementById("roleDescription")
+                        .getElementById(
+                            "roleDescription"
+                        )
                         .value
                         .trim();
-
 
                 if (!name) {
 
@@ -2067,18 +4324,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 }
 
-
                 try {
 
                     const response =
                         await fetch(
                             "/api/owner/roles",
                             {
-                                method: "POST",
+                                method:
+                                    "POST",
 
                                 headers: {
                                     "Content-Type":
                                         "application/json",
+
                                     "Accept":
                                         "application/json"
                                 },
@@ -2092,10 +4350,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             }
                         );
 
-
                     const data =
                         await response.json();
-
 
                     if (!data.ok) {
 
@@ -2108,7 +4364,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     }
 
-
                     closeRoleModal();
 
                     roleForm.reset();
@@ -2117,9 +4372,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         "تم إنشاء الرتبة بنجاح"
                     );
 
-
                     loadRoles();
-
 
                 } catch (error) {
 
@@ -2146,7 +4399,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "refreshButton"
         );
 
-
     if (refresh) {
 
         refresh.addEventListener(
@@ -2157,9 +4409,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     "rotating"
                 );
 
-
                 await loadBots();
 
+                if (
+                    welcomeEditorInitialized &&
+                    welcomeState.botNumber
+                ) {
+
+                    await loadWelcomeSettings();
+
+                }
 
                 setTimeout(
                     () => {
@@ -2189,26 +4448,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 "toast"
             );
 
-
         const text =
             document.getElementById(
                 "toastMessage"
             );
 
-
         if (!toast || !text) {
             return;
         }
 
-
         text.textContent =
             message;
-
 
         toast.classList.add(
             "show"
         );
-
 
         setTimeout(
             () => {
@@ -2231,11 +4485,26 @@ document.addEventListener("DOMContentLoaded", () => {
     function escapeHtml(value) {
 
         return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
 
     }
 
