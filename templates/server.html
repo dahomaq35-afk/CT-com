@@ -18,62 +18,155 @@
 
     <style>
         /* =====================================================
-           SIDEBAR - LEFT + VERTICAL
+           CT BOTTOM NAVIGATION
+           ثابت أسفل الشاشة + سحب يمين ويسار
         ====================================================== */
 
         body {
             direction: rtl;
+            padding-bottom: 92px !important;
         }
 
         .sidebar {
+            position: fixed !important;
             left: 0 !important;
-            right: auto !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            top: auto !important;
+
+            width: 100% !important;
+            height: 76px !important;
+            min-height: 76px !important;
+
+            z-index: 9999 !important;
+
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+
+            box-sizing: border-box !important;
+
+            padding: 8px 12px !important;
+            margin: 0 !important;
+
+            background: rgba(10, 10, 13, .97) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
+
+            border-top: 1px solid rgba(255,255,255,.08) !important;
+            border-right: 0 !important;
+            border-left: 0 !important;
+            border-bottom: 0 !important;
+
+            overflow: hidden !important;
         }
 
-        .main {
-            margin-left: 280px !important;
-            margin-right: 0 !important;
+        .sidebar .brand {
+            display: none !important;
         }
 
         .sidebar-nav {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: stretch !important;
             width: 100% !important;
-            gap: 6px !important;
+            height: 100% !important;
+
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+
+            gap: 8px !important;
+
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+
+            flex-wrap: nowrap !important;
+
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+
+            touch-action: pan-x !important;
+            -webkit-overflow-scrolling: touch !important;
+
+            padding: 0 4px !important;
+            box-sizing: border-box !important;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         .sidebar-nav .nav-item {
-            width: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: flex-start !important;
-            box-sizing: border-box !important;
             flex: 0 0 auto !important;
+
+            width: auto !important;
+            min-width: 92px !important;
+            height: 58px !important;
+
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            gap: 3px !important;
+
+            box-sizing: border-box !important;
+
+            padding: 6px 13px !important;
+            margin: 0 !important;
+
+            white-space: nowrap !important;
+
             cursor: pointer !important;
+            pointer-events: auto !important;
+
+            border-radius: 12px !important;
+        }
+
+        .sidebar-nav .nav-item span:first-child {
+            font-size: 17px !important;
+            line-height: 18px !important;
+        }
+
+        .sidebar-nav .nav-item span:last-child {
+            font-size: 10px !important;
+            line-height: 14px !important;
+            white-space: nowrap !important;
         }
 
         .sidebar-nav .nav-title {
-            width: 100% !important;
-            display: block !important;
             flex: 0 0 auto !important;
+
+            width: auto !important;
+            min-width: 70px !important;
+
+            height: 58px !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
             box-sizing: border-box !important;
+
+            padding: 0 8px !important;
+            margin: 0 !important;
+
+            white-space: nowrap !important;
+
+            font-size: 10px !important;
+            color: #888 !important;
         }
 
         .sidebar-bottom {
-            width: 100% !important;
+            display: none !important;
         }
 
-        @media (max-width: 900px) {
-            .main {
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-
-            .sidebar {
-                left: 0 !important;
-                right: auto !important;
-            }
+        .main {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding-bottom: 20px !important;
+            box-sizing: border-box !important;
         }
 
         /* =====================================================
@@ -82,7 +175,7 @@
 
         .welcome-editor {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+            grid-template-columns: 1fr;
             gap: 18px;
         }
 
@@ -91,6 +184,7 @@
             border: 1px solid rgba(255,255,255,.06);
             border-radius: 18px;
             padding: 18px;
+            box-sizing: border-box;
         }
 
         .welcome-panel h3 {
@@ -288,7 +382,7 @@
         }
 
         /* =====================================================
-           MAKE EVERY PAGE CLICKABLE / CORRECTLY STACKED
+           PAGES
         ====================================================== */
 
         .server-page {
@@ -308,9 +402,75 @@
             pointer-events: auto;
         }
 
+        /* =====================================================
+           MOBILE
+        ====================================================== */
+
         @media (max-width: 900px) {
+
+            body {
+                padding-bottom: 82px !important;
+            }
+
+            .sidebar {
+                height: 70px !important;
+                min-height: 70px !important;
+                padding: 6px 8px !important;
+            }
+
+            .sidebar-nav {
+                gap: 6px !important;
+            }
+
+            .sidebar-nav .nav-item {
+                min-width: 82px !important;
+                height: 56px !important;
+                padding: 5px 10px !important;
+            }
+
+            .sidebar-nav .nav-title {
+                min-width: 60px !important;
+                height: 56px !important;
+            }
+
+            .main {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-bottom: 10px !important;
+            }
+
             .welcome-editor {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            body {
+                padding-bottom: 76px !important;
+            }
+
+            .sidebar {
+                height: 66px !important;
+                min-height: 66px !important;
+            }
+
+            .sidebar-nav .nav-item {
+                min-width: 76px !important;
+                height: 54px !important;
+            }
+
+            .sidebar-nav .nav-item span:first-child {
+                font-size: 16px !important;
+            }
+
+            .sidebar-nav .nav-item span:last-child {
+                font-size: 9px !important;
+            }
+
+            .sidebar-nav .nav-title {
+                min-width: 55px !important;
+                font-size: 9px !important;
             }
         }
     </style>
@@ -319,7 +479,7 @@
 <body>
 
 <!-- =========================================================
-     SIDEBAR
+     BOTTOM NAVIGATION
 ========================================================== -->
 
 <aside class="sidebar">
@@ -1110,7 +1270,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        NAVIGATION
-       ====================================================== */
+    ====================================================== */
 
     const navItems = document.querySelectorAll(".nav-item");
     const pages = document.querySelectorAll(".server-page");
@@ -3508,11 +3668,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 1,
                 welcomeState.gesture.startDistance
             );
-
-        /*
-         * الخلفية والعضو مستقلان تمامًا.
-         * لا يتم تعديل أحدهما عند تكبير الآخر.
-         */
 
         object.scale =
             clamp(
